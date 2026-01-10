@@ -1,0 +1,6 @@
+@Geo.API_HostAddress = http://localhost:5251
+
+GET {{Geo.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

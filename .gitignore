@@ -1,0 +1,31 @@
+# Visual Studio & .NET
+.vs/
+bin/
+obj/
+*.user
+*.suo
+[Dd]ebug/
+[Rr]elease/
+*.dll
+*.exe
+*.pdb
+
+# Configuration & Secrets
+appsettings.Development.json
+appsettings.local.json
+.env
+*.secret
+*.pfx
+
+# Node.js / Frontend
+node_modules/
+dist/
+coverage/
+.DS_Store
+
+# Logs
+*.log
+
+# Editors
+.idea/
+.vscode/

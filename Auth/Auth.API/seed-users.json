@@ -1,0 +1,10 @@
+[
+    {
+        "Email": "admin@platform.com",
+        "Password": "SuperSecretPassword123!",
+        "Phone": "+15550000000",
+        "Roles": [
+            "SuperAdmin"
+        ]
+    }
+]

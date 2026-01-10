@@ -1,0 +1,292 @@
+version: '3.8'
+
+services:
+  # Infrastructure
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ms_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ms_sqlserver
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Password123!
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+  redis:
+    image: redis:alpine
+    container_name: ms_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  exclude_mongo:
+    # Renamed to avoid conflicts if needed, but keeping mongo
+    image: mongo:latest
+    container_name: ms_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  minio:
+    image: minio/minio
+    container_name: ms_minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  seq:
+    image: datalust/seq
+    container_name: ms_seq
+    ports:
+      - "5341:5341"
+      - "8081:80"
+    environment:
+      - ACCEPT_EULA=Y
+    volumes:
+      - seq_data:/data
+
+  postgis:
+    image: postgis/postgis:16-3.4
+    container_name: ms_postgis
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=Password123!
+      - POSTGRES_DB=SearchDb
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+
+  # Microservices
+  auth-api:
+    build:
+      context: .
+      dockerfile: Auth/Auth.API/Dockerfile
+    container_name: ms_auth
+    ports:
+      - "5001:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=AuthDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+      - RabbitMq__Host=rabbitmq
+    depends_on:
+      - sqlserver
+      - rabbitmq
+
+  apps-api:
+    build:
+      context: .
+      dockerfile: Apps/Apps.API/Dockerfile
+    container_name: ms_apps
+    ports:
+      - "5002:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=AppsDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+      - RabbitMq__Host=rabbitmq
+    depends_on:
+      - sqlserver
+
+  users-api:
+    build:
+      context: .
+      dockerfile: Users/Users.API/Dockerfile
+    container_name: ms_users
+    ports:
+      - "5003:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=UsersDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+      - RabbitMq__Host=rabbitmq
+    depends_on:
+      - sqlserver
+      - rabbitmq
+
+  notifications-api:
+    build:
+      context: .
+      dockerfile: Notifications/Notifications.API/Dockerfile
+    container_name: ms_notifications
+    ports:
+      - "5004:8080"
+    environment:
+      - RabbitMq__Host=rabbitmq
+    depends_on:
+      - rabbitmq
+
+  media-api:
+    build:
+      context: .
+      dockerfile: Media/Media.API/Dockerfile
+    container_name: ms_media
+    ports:
+      - "5005:8080"
+    environment:
+      - MinioSettings__Endpoint=minio:9000
+      - MinioSettings__AccessKey=minioadmin
+      - MinioSettings__SecretKey=minioadmin
+    depends_on:
+      - minio
+
+  chat-api:
+    build:
+      context: .
+      dockerfile: Chat/Chat.API/Dockerfile
+    container_name: ms_chat
+    ports:
+      - "5006:8080"
+    environment:
+      - ConnectionStrings__MongoConnection=mongodb://mongo:27017
+    depends_on:
+      - exclude_mongo
+
+  payments-api:
+    build:
+      context: .
+      dockerfile: Payments/Payments.API/Dockerfile
+    container_name: ms_payments
+    ports:
+      - "5007:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PaymentsDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+      - RabbitMq__Host=rabbitmq
+    depends_on:
+      - sqlserver
+      - rabbitmq
+
+  gateway-api:
+    build:
+      context: .
+      dockerfile: Gateway/Gateway.API/Dockerfile
+    container_name: ms_gateway
+    ports:
+      - "7032:8080" # Mapping 8080 internal to 7032 external to match frontend config
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    depends_on:
+      - auth-api
+      - apps-api
+      - users-api
+
+  audit-api:
+    build:
+      context: .
+      dockerfile: Audit/Audit.API/Dockerfile
+    container_name: ms_audit
+    ports:
+      - "5008:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=AuditDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+      - RabbitMq__Host=rabbitmq
+    depends_on:
+      - sqlserver
+      - rabbitmq
+
+  search-api:
+    build:
+      context: .
+      dockerfile: Search/Search.API/Dockerfile
+    container_name: ms_search
+    ports:
+      - "5009:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=postgis;Database=SearchDb;User Id=postgres;Password=Password123!;
+      - RabbitMq__Host=rabbitmq
+    depends_on:
+      - postgis
+      - rabbitmq
+
+  scheduler-api:
+    build:
+      context: .
+      dockerfile: Scheduler/Scheduler.API/Dockerfile
+    container_name: ms_scheduler
+    ports:
+      - "5010:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=SchedulerDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+    depends_on:
+      - sqlserver
+
+  geo-api:
+    build:
+      context: .
+      dockerfile: Geo/Geo.API/Dockerfile
+    container_name: ms_geo
+    ports:
+      - "5011:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=postgis;Database=GeoDb;User Id=postgres;Password=Password123!;
+      - RabbitMq__Host=rabbitmq
+    depends_on:
+      - postgis
+      - rabbitmq
+
+  recommendation-api:
+    build:
+      context: .
+      dockerfile: Recommendation/Recommendation.API/Dockerfile
+    container_name: ms_recommendation
+    ports:
+      - "5012:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    # depends_on: No external db yet, strictly in-memory
+
+  global-admin:
+    build:
+      context: .
+      dockerfile: Frontend/GlobalAdmin/Dockerfile
+    container_name: global_admin
+    ports:
+      - "3000:80"
+    depends_on:
+      - gateway-api
+
+  fitit-admin:
+    build:
+      context: .
+      dockerfile: Frontend/FitITAdmin/Dockerfile
+    container_name: fitit_admin
+    ports:
+      - "3001:80"
+    depends_on:
+      - gateway-api
+
+  wissler-admin:
+    build:
+      context: .
+      dockerfile: Frontend/WisslerAdmin/Dockerfile
+    container_name: wissler_admin
+    ports:
+      - "3002:80"
+    depends_on:
+      - gateway-api
+
+volumes:
+  rabbitmq_data:
+  sqlserver_data:
+  redis_data:
+  seq_data:
+  mongo_data:
+  minio_data:
+  postgis_data:
+  elastic_data:
