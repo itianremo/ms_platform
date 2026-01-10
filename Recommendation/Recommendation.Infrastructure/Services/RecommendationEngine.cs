@@ -28,7 +28,9 @@ public class RecommendationEngine : IRecommendationEngine
             ApproximationRank = 100
         };
 
-        var pipeline = _mlContext.Recommendation().Trainers.MatrixFactorization(options);
+        var pipeline = _mlContext.Transforms.Conversion.MapValueToKey(nameof(RecommendationData.UserId))
+            .Append(_mlContext.Transforms.Conversion.MapValueToKey(nameof(RecommendationData.ItemId)))
+            .Append(_mlContext.Recommendation().Trainers.MatrixFactorization(options));
 
         _model = pipeline.Fit(dataView);
     }

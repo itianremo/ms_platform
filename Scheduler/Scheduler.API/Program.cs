@@ -9,6 +9,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Ensure DB exists
+try 
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (!string.IsNullOrEmpty(connectionString))
+    {
+        Scheduler.API.Data.DatabaseInitializer.EnsureDatabaseCreated(connectionString);
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Check DB failed: {ex.Message}");
+    // Continue, maybe it exists or it's a transient error the retry policy will handle? 
+    // But creation failure usually is fatal for start.
+}
+
 // Hangfire Client
 builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
