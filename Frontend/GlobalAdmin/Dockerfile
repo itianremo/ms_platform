@@ -1,4 +1,4 @@
-FROM node:18-alpine AS build
+FROM node:22-alpine AS build
 
 # Build SharedUI
 WORKDIR /SharedUI
@@ -16,6 +16,6 @@ RUN npm run build
 
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
-COPY Frontend/Admin/nginx.conf /etc/nginx/conf.d/default.conf
+COPY Frontend/GlobalAdmin/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

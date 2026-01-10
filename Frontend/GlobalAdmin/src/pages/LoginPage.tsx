@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Lock, Mail } from 'lucide-react';
-import { Button, Card, Input } from 'shared-ui';
+import { Button, Card, Input } from 'sharedui';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');

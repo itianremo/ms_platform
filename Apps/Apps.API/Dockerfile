@@ -10,6 +10,7 @@ COPY ["Apps/Apps.Application/Apps.Application.csproj", "Apps/Apps.Application/"]
 COPY ["Apps/Apps.Domain/Apps.Domain.csproj", "Apps/Apps.Domain/"]
 COPY ["Apps/Apps.Infrastructure/Apps.Infrastructure.csproj", "Apps/Apps.Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
+COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
 RUN dotnet restore "Apps/Apps.API/Apps.API.csproj"
 COPY . .
 WORKDIR "/src/Apps/Apps.API"

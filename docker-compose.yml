@@ -1,4 +1,4 @@
-version: '3.8'
+#version: '3.8'
 
 services:
   # Infrastructure
@@ -79,7 +79,7 @@ services:
       - postgis_data:/var/lib/postgresql/data
 
   # Microservices
-  auth-api:
+  ms-auth-api:
     build:
       context: .
       dockerfile: Auth/Auth.API/Dockerfile
@@ -182,7 +182,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
     depends_on:
-      - auth-api
+      - ms-auth-api
       - apps-api
       - users-api
 
@@ -278,6 +278,16 @@ services:
     container_name: wissler_admin
     ports:
       - "3002:80"
+    depends_on:
+      - gateway-api
+
+  app-portal:
+    build:
+      context: .
+      dockerfile: Frontend/App/Dockerfile
+    container_name: app_portal
+    ports:
+      - "5173:80"
     depends_on:
       - gateway-api
 

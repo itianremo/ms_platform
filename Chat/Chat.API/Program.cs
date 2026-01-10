@@ -13,8 +13,8 @@ builder.Services.AddSignalR();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 
-// builder.Services.AddHealthChecks()
-//     .AddMongoDb(builder.Configuration.GetConnectionString("MongoDb") ?? "mongodb://localhost:27017", name: "mongodb");
+builder.Services.AddHealthChecks()
+    .AddMongoDb(builder.Configuration.GetConnectionString("MongoDb") ?? "mongodb://localhost:27017", name: "mongodb");
 
 var app = builder.Build();
 

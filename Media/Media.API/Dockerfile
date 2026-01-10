@@ -8,7 +8,9 @@ WORKDIR /src
 COPY ["Media/Media.API/Media.API.csproj", "Media/Media.API/"]
 COPY ["Media/Media.Application/Media.Application.csproj", "Media/Media.Application/"]
 COPY ["Media/Media.Infrastructure/Media.Infrastructure.csproj", "Media/Media.Infrastructure/"]
+COPY ["Media/Media.Domain/Media.Domain.csproj", "Media/Media.Domain/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
+COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
 RUN dotnet restore "Media/Media.API/Media.API.csproj"
 COPY . .
 WORKDIR "/src/Media/Media.API"

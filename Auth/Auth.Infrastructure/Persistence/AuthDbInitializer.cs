@@ -21,6 +21,9 @@ public class AuthDbInitializer
     public async Task SeedAsync()
     {
         using var scope = _serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+        await context.Database.EnsureCreatedAsync();
+
         var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
         var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
 
