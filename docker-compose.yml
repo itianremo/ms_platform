@@ -18,7 +18,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: ms_sqlserver
     ports:
-      - "1433:1433"
+      - "14333:1433"
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=Password123!
@@ -91,6 +91,10 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=AuthDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
       - RabbitMq__Host=rabbitmq
+      - JwtSettings__Secret=ThisIsSuperSecretKeyForAuthService123!
+      - JwtSettings__Issuer=ms-auth
+      - JwtSettings__Audience=ms-platform
+      - JwtSettings__ExpiryMinutes=60
     depends_on:
       - sqlserver
       - rabbitmq
