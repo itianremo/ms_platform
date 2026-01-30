@@ -20,10 +20,13 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<Us
         return users.Select(u => new UserDto(
             u.Id,
             u.Email,
-            "N/A", // FirstName not in Auth
-            "N/A", // LastName not in Auth
+            u.Phone, 
+            "N/A", // FirstName placeholder
+            "", // LastName placeholder
             u.Status == Domain.Entities.GlobalUserStatus.Active,
-            u.Memberships.Select(m => m.Role.Name).Distinct().ToList()
+            u.Memberships.Select(m => m.Role.Name).Distinct().ToList(),
+            u.IsEmailVerified,
+            u.IsPhoneVerified
         )).ToList();
     }
 }

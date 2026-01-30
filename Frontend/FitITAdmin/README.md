@@ -1,19 +1,21 @@
-# FitIT Admin Portal
+# FitIT Admin (Tenant Dashboard)
 
-The Tenant Administration Dashboard for the "FitIT" application.
+Tenant-specific administration dashboard for the FitIT application.
 
-## Audience
-- **App Admins**: Managers of the specific tenant/app.
-- **Moderators**: Content review staff.
+## ✨ Features
+- **Dashboard**: Usage statistics and overview.
+- **User Management**: Manage users within the FitIT tenant.
+- **Content Management**: Manage media and specific app content.
 
-## Features
-- **Dashboard**: High-level metrics.
-- **User Management**: View, Ban, and Reactivate users.
-- **Moderation Queue**: Review flagged Chats and Media.
-- **Payment Config**: Set up Stripe/Mock gateways.
+## 🚀 Getting Started
 
-## Tech Stack
-- **React 18**
-- **Vite**
-- **TypeScript**
-- **TailwindCSS**
+### Development
+```bash
+npm install
+npm run dev
+```
+Runs on: http://localhost:3001
+
+### Production Logic
+- Built via Docker (`nginx:alpine`).
+- Docker Port: 3001

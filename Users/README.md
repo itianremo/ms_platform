@@ -1,13 +1,35 @@
 # Users Service (Profile Management)
 
-Handles extended user profile data, settings, and efficient profile retrieval.
+Manages User Profiles, Preferences, and User-specific data distinct from Identity credentials.
 
-## Features
-- **Profile Management**: Bio, Age, Gender, Interests.
-- **Synchronization**: Publishes `UserProfileCreated` events for Search/Recommendation services.
-- **Isolation**: Decoupled from Auth credentials.
+## ✨ Features
+- **Profile Management**: Stores Display Name, Avatar, and Personal Details.
+- **Preferences**: Manages User Settings (Theme, Notifications) synchronized with App defaults.
+- **Search Synchronization**: Publishes profile updates to the Search Index.
 
-## Tech Stack
-- **.NET 8**
-- **PostgreSQL**
-- **MassTransit** (Event Bus)
+## 🏗 Technology Stack
+- **Framework**: .NET 8 (ASP.NET Core)
+- **Database**: PostgreSQL (`UsersDb`)
+- **Messaging**: MassTransit (RabbitMQ)
+- **Documentation**: Swagger / OpenAPI
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Docker & Docker Compose
+- .NET 8 SDK
+
+### Running Locally
+```bash
+cd Users/Users.API
+dotnet run
+```
+
+### Running via Docker
+```bash
+docker-compose up -d users-api
+```
+
+## 🔌 API Documentation
+- **Swagger UI**: http://localhost:5003/swagger
+- **Health Check**: http://localhost:5003/health

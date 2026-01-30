@@ -5,7 +5,8 @@ namespace Auth.Domain.Entities;
 public enum AppUserStatus
 {
     Active,
-    Banned
+    Banned,
+    PendingApproval
 }
 
 public class UserAppMembership : Entity
@@ -36,4 +37,5 @@ public class UserAppMembership : Entity
 
     public void Ban() => Status = AppUserStatus.Banned;
     public void Activate() => Status = AppUserStatus.Active;
+    public void SetStatus(AppUserStatus status) => Status = status;
 }

@@ -19,8 +19,10 @@ public class CheckPermissionCommandHandler : IRequestHandler<CheckPermissionQuer
         var user = await _userRepository.GetUserWithRolesAsync(request.UserId);
         if (user == null) return false;
 
-        // 1. Check if global admin
-        if (user.IsGlobalAdmin) return true;
+        // 1. Check if global admin (SuperAdmin role)
+        // Hardcoded System App ID for now
+        var systemAppId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        if (user.Memberships.Any(m => m.AppId == systemAppId && m.Role?.Name == "SuperAdmin")) return true;
 
         // 2. Find membership for the requested App
         var membership = user.Memberships.FirstOrDefault(m => m.AppId == request.AppId);

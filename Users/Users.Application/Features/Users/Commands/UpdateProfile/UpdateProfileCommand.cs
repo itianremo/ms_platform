@@ -8,5 +8,7 @@ public record UpdateProfileCommand(
     string DisplayName, 
     string? Bio, 
     string? AvatarUrl, 
-    string CustomDataJson
+    string CustomDataJson,
+    DateTime? DateOfBirth,
+    string? Gender
 ) : IRequest;

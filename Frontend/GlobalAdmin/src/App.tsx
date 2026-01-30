@@ -1,14 +1,103 @@
 import React from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+
+// Layouts
+import DashboardLayout from './layouts/DashboardLayout';
+import AuthLayout from './layouts/AuthLayout';
+
+// Pages
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import VerificationPage from './pages/VerificationPage';
+import Dashboard from './pages/Dashboard';
+import PreferencesPage from './pages/PreferencesPage';
+import UsersPage from './pages/UsersPage';
+import UserDetailsPage from './pages/UserDetailsPage';
+import AppsPage from './pages/AppsPage';
+
+
+import { Toaster } from './components/ui/sonner';
+import AuditLogsPage from './pages/AuditLogsPage';
+import SubscriptionPage from './pages/SubscriptionPage';
+import SystemSettingsPage from './pages/SystemSettingsPage';
+import ProfilePage from './pages/ProfilePage';
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    // ... [No changes to component body]
+    const { user, isLoading } = useAuth();
+    const location = useLocation();
+
+    if (isLoading) {
+        return <div className="flex items-center justify-center h-screen">Loading...</div>; // Or a proper spinner component
+    }
+
+    if (!user) {
+        return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+
+    return children;
+};
+
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+    const { user, isLoading } = useAuth();
+
+    if (isLoading) {
+        return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    }
+
+    if (user) {
+        return <Navigate to="/" replace />;
+    }
+
+    return children;
+};
 
 function App() {
     return (
-        <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-            <h1 style={{ color: '#3b82f6' }}>Global Admin Dashboard</h1>
-            <p>Welcome, Super Admin.</p>
-            <p>Manage Tenants, Billing, and Platform Health here.</p>
-            <hr />
-            <p><em>(Ported from original Admin Portal - Placeholder)</em></p>
-        </div>
+        <>
+            <Routes>
+                {/* Public Routes - Accessible only when NOT logged in */}
+                <Route element={
+                    <PublicRoute>
+                        <AuthLayout />
+                    </PublicRoute>
+                }>
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/verify" element={<VerificationPage />} />
+                </Route>
+
+                {/* Protected Routes */}
+                <Route path="/" element={
+                    <ProtectedRoute>
+                        <DashboardLayout />
+                    </ProtectedRoute>
+                }>
+                    <Route index element={<Dashboard />} />
+                    <Route path="preferences" element={<PreferencesPage />} />
+
+                    {/* Profile */}
+                    <Route path="profile" element={<ProfilePage />} />
+
+                    {/* Management Routes */}
+                    <Route path="users" element={<UsersPage />} />
+                    <Route path="users/:userId" element={<UserDetailsPage />} />
+                    <Route path="apps" element={<AppsPage />} />
+                    <Route path="audit-logs" element={<AuditLogsPage />} />
+                    <Route path="subscriptions" element={<SubscriptionPage />} />
+
+                    {/* System Settings Routes */}
+                    <Route path="configurations" element={<SystemSettingsPage />} />
+                </Route>
+
+                {/* Fallback */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <Toaster position="top-right" />
+        </>
     );
 }
 

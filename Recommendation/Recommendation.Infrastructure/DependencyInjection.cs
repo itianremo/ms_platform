@@ -9,6 +9,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
         services.AddSingleton<IRecommendationEngine, RecommendationEngine>();
+        services.AddSingleton<IRecommendationStore, InMemoryRecommendationStore>();
         return services;
     }
 }

@@ -1,14 +1,38 @@
 # Chat Service (Real-time Messaging)
 
-Provides real-time messaging capabilities and message history.
+Provides real-time chat functionality, message history, and user presence for the platform.
 
-## Features
-- **Real-time Chat**: SignalR Hub (`/chatHub`) for instant message delivery.
-- **Persistence**: Stores all messages in MongoDB.
-- **Moderation Integration**: Filters messages containing banned words via `ITextModerationService`.
-- **History API**: Retrieve past conversations.
+## ✨ Features
+- **Real-time Messaging**: SignalR-based WebSocket communication.
+- **Message Persistence**: stores chat history in MongoDB for scalability.
+- **Presence**: Tracks User Online/Offline status.
+- **Presence**: Tracks User Online/Offline status.
+- **Channels**: Supports 1:1 and Group Chat scenarios (Match Groups).
+- **Match Integration**: Dedicated channels for matched users.
 
-## Tech Stack
-- **.NET 8**
-- **MongoDB**
-- **SignalR**
+## 🏗 Technology Stack
+- **Framework**: .NET 8 (ASP.NET Core)
+- **Database**: MongoDB (NoSQL)
+- **Real-time**: SignalR
+- **Documentation**: Swagger / OpenAPI
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Docker & Docker Compose
+- .NET 8 SDK
+
+### Running Locally
+```bash
+cd Chat/Chat.API
+dotnet run
+```
+
+### Running via Docker
+```bash
+docker-compose up -d chat-api
+```
+
+## 🔌 API Documentation
+- **Swagger UI**: http://localhost:5006/swagger
+- **Health Check**: http://localhost:5006/health

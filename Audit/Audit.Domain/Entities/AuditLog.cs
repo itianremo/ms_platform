@@ -13,9 +13,9 @@ public class AuditLog : Entity
 
     public string? EntityId { get; set; } // ID of the entity changed
 
-    public int? UserId { get; set; } // Who did it
+    public Guid? UserId { get; set; } // Who did it
 
-    public int? AppId { get; set; } // In which tenant
+    public Guid? AppId { get; set; } // In which tenant
 
     public string ChangesJson { get; set; } = "{}"; // Serialized diff or payload
 
@@ -23,14 +23,14 @@ public class AuditLog : Entity
 
     public AuditLog() { }
 
-    public AuditLog(string action, string entityName, string entityId, int? userId, int? appId, string changes)
+    public AuditLog(string action, string entityName, string entityId, Guid? userId, Guid? appId, string changesJson)
     {
         Action = action;
         EntityName = entityName;
         EntityId = entityId;
         UserId = userId;
         AppId = appId;
-        ChangesJson = changes;
+        ChangesJson = changesJson;
         Timestamp = DateTime.UtcNow;
     }
 }

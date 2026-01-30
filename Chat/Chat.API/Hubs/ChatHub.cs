@@ -45,4 +45,16 @@ public class ChatHub : Hub<IChatClient>
 
         await Clients.User(userId).ReceiveMessage(Context.UserIdentifier ?? "Anonymous", message, DateTime.UtcNow.ToString());
     }
+
+    public async Task JoinChannel(string channelId)
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, channelId);
+    }
+
+    public async Task SendMessageToChannel(string channelId, string message)
+    {
+         // Verify user is member of channel using Repository...
+         // For now, just broadcast to group
+         await Clients.Group(channelId).ReceiveMessage(Context.UserIdentifier ?? "Anonymous", message, DateTime.UtcNow.ToString());
+    }
 }

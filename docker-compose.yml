@@ -138,6 +138,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=guest
+      - RabbitMq__Password=guest
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=NotificationsDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
     depends_on:
       - rabbitmq
 
@@ -165,7 +168,7 @@ services:
       - "5006:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__MongoConnection=mongodb://mongo:27017
+      - ConnectionStrings__MongoConnection=mongodb://ms_mongo:27017
     depends_on:
       - exclude_mongo
 
@@ -192,7 +195,10 @@ services:
     ports:
       - "7032:8080" # Mapping 8080 internal to 7032 external to match frontend config
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development # Changed from Docker
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - JwtSettings__Secret=ThisIsSuperSecretKeyForAuthService123!
+      - JwtSettings__Issuer=ms-auth
+      - JwtSettings__Audience=ms-platform
     depends_on:
       - ms-auth-api
       - apps-api
@@ -297,15 +303,7 @@ services:
     depends_on:
       - gateway-api
 
-  app-portal:
-    build:
-      context: .
-      dockerfile: Frontend/App/Dockerfile
-    container_name: app_portal
-    ports:
-      - "5173:80"
-    depends_on:
-      - gateway-api
+
 
 volumes:
   rabbitmq_data:

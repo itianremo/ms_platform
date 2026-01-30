@@ -12,7 +12,8 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppsDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
+                builder => builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)));
 
         services.AddScoped<IAppRepository, AppRepository>();
 

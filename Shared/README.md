@@ -1,11 +1,21 @@
-# Shared Kernel & Infrastructure
+# Shared Kernel (Common Library)
 
-A class library containing common building blocks used across all microservices.
+Core shared library containing building blocks for Clean Architecture and Domain-Driven Design.
 
-## Components
-- **Shared.Kernel**: Interfaces (`IEntity`, `IRepository`, `IEventBus`, `ICacheService`).
-- **Shared.Infrastructure**: Implementations (`MassTransitEventBus`, `RedisCacheService`, `EfCoreRepository`).
-- **Shared.Messaging**: Integration Events (Contracts) shared between producers and consumers.
+## 📦 Components
+- **Domain**: Base Entity, AggregateRoot, ValueObject implementations.
+- **Application**: CQRS Behaviours (Validation, Logging), Exceptions, Interfaces.
+- **Infrastructure**: EF Core configurations, Repository implementations, MassTransit consumers.
+- **Messaging**: Event definitions shared across microservices.
 
-## Usage
-Add reference to `Shared.Infrastructure` in any new microservice to gain access to the EventBus and Caching capabilities.
+## 🔨 Usage
+This project is referenced by all microservices to ensure consistency in patterns like:
+- Result Pattern
+- Domain Events
+- Repository Pattern
+- Cross-Cutting Concerns
+
+## 🚀 Building
+```bash
+dotnet build Shared/Shared.Kernel/Shared.Kernel.csproj
+```

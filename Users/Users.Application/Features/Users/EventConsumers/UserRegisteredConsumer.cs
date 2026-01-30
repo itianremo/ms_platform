@@ -22,7 +22,8 @@ public class UserRegisteredConsumer : IConsumer<UserRegisteredEvent>
         var existing = await _repository.GetByUserIdAndAppIdAsync(message.UserId, message.AppId);
         if (existing == null)
         {
-            var profile = new UserProfile(message.UserId, message.AppId, message.DisplayName);
+            var defaultSettings = await _repository.GetAppDefaultSettingsAsync(message.AppId);
+            var profile = new UserProfile(message.UserId, message.AppId, message.DisplayName, defaultSettings);
             await _repository.AddAsync(profile);
         }
     }

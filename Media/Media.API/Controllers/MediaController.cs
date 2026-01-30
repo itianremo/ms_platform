@@ -1,3 +1,4 @@
+using Media.Application.Common.Interfaces;
 using Media.Application.Features.Media.Commands.UploadMedia;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -9,10 +10,12 @@ namespace Media.API.Controllers;
 public class MediaController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IMediaService _mediaService;
 
-    public MediaController(IMediator mediator)
+    public MediaController(IMediator mediator, IMediaService mediaService)
     {
         _mediator = mediator;
+        _mediaService = mediaService;
     }
 
     [HttpPost("upload")]
@@ -39,5 +42,19 @@ public class MediaController : ControllerBase
             new { Id = Guid.NewGuid(), FileName = "spam_banner.png", Url = "http://localhost:9000/media/spam_banner.png", Reason = "Text overlay spam" }
         };
         return Ok(mockData);
+    }
+    [HttpGet("{id}/url")]
+    public async Task<IActionResult> GetUrl(string id)
+    {
+        // 'id' is currently the object name or filename
+        try 
+        {
+            var url = await _mediaService.GetPresignedUrlAsync(id);
+            return Ok(new { Url = url });
+        }
+        catch (Exception ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 }

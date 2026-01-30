@@ -1,0 +1,22 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Shared.Kernel -> D:\Worx\_MyProjz\ms_platform\Shared\Shared.Kernel\bin\Debug\net8.0\Shared.Kernel.dll
+  Auth.Domain -> D:\Worx\_MyProjz\ms_platform\Auth\Auth.Domain\bin\Debug\net8.0\Auth.Domain.dll
+  Shared.Messaging -> D:\Worx\_MyProjz\ms_platform\Shared\Shared.Messaging\bin\Debug\net8.0\Shared.Messaging.dll
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\RevokeSession\RevokeSessionCommandHandler.cs(3,17): error CS0234: The type or namespace name 'EntityFrameworkCore' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\RevokeSession\RevokeSessionCommandHandler.cs(4,12): error CS0234: The type or namespace name 'Infrastructure' does not exist in the namespace 'Auth' (are you missing an assembly reference?) [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\LoginUser\LoginUserCommand.cs(5,137): error CS0246: The type or namespace name 'IRequest<>' could not be found (are you missing a using directive or an assembly reference?) [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\LoginUser\LoginUserCommandHandler.cs(9,14): error CS0311: The type 'Auth.Application.Features.Auth.Commands.LoginUser.LoginUserCommand' cannot be used as type parameter 'TRequest' in the generic type or method 'IRequestHandler<TRequest, TResponse>'. There is no implicit reference conversion from 'Auth.Application.Features.Auth.Commands.LoginUser.LoginUserCommand' to 'MediatR.IRequest<string>'. [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\RevokeSession\RevokeSessionCommandHandler.cs(15,22): error CS0246: The type or namespace name 'AuthDbContext' could not be found (are you missing a using directive or an assembly reference?) [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+
+Build FAILED.
+
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\RevokeSession\RevokeSessionCommandHandler.cs(3,17): error CS0234: The type or namespace name 'EntityFrameworkCore' does not exist in the namespace 'Microsoft' (are you missing an assembly reference?) [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\RevokeSession\RevokeSessionCommandHandler.cs(4,12): error CS0234: The type or namespace name 'Infrastructure' does not exist in the namespace 'Auth' (are you missing an assembly reference?) [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\LoginUser\LoginUserCommand.cs(5,137): error CS0246: The type or namespace name 'IRequest<>' could not be found (are you missing a using directive or an assembly reference?) [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\LoginUser\LoginUserCommandHandler.cs(9,14): error CS0311: The type 'Auth.Application.Features.Auth.Commands.LoginUser.LoginUserCommand' cannot be used as type parameter 'TRequest' in the generic type or method 'IRequestHandler<TRequest, TResponse>'. There is no implicit reference conversion from 'Auth.Application.Features.Auth.Commands.LoginUser.LoginUserCommand' to 'MediatR.IRequest<string>'. [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\RevokeSession\RevokeSessionCommandHandler.cs(15,22): error CS0246: The type or namespace name 'AuthDbContext' could not be found (are you missing a using directive or an assembly reference?) [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+    0 Warning(s)
+    5 Error(s)
+
+Time Elapsed 00:00:01.33

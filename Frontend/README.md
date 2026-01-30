@@ -1,26 +1,33 @@
-# Frontend Applications
+# Frontend Monorepo
 
-This directory contains the React-based user interfaces for the Platform.
+Contains the React-based frontend applications for the MS Platform.
 
-## Projects
+## 📂 Applications
+| Application | Path | Port | Description |
+| :--- | :--- | :--- | :--- |
+| **Global Admin** | `/GlobalAdmin` | 3000 | Superadmin dashboard for platform management. |
+| **FitIT Admin** | `/FitITAdmin` | 3001 | Tenant-specific dashboard for FitIT. |
+| **Wissler Admin** | `/WisslerAdmin` | 3002 | Tenant-specific dashboard for Wissler. |
+| **App Portal** | `/App` | 5173 | User-facing mobile web application. |
+| **Shared UI** | `/SharedUI` | - | Shared components, hooks, and styles. |
 
-| Project | Type | Description |
-| :--- | :--- | :--- |
-| **[FitITAdmin](./FitITAdmin)** | Admin Portal | Dashboard for Tenant Admins (Users, Content, Payments). |
-| **[GlobalAdmin](./GlobalAdmin)** | Superadmin Portal | Dashboard for Platform Owners (Tenant Mgmt). |
-| **[App](./App)** | User App | Mobile-responsive web application for end-users. |
-| **[SharedUI](./SharedUI)** | Component Library | Reusable UI KIT used across Admin portals. |
+## 🛠 Technology Stack
+- **Framework**: React 18
+- **Build Tool**: Vite
+- **Language**: TypeScript
+- **Styling**: TailwindCSS
+- **State**: React Query / Context
+- **Routing**: React Router DOM
 
-## Tech Stack
-- **React 18**
-- **Vite**
-- **TypeScript**
-- **TailwindCSS** (via index.css / SharedUI)
+## 🚀 Getting Started
 
-## Getting Started
-Each project is a standalone Vite application.
+### Prerequisites
+- Node.js 18+
+- npm or pnpm
+
+### Running an App
+Navigate to the specific app folder and run:
 ```bash
-cd FitITAdmin
 npm install
 npm run dev
 ```

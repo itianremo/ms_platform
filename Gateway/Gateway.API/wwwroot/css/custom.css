@@ -1,0 +1,117 @@
+/* Custom Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+body,
+html,
+#app,
+.hc-main-content,
+table,
+th,
+td,
+button,
+input {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+/* Sidebar Styling */
+.hc-aside {
+    background: #0f172a !important;
+    /* Dark Slate to match Admin */
+    width: 260px !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Fix for collapsed state if needed */
+.hc-aside.collapsed {
+    width: 80px !important;
+}
+
+.hc-menu-item {
+    color: #94a3b8 !important;
+    padding: 0.75rem 1rem !important;
+    margin: 0.25rem 0.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s !important;
+}
+
+.hc-menu-item:hover,
+.hc-menu-item.active {
+    background: rgba(99, 102, 241, 0.1) !important;
+    color: #6366f1 !important;
+    /* Indigo for active */
+}
+
+/* Header customization */
+.hc-header {
+    background: rgba(15, 23, 42, 0.9) !important;
+    backdrop-filter: blur(8px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: none !important;
+}
+
+/* Table Enhancements */
+.hc-checks-table th {
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.05em !important;
+    padding: 1rem !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+}
+
+.hc-checks-table td {
+    padding: 1rem !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    color: #334155 !important;
+}
+
+.hc-checks-table tr:hover td {
+    background-color: #f8fafc !important;
+}
+
+/* Status Badges */
+.status-healthy {
+    background-color: #d1fae5 !important;
+    color: #065f46 !important;
+    padding: 0.25rem 0.75rem !important;
+    border-radius: 9999px !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+}
+
+.status-unhealthy {
+    background-color: #fee2e2 !important;
+    color: #991b1b !important;
+    padding: 0.25rem 0.75rem !important;
+    border-radius: 9999px !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+}
+
+/* Custom Links Section */
+.custom-sidebar-links {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.custom-link {
+    display: flex !important;
+    align-items: center !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+}
+
+/* Specific colors for custom actions if needed, otherwise they inherit from hc-menu-item */
+.custom-link:hover {
+    background: rgba(99, 102, 241, 0.1) !important;
+    color: #6366f1 !important;
+}

@@ -1,0 +1,14 @@
+[
+    {
+        "AppId": "system-global",
+        "GatewayName": "Stripe",
+        "IsEnabled": true,
+        "ConfigJson": "{\"PublishableKey\":\"pk_test_placeholder\",\"SecretKey\":\"sk_test_placeholder\"}"
+    },
+    {
+        "AppId": "system-global",
+        "GatewayName": "PayPal",
+        "IsEnabled": false,
+        "ConfigJson": "{\"ClientId\":\"client_id_placeholder\",\"ClientSecret\":\"client_secret_placeholder\",\"Mode\":\"Sandbox\"}"
+    }
+]

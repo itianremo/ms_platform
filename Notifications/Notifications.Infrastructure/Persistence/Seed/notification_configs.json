@@ -1,0 +1,14 @@
+[
+    {
+        "Type": "Email",
+        "Provider": "SMTP",
+        "IsActive": true,
+        "ConfigJson": "{\"Host\":\"smtp.gmail.com\",\"Port\":587,\"Username\":\"admin@example.com\",\"Password\":\"change_me\",\"EnableSsl\":true}"
+    },
+    {
+        "Type": "Sms",
+        "Provider": "Twilio",
+        "IsActive": true,
+        "ConfigJson": "{\"AccountSid\":\"AC_placeholder\",\"AuthToken\":\"token_placeholder\",\"FromNumber\":\"+15555555555\"}"
+    }
+]

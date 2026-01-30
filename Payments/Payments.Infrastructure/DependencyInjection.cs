@@ -43,6 +43,7 @@ public static class DependencyInjection
             });
         });
 
+        services.AddScoped<PaymentsDbInitializer>();
         return services;
     }
 }

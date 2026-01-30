@@ -11,6 +11,7 @@ namespace Payments.Infrastructure.Persistence
         public DbSet<Subscription> Subscriptions { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<AppPaymentProvider> AppPaymentProviders { get; set; }
+        public DbSet<Bank> Banks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

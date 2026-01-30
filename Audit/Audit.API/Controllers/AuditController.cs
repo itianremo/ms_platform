@@ -16,7 +16,7 @@ public class AuditController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<AuditLog>>> GetLogs([FromQuery] int? appId, [FromQuery] int? userId)
+    public async Task<ActionResult<List<AuditLog>>> GetLogs([FromQuery] Guid? appId, [FromQuery] Guid? userId)
     {
         if (appId.HasValue && userId.HasValue)
         {

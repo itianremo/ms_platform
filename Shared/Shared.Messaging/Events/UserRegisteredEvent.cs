@@ -8,13 +8,15 @@ public class UserRegisteredEvent : IDomainEvent
     public Guid AppId { get; set; }
     public string Email { get; set; }
     public string DisplayName { get; set; }
+    public string Phone { get; set; }
     public DateTime OccurredOn { get; set; } = DateTime.UtcNow;
 
-    public UserRegisteredEvent(Guid userId, Guid appId, string email, string displayName)
+    public UserRegisteredEvent(Guid userId, Guid appId, string email, string phone, string displayName)
     {
         UserId = userId;
         AppId = appId;
         Email = email;
+        Phone = phone;
         DisplayName = displayName;
     }
 }

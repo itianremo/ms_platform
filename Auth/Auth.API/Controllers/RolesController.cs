@@ -21,4 +21,11 @@ public class RolesController : ControllerBase
         await _mediator.Send(command);
         return Ok();
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetRoles([FromQuery] Guid? appId)
+    {
+        var result = await _mediator.Send(new Auth.Application.Features.Auth.Queries.GetRoles.GetRolesQuery(appId));
+        return Ok(result);
+    }
 }

@@ -4,6 +4,8 @@ using Auth.Domain.Repositories;
 using Auth.Application.Common.Interfaces;
 using MassTransit;
 using Shared.Messaging.Events;
+using Shared.Kernel;
+using Microsoft.Extensions.Logging;
 
 namespace Auth.Application.Features.Auth.Commands.RegisterUser;
 
@@ -12,36 +14,199 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly Microsoft.Extensions.Logging.ILogger<RegisterUserCommandHandler> _logger;
 
-    public RegisterUserCommandHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IPublishEndpoint publishEndpoint)
+    public RegisterUserCommandHandler(
+        IUserRepository userRepository, 
+        IPasswordHasher passwordHasher, 
+        IPublishEndpoint publishEndpoint,
+        Microsoft.Extensions.Logging.ILogger<RegisterUserCommandHandler> logger)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _publishEndpoint = publishEndpoint;
+        _logger = logger;
     }
 
     public async Task<Guid> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
     {
+        // 1. Check for Existing User (Email or Phone)
         var existingUser = await _userRepository.GetByEmailAsync(request.Email);
-        if (existingUser != null)
+        if (existingUser == null && !string.IsNullOrEmpty(request.Phone))
         {
-            throw new InvalidOperationException("User with this email already exists.");
+            existingUser = await _userRepository.GetByEmailOrPhoneAsync(request.Phone);
         }
 
-        var passwordHash = _passwordHasher.Hash(request.Password);
-        
-        var user = new User(request.Email, request.Phone, passwordHash);
+        if (existingUser != null)
+        {
+            // --- Existing User Logic ---
 
-        await _userRepository.AddAsync(user);
+            // A. Deleted Account
+            if (existingUser.Status == GlobalUserStatus.SoftDeleted)
+            {
+                // Throwing specific exception for UI to handle "Restore" flow
+                throw new Common.Exceptions.UserSoftDeletedException("Account is deleted. Restoration is available.");
+            }
+
+            // Reload User with Roles/Memberships to ensure we have the latest state
+            existingUser = await _userRepository.GetUserWithRolesAsync(existingUser.Id) ?? existingUser;
+
+            // B. Exists in THIS App
+            if (request.AppId.HasValue && existingUser.Memberships.Any(m => m.AppId == request.AppId.Value))
+            {
+                throw new InvalidOperationException("User is already registered in this application.");
+            }
+
+            // C. Exists in OTHER App -> Register in New App
+            if (request.AppId.HasValue)
+            {
+                await RegisterExistingUserInNewApp(existingUser, request.AppId.Value, request.VerificationType, request.RequiresAdminApproval);
+                
+                // Publish Event (UserRegisteredEvent or UserJoinedAppEvent? Using Registered for now as generic 'User Entered App')
+                await PublishUserRegisteredEvent(existingUser, request.AppId.Value, cancellationToken);
+                
+                return existingUser.Id;
+            }
+            
+            // Fallback if no AppId provided but user exists
+            throw new InvalidOperationException("User account already exists.");
+        }
+
+        // --- New User Logic ---
+        
+        var passwordHash = _passwordHasher.Hash(request.Password);
+        var newUser = new User(request.Email, request.Phone, passwordHash);
+
+        // Determine Initial Status
+        ResolveNewUserStatus(newUser, request.VerificationType, request.RequiresAdminApproval);
+
+        // Add Membership if App provided
+        if (request.AppId.HasValue)
+        {
+            await AddMembershipAsync(newUser, request.AppId.Value, request.RequiresAdminApproval);
+        }
+
+        // Save
+        await _userRepository.AddAsync(newUser);
 
         // Publish Event
-        await _publishEndpoint.Publish(new UserRegisteredEvent(
-            user.Id, 
-            request.AppId ?? Guid.Empty, 
-            user.Email, 
-            user.Email // DisplayName defaults to Email initially
-        ), cancellationToken);
+        await PublishUserRegisteredEvent(newUser, request.AppId.Value, cancellationToken);
 
-        return user.Id;
+        return newUser.Id;
+    }
+
+    private void ResolveNewUserStatus(User user, VerificationType verificationType, bool requiresAdminApproval)
+    {
+        // Prioritize Verification -> Admin Approval -> ProfileIncomplete
+        
+        if (verificationType != VerificationType.None)
+        {
+            switch (verificationType)
+            {
+                case VerificationType.Email:
+                    user.SetStatus(GlobalUserStatus.PendingEmailVerification);
+                    break;
+                case VerificationType.Phone:
+                    user.SetStatus(GlobalUserStatus.PendingMobileVerification);
+                    break;
+                case VerificationType.Both:
+                    user.SetStatus(GlobalUserStatus.PendingAccountVerification);
+                    break;
+            }
+        }
+        else if (requiresAdminApproval)
+        {
+             user.SetStatus(GlobalUserStatus.PendingAdminApproval);
+        }
+        else
+        {
+            // If no immediate verification or admin approval needed, set to ProfileIncomplete
+            // Usage: User can login but might be blocked until Profile is filled.
+            user.SetStatus(GlobalUserStatus.ProfileIncomplete);
+        }
+    }
+
+    private async Task RegisterExistingUserInNewApp(User user, Guid appId, VerificationType verificationType, bool requiresAdminApproval)
+    {
+        // 1. Add Membership
+        await AddMembershipAsync(user, appId, requiresAdminApproval);
+
+        // 2. Check Verification Requirements vs Current Status
+        // If current user is missing verified fields required by this new app, degrade global status?
+        // Risky for existing apps. Usually, we just ensure the verification flow is triggered.
+        // User.cs has methods UpdateEmail/Phone which reset verification.
+        // Here we just check completeness.
+
+        bool emailNeeded = (verificationType == VerificationType.Email || verificationType == VerificationType.Both);
+        bool phoneNeeded = (verificationType == VerificationType.Phone || verificationType == VerificationType.Both);
+
+        if (emailNeeded && !user.IsEmailVerified)
+        {
+            // If strictly required and not verified, we might need to set status to ensure they verify.
+            // But we shouldn't block them if they are Active elsewhere? 
+            // The prompt says "Register him... consider if ... verifications are required".
+            // We set the Global Status to pending if they are missing a credential verification.
+            if (user.Status == GlobalUserStatus.Active || user.Status == GlobalUserStatus.ProfileIncomplete)
+            {
+                 user.SetStatus(GlobalUserStatus.PendingEmailVerification);
+            }
+        }
+        else if (phoneNeeded && !user.IsPhoneVerified)
+        {
+             if (user.Status == GlobalUserStatus.Active || user.Status == GlobalUserStatus.ProfileIncomplete)
+             {
+                  user.SetStatus(GlobalUserStatus.PendingMobileVerification);
+             }
+        }
+
+        // We do NOT force ProfileIncomplete on Existing users to avoid disrupting their other apps.
+        // The App-Level profile check should be enforced at Login or Usage time for that specific App.
+        
+        await _userRepository.UpdateAsync(user);
+    }
+
+    private async Task AddMembershipAsync(User user, Guid appId, bool requiresAdminApproval)
+    {
+        var userRole = await _userRepository.GetRoleByNameAsync(appId, "NormalUser") 
+                       ?? await _userRepository.GetRoleByNameAsync(appId, "User"); // Fallback
+
+        if (userRole == null)
+        {
+            // Create default role if missing
+            userRole = new Role(appId, "NormalUser");
+            await _userRepository.AddRoleAsync(userRole);
+        }
+
+        var membership = new UserAppMembership(user.Id, appId, userRole.Id);
+        
+        // Handle App Specific Status
+        if (requiresAdminApproval)
+        {
+            membership.SetStatus(AppUserStatus.PendingApproval);
+        }
+        else
+        {
+            membership.SetStatus(AppUserStatus.Active);
+        }
+
+        user.AddMembership(membership);
+    }
+
+    private async Task PublishUserRegisteredEvent(User user, Guid appId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _publishEndpoint.Publish(new UserRegisteredEvent(
+                user.Id, 
+                appId, 
+                user.Email, 
+                user.Phone,
+                user.Email 
+            ), cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to publish UserRegisteredEvent for User {UserId}", user.Id);
+        }
     }
 }

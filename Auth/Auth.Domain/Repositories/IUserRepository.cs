@@ -6,7 +6,22 @@ namespace Auth.Domain.Repositories;
 public interface IUserRepository : IRepository<User>
 {
     Task<User?> GetByEmailAsync(string email);
+    Task<User?> GetByEmailOrPhoneAsync(string emailOrPhone);
     Task<User?> GetByLoginAsync(string loginProvider, string providerKey);
     Task<User?> GetUserWithRolesAsync(Guid userId);
     Task<List<User>> ListWithRolesAsync();
+    Task<List<AppRequirement>> GetMemberAppRequirementsAsync(Guid userId);
+    Task<AppRequirement?> GetAppVerificationConfigAsync(Guid appId);
+    Task<bool> IsAppActiveAsync(Guid appId);
+    Task<Role?> GetRoleByNameAsync(Guid appId, string roleName);
+    Task AddRoleAsync(Role role);
+    Task<List<UserSessionDto>> GetSessionsAsync(Guid userId);
+    Task<UserSession?> GetSessionByIdAsync(Guid sessionId);
+    Task<UserSession?> GetSessionByRefreshTokenAsync(string refreshToken);
+    Task UpdateSessionAsync(UserSession session);
+    Task AddSessionAsync(UserSession session);
+    Task<List<Role>> GetRolesAsync(Guid? appId = null);
 }
+
+public record AppRequirement(Guid AppId, VerificationType VerificationType, bool RequiresAdminApproval, int MembershipStatus);
+public record UserSessionDto(Guid Id, Guid? AppId, string? AppName, string? IpAddress, string? UserAgent, string? DeviceInfo, bool IsCurrent, bool IsRevoked, DateTime CreatedAt, DateTime ExpiresAt);

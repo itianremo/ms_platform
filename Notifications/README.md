@@ -1,13 +1,36 @@
-# Notifications Service
+# Notifications Service (Communication)
 
-Centralized dispatch for Email, SMS, and In-App notifications.
+Centralized service for dispatching emails, SMS, and in-app notifications.
 
-## Features
-- **SignalR Hub**: Delivers real-time alerts to connected clients.
-- **Email/SMS Abstraction**: Pattern for integrating Twilio/SendGrid (Stubbed implementation).
-- **Event Consumers**: Reacts to system events (e.g., `UserRegistered`) to send welcome messages.
+## ✨ Features
+- **Multi-Channel Dispatch**: Support for Email (SMTP), SMS, and In-App alerts.
+- **Templates**: Dynamic template rendering for notifications.
+- **Event-Driven**: Listens to system events (e.g., `UserRegistered`) to trigger notifications.
+- **User Preferences**: Respects user opt-in/opt-out settings.
 
-## Tech Stack
-- **.NET 8**
-- **RabbitMQ**
-- **SignalR**
+## 🏗 Technology Stack
+- **Framework**: .NET 8 (ASP.NET Core)
+- **Messaging**: MassTransit (RabbitMQ)
+- **Database**: SQL Server (for logs/templates) - `NotificationsDb`
+- **Documentation**: Swagger / OpenAPI
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Docker & Docker Compose
+- .NET 8 SDK
+
+### Running Locally
+```bash
+cd Notifications/Notifications.API
+dotnet run
+```
+
+### Running via Docker
+```bash
+docker-compose up -d notifications-api
+```
+
+## 🔌 API Documentation
+- **Swagger UI**: http://localhost:5004/swagger
+- **Health Check**: http://localhost:5004/health

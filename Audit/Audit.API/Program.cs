@@ -1,5 +1,6 @@
 using Audit.Application;
 using Audit.Infrastructure;
+using Audit.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
+
+// Initialize Database
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider.GetRequiredService<AuditDbInitializer>();
+    await initializer.InitializeAsync();
+}
 
 app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
 {

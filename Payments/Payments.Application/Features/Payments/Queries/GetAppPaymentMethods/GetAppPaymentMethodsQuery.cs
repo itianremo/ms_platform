@@ -7,12 +7,12 @@ using System.Linq;
 
 namespace Payments.Application.Features.Payments.Queries.GetAppPaymentMethods
 {
-    public class GetAppPaymentMethodsQuery : IRequest<List<string>>
+    public class GetAppPaymentMethodsQuery : IRequest<List<PaymentMethodDto>>
     {
         public string AppId { get; set; }
     }
 
-    public class GetAppPaymentMethodsQueryHandler : IRequestHandler<GetAppPaymentMethodsQuery, List<string>>
+    public class GetAppPaymentMethodsQueryHandler : IRequestHandler<GetAppPaymentMethodsQuery, List<PaymentMethodDto>>
     {
         private readonly IAppPaymentProviderRepository _repository;
 
@@ -21,10 +21,16 @@ namespace Payments.Application.Features.Payments.Queries.GetAppPaymentMethods
             _repository = repository;
         }
 
-        public async Task<List<string>> Handle(GetAppPaymentMethodsQuery request, CancellationToken cancellationToken)
+        public async Task<List<PaymentMethodDto>> Handle(GetAppPaymentMethodsQuery request, CancellationToken cancellationToken)
         {
             var providers = await _repository.GetByAppIdAsync(request.AppId);
-            return providers.Select(p => p.GatewayName).ToList();
+            return providers.Select(p => new PaymentMethodDto
+            {
+                GatewayName = p.GatewayName,
+                IsEnabled = p.IsEnabled,
+                ConfigJson = p.ConfigJson
+            }).ToList();
         }
     }
 }
+

@@ -22,6 +22,7 @@ public static class DependencyInjection
         services.AddMassTransit(x =>
         {
             x.AddConsumer<UserRegisteredConsumer>();
+            x.AddConsumer<UserContactUpdatedConsumer>();
 
             x.UsingRabbitMq((context, cfg) =>
             {
@@ -35,9 +36,15 @@ public static class DependencyInjection
                 {
                     e.ConfigureConsumer<UserRegisteredConsumer>(context);
                 });
+
+                cfg.ReceiveEndpoint("user-contact-updated-queue", e =>
+                {
+                    e.ConfigureConsumer<UserContactUpdatedConsumer>(context);
+                });
             });
         });
 
+        services.AddScoped<UsersDbInitializer>();
         return services;
     }
 }

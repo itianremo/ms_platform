@@ -24,7 +24,7 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand>
             await _profileRepository.AddAsync(profile);
         }
 
-        profile.UpdateProfile(request.DisplayName, request.Bio, request.AvatarUrl, request.CustomDataJson);
+        profile.UpdateProfile(request.DisplayName, request.Bio, request.AvatarUrl, request.CustomDataJson, request.DateOfBirth, request.Gender);
         
         await _profileRepository.UpdateAsync(profile);
     }

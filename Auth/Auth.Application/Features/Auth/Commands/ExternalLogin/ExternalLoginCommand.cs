@@ -33,7 +33,8 @@ public class ExternalLoginCommandHandler : IRequestHandler<ExternalLoginCommand,
             if (user.Status == GlobalUserStatus.Banned)
                 throw new UnauthorizedAccessException("Account is banned.");
 
-            return _tokenService.GenerateAccessToken(user);
+            var (token, _) = _tokenService.GenerateAccessToken(user);
+            return token;
         }
 
         // 2. Check if user exists by Email (Link Account)
@@ -44,7 +45,8 @@ public class ExternalLoginCommandHandler : IRequestHandler<ExternalLoginCommand,
             user.AddLogin(new UserLogin(user.Id, request.LoginProvider, request.ProviderKey, request.DisplayName));
             await _userRepository.UpdateAsync(user);
             
-            return _tokenService.GenerateAccessToken(user);
+            var (token, _) = _tokenService.GenerateAccessToken(user);
+            return token;
         }
 
         // 3. Register new user
@@ -62,6 +64,7 @@ public class ExternalLoginCommandHandler : IRequestHandler<ExternalLoginCommand,
         
         await _userRepository.AddAsync(user);
 
-        return _tokenService.GenerateAccessToken(user);
+        var (newToken, _) = _tokenService.GenerateAccessToken(user);
+        return newToken;
     }
 }

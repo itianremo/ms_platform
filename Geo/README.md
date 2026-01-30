@@ -1,11 +1,36 @@
-# Geo Service (Location Features)
+# Geo Service (Location Services)
 
-Handles location-based queries and proximity matching.
+Provides geospatial functionality, location tracking, and proximity search.
 
-## Features
-- **Proximity Search**: Find users near a specific coordinate.
-- **Location Storage**: PostGIS integration for efficient spatial queries.
+## ✨ Features
+- **Geocoding**: Address to Coordinate conversion (and vice versa).
+- **Location Updates**: Real-time user location tracking (`POST /location`).
+- **Proximity Search**: Find entities "near me" using PostGIS spatial queries (`GET /nearby`).
+- **Regions**: Manage geographical boundaries (polygons).
 
-## Tech Stack
-- **.NET 8**
-- **PostgreSQL** (PostGIS Extension)
+## 🏗 Technology Stack
+- **Framework**: .NET 8 (ASP.NET Core)
+- **Database**: PostgreSQL + PostGIS Extension
+- **Messaging**: MassTransit (RabbitMQ)
+- **Documentation**: Swagger / OpenAPI
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Docker & Docker Compose
+- .NET 8 SDK
+
+### Running Locally
+```bash
+cd Geo/Geo.API
+dotnet run
+```
+
+### Running via Docker
+```bash
+docker-compose up -d geo-api
+```
+
+## 🔌 API Documentation
+- **Swagger UI**: http://localhost:5011/swagger
+- **Health Check**: http://localhost:5011/health

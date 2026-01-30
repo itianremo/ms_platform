@@ -23,6 +23,17 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<Notifications.Infrastructure.Persistence.NotificationsDbContext>();
+        // We can create a temporary initializer or register it in DI.
+        // Since it's not registered in DI in Infrastructure DependencyInjection (likely), 
+        // we can instantiate manually or register it. 
+        // Let's assume we can just instantiate it since it only needs context.
+        var initializer = new Notifications.Infrastructure.Persistence.NotificationsDbInitializer(dbContext);
+        await initializer.InitializeAsync();
+    }
 }
 
 app.UseHttpsRedirection();

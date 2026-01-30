@@ -10,6 +10,8 @@ public class UserProfile : Entity
     public string? AvatarUrl { get; private set; }
     public string? Bio { get; private set; }
     
+
+
     // JSON blob for app-specific data (e.g. "Height", "Certifications")
     public string CustomDataJson { get; private set; } 
 
@@ -19,20 +21,22 @@ public class UserProfile : Entity
 
     private UserProfile() { }
 
-    public UserProfile(Guid userId, Guid appId, string displayName)
+    public UserProfile(Guid userId, Guid appId, string displayName, string customDataJson = "{}")
     {
         Id = Guid.NewGuid();
         UserId = userId;
         AppId = appId;
         DisplayName = displayName;
-        CustomDataJson = "{}";
+        CustomDataJson = customDataJson;
     }
 
-    public void UpdateProfile(string displayName, string? bio, string? avatarUrl, string customDataJson)
+    public void UpdateProfile(string displayName, string? bio, string? avatarUrl, string customDataJson, DateTime? dateOfBirth, string? gender)
     {
         DisplayName = displayName;
         Bio = bio;
         AvatarUrl = avatarUrl;
         CustomDataJson = customDataJson;
+        DateOfBirth = dateOfBirth;
+        Gender = gender;
     }
 }

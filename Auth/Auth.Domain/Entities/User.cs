@@ -4,10 +4,14 @@ namespace Auth.Domain.Entities;
 
 public enum GlobalUserStatus
 {
-    PendingApproval,
-    Active,
-    Banned,
-    SoftDeleted
+    PendingAccountVerification, // 0
+    PendingMobileVerification,  // 1
+    PendingEmailVerification,   // 2
+    PendingAdminApproval,       // 3
+    Active,                     // 4
+    Banned,                     // 5
+    SoftDeleted,                // 6
+    ProfileIncomplete           // 7
 }
 
 public class User : Entity
@@ -15,9 +19,11 @@ public class User : Entity
     public string Email { get; private set; }
     public string Phone { get; private set; }
     public string PasswordHash { get; private set; }
-    public bool IsGlobalAdmin { get; private set; }
+
+    // Removed IsGlobalAdmin
     public bool IsSealed { get; private set; } // Cannot be deleted or modified
     public GlobalUserStatus Status { get; private set; }
+    public DateTime? OtpBlockedUntil { get; private set; }
 
     private readonly List<UserAppMembership> _memberships = new();
     public IReadOnlyCollection<UserAppMembership> Memberships => _memberships.AsReadOnly();
@@ -25,16 +31,27 @@ public class User : Entity
     private readonly List<UserLogin> _logins = new();
     public IReadOnlyCollection<UserLogin> Logins => _logins.AsReadOnly();
 
+    private readonly List<UserSession> _sessions = new();
+    public IReadOnlyCollection<UserSession> Sessions => _sessions.AsReadOnly();
+
     private User() { }
 
-    public User(string email, string phone, string passwordHash, bool isGlobalAdmin = false)
+    public User(string email, string phone, string passwordHash)
     {
         Id = Guid.NewGuid();
         Email = email;
         Phone = phone;
         PasswordHash = passwordHash;
-        IsGlobalAdmin = isGlobalAdmin;
-        Status = GlobalUserStatus.PendingApproval;
+        Status = GlobalUserStatus.PendingAccountVerification;
+    }
+
+    public User(Guid id, string email, string phone, string passwordHash)
+    {
+        Id = id;
+        Email = email;
+        Phone = phone;
+        PasswordHash = passwordHash;
+        Status = GlobalUserStatus.PendingAccountVerification;
     }
 
     public void Activate()
@@ -52,6 +69,48 @@ public class User : Entity
         Status = GlobalUserStatus.SoftDeleted;
     }
 
+    public bool IsEmailVerified { get; private set; }
+    public bool IsPhoneVerified { get; private set; }
+
+    // ... existing constructors ...
+
+    public void VerifyEmail()
+    {
+        IsEmailVerified = true;
+    }
+
+    public void VerifyPhone()
+    {
+        IsPhoneVerified = true;
+    }
+
+    public void SetStatus(GlobalUserStatus status)
+    {
+        Status = status;
+    }
+
+    public void UpdateEmail(string newEmail)
+    {
+        Email = newEmail;
+        IsEmailVerified = false;
+    }
+
+    public void UpdatePhone(string newPhone)
+    {
+        Phone = newPhone;
+        IsPhoneVerified = false;
+    }
+
+    public void SetEmailVerified(bool verified)
+    {
+        IsEmailVerified = verified;
+    }
+
+    public void SetPhoneVerified(bool verified)
+    {
+        IsPhoneVerified = verified;
+    }
+
     public void AddMembership(UserAppMembership membership)
     {
         // Validation logic can go here (e.g. check duplicate app)
@@ -66,8 +125,40 @@ public class User : Entity
         }
     }
 
+    public void AddSession(UserSession session)
+    {
+        _sessions.Add(session);
+    }
+
     public void MarkAsSealed()
     {
         IsSealed = true;
+    }
+    public void UpdatePassword(string newPasswordHash)
+    {
+        PasswordHash = newPasswordHash;
+    }
+
+    public void BlockOtp(DateTime until)
+    {
+        OtpBlockedUntil = until;
+    }
+
+    public void UpdateMembershipStatus(Guid appId, AppUserStatus status)
+    {
+        var membership = _memberships.FirstOrDefault(m => m.AppId == appId);
+        if (membership != null)
+        {
+            membership.SetStatus(status);
+        }
+    }
+
+    public void RemoveMembership(Guid appId)
+    {
+        var membership = _memberships.FirstOrDefault(m => m.AppId == appId);
+        if (membership != null)
+        {
+            _memberships.Remove(membership);
+        }
     }
 }

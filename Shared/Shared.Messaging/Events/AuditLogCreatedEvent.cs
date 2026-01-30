@@ -4,8 +4,8 @@ public record AuditLogCreatedEvent(
     string Action,
     string EntityName,
     string EntityId,
-    int? UserId,
-    int? AppId,
+    Guid? UserId,
+    Guid? AppId,
     string ChangesJson,
     DateTime Timestamp
 );

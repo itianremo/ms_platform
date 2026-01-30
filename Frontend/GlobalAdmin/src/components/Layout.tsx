@@ -21,8 +21,8 @@ export default function Layout() {
                     <Link to="/users" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: '#18181b', padding: '10px', borderRadius: '6px' }}>
                         <Users size={20} /> Users
                     </Link>
-                    <Link to="/settings" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: '#18181b', padding: '10px', borderRadius: '6px' }}>
-                        <Settings size={20} /> Settings
+                    <Link to="/preferences" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: '#18181b', padding: '10px', borderRadius: '6px' }}>
+                        <Settings size={20} /> Preferences
                     </Link>
                 </nav>
 

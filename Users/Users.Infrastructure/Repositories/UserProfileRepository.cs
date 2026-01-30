@@ -26,6 +26,16 @@ public class UserProfileRepository : IUserProfileRepository
         return await _context.UserProfiles.FirstOrDefaultAsync(p => p.UserId == userId && p.AppId == appId);
     }
 
+    public async Task<List<UserProfile>> GetAllByUserIdAsync(Guid userId)
+    {
+        return await _context.UserProfiles.Where(p => p.UserId == userId).ToListAsync();
+    }
+
+    public async Task<List<UserProfile>> GetAllProfilesAsync(Guid appId)
+    {
+        return await _context.UserProfiles.Where(p => p.AppId == appId).ToListAsync();
+    }
+
     public async Task<List<UserProfile>> ListAsync()
     {
         return await _context.UserProfiles.ToListAsync();
@@ -53,5 +63,26 @@ public class UserProfileRepository : IUserProfileRepository
     {
         _context.UserProfiles.Remove(entity);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<string> GetAppDefaultSettingsAsync(Guid appId)
+    {
+        try
+        {
+            // Cross-Database Query to AppsDb
+            var sql = "SELECT DefaultUserProfileJson FROM [AppsDb].[dbo].[Apps] WHERE Id = {0}";
+            
+            // Execute logic
+            var result = await _context.Database
+                .SqlQueryRaw<string>(sql, appId)
+                .ToListAsync();
+            
+            return result.FirstOrDefault() ?? "{}";
+        }
+        catch (Exception)
+        {
+            // Fallback to empty JSON if DB access fails
+            return "{}";
+        }
     }
 }

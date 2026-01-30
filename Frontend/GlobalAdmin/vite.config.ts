@@ -7,7 +7,27 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://localhost:7032',
+        target: 'http://localhost:7032',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/payments': {
+        target: 'http://localhost:7032',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/notifications': {
+        target: 'http://localhost:7032',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/auth': {
+        target: 'http://localhost:7032',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/users': {
+        target: 'http://localhost:7032',
         changeOrigin: true,
         secure: false,
       }

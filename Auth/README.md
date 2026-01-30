@@ -1,19 +1,36 @@
 # Auth Service (Identity & Access)
 
-Manages User Identity, Authentication (JWT), and Authorization (RBAC) for the entire platform.
+The centralized Identity Provider (IdP) handling Authentication, Authorization (RBAC), and Session Management.
 
-## Features
-- **OIDC/SSO**: Supports secure cookie sharing across subdomains.
-- **RBAC**: Application-scoped Roles and Permissions.
-- **Superadmin Protection**: Sealed entities logic.
-- **Social Login**: Google, Facebook Integration.
+## ✨ Features
+- **OIDC/SSO**: JWT-based authentication with Secure Cookie Sharing across subdomains.
+- **RBAC**: Role-Based Access Control with granular Permissions.
+- **OTP Verification**: Email and SMS verification logic.
+- **User Management**: Registration, Login, and Password Reset flows.
 
-## Tech Stack
-- **.NET 8** (Onion Architecture)
-- **SQL Server** (Persistence)
-- **MassTransit** (Event Publishing)
+## 🏗 Technology Stack
+- **Framework**: .NET 8 (ASP.NET Core)
+- **Database**: SQL Server (`AuthDb`)
+- **Messaging**: MassTransit (RabbitMQ)
+- **Documentation**: Swagger / OpenAPI
 
-## Key Endpoints
-- `POST /api/auth/login`: Issue JWT & Cookie.
-- `POST /api/auth/register`: Create new user.
-- `POST /api/auth/external-login`: Social Auth.
+## 🚀 Getting Started
+
+### Prerequisites
+- Docker & Docker Compose
+- .NET 8 SDK
+
+### Running Locally
+```bash
+cd Auth/Auth.API
+dotnet run
+```
+
+### Running via Docker
+```bash
+docker-compose up -d ms-auth-api
+```
+
+## 🔌 API Documentation
+- **Swagger UI**: http://localhost:5001/swagger
+- **Health Check**: http://localhost:5001/health

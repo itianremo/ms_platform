@@ -1,15 +1,22 @@
-# Global Admin Portal
+# Global Admin (Superadmin Dashboard)
 
-The Superadmin Dashboard for the Platform Owner.
+The central management console for the platform owner.
 
-## Audience
-- **Platform Owners**: Administrators of the entire MS Platform system.
+## ✨ Features
+- **Tenant Management**: Create and configure Tenants/Apps.
+- **User Management**: View comprehensive user list across the platform.
+- **System Monitoring**: Access Audit Logs and System Health.
+- **Settings**: Configure Global Defaults.
 
-## Features
-- **Tenant Management**: Create and configure new Apps (Tenants) like "FitIT" or "Wissler".
-- **Global Settings**: System-wide configurations.
+## 🚀 Getting Started
 
-## Tech Stack
-- **React 18**
-- **Vite**
-- **TypeScript**
+### Development
+```bash
+npm install
+npm run dev
+```
+Runs on: http://localhost:3000
+
+### Production Logic
+- Built via Docker (`nginx:alpine`).
+- Docker Port: 3000

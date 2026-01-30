@@ -3,6 +3,10 @@ using Chat.Application.Features.Chat.Queries.GetHistory;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
+using Chat.API.DTOs;
+using Chat.Domain.Entities;
+using Microsoft.AspNetCore.Mvc;
+
 namespace Chat.API.Controllers;
 
 [ApiController]
@@ -40,5 +44,19 @@ public class ChatController : ControllerBase
 
         var messages = await _repository.GetFlaggedAsync(appId);
         return Ok(messages);
+    }
+    [HttpPost("channels")]
+    public async Task<IActionResult> CreateChannel([FromBody] CreateChannelRequest request)
+    {
+        // In real impl, use Mediator/Repository. For now, mock success.
+        var channel = new ChatChannel
+        {
+            Name = request.Name,
+            MemberIds = request.MemberIds
+        };
+        
+        // await _repository.AddChannelAsync(channel); -- Function doesn't exist in interface yet
+        
+        return Ok(new ChannelResponse { Id = channel.Id, Name = channel.Name });
     }
 }

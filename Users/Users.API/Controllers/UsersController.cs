@@ -31,4 +31,11 @@ public class UsersController : ControllerBase
         await _mediator.Send(command);
         return Ok();
     }
+    [HttpGet("profiles")]
+    public async Task<IActionResult> GetProfiles([FromQuery] Guid appId)
+    {
+        var query = new Users.Application.Features.Users.Queries.GetProfiles.GetProfilesQuery(appId);
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
 }

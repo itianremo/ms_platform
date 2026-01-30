@@ -10,10 +10,15 @@ A scalable, modular microservices platform built with **.NET 8 (Backend)** and *
 - **Content Management**: MinIO-based Media storage with automatic Image Resizing and Moderation.
 - **Search**: PostgreSQL Full-Text Search synchronized via Events.
 - **Dynamic Payments**: Strategy-based Payment Gateway (Stripe/Mock) with configurable providers per Tenant.
+- **Geo-Location**: PostGIS-powered proximity search and location tracking.
+- **Matching Engine**: ML-based user recommendation and swipe logic.
 - **Frontend**: 
-  - **FitITAdmin**: Tenant Administration Dashboard.
   - **GlobalAdmin**: Superadmin Dashboard.
   - **App**: User-facing Mobile Web App.
+- **Identity Features**:
+  - **Cross-App Registration**: Seamless logic for users joining multiple apps with shared identity.
+  - **Account Reactivation**: Secure email-based restoration for deleted accounts.
+  - **Dynamic Profile Enforcement**: Status-based profile completion gates.
 
 ## 📂 Architecture Overview
 

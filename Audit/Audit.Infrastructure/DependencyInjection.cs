@@ -20,6 +20,8 @@ public static class DependencyInjection
         services.AddMassTransit(x =>
         {
             x.AddConsumer<AuditLogConsumer>();
+            x.AddConsumer<UserStatusChangedConsumer>();
+            x.AddConsumer<RoleAssignedConsumer>();
 
             x.UsingRabbitMq((context, cfg) =>
             {
@@ -32,10 +34,13 @@ public static class DependencyInjection
                 cfg.ReceiveEndpoint("audit-service-queue", e =>
                 {
                     e.ConfigureConsumer<AuditLogConsumer>(context);
+                    e.ConfigureConsumer<UserStatusChangedConsumer>(context);
+                    e.ConfigureConsumer<RoleAssignedConsumer>(context);
                 });
             });
         });
 
+        services.AddScoped<AuditDbInitializer>();
         return services;
     }
 }

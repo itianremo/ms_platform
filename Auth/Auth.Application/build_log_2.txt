@@ -1,0 +1,16 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  Shared.Kernel -> D:\Worx\_MyProjz\ms_platform\Shared\Shared.Kernel\bin\Debug\net8.0\Shared.Kernel.dll
+  Auth.Domain -> D:\Worx\_MyProjz\ms_platform\Auth\Auth.Domain\bin\Debug\net8.0\Auth.Domain.dll
+  Shared.Messaging -> D:\Worx\_MyProjz\ms_platform\Shared\Shared.Messaging\bin\Debug\net8.0\Shared.Messaging.dll
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\LoginUser\LoginUserCommandHandler.cs(9,105): error CS1514: { expected [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\LoginUser\LoginUserCommandHandler.cs(9,105): error CS1513: } expected [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+
+Build FAILED.
+
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\LoginUser\LoginUserCommandHandler.cs(9,105): error CS1514: { expected [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Features\Auth\Commands\LoginUser\LoginUserCommandHandler.cs(9,105): error CS1513: } expected [D:\Worx\_MyProjz\ms_platform\Auth\Auth.Application\Auth.Application.csproj]
+    0 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:01.42

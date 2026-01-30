@@ -22,7 +22,9 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IMaintenanceService, MaintenanceService>();
-        services.AddSingleton<IOtpService, OtpService>();
+        services.AddScoped<Shared.Kernel.IRepository<Auth.Domain.Entities.UserOtp>, Auth.Infrastructure.Repositories.UserOtpRepository>();
+
+
         
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
@@ -39,6 +41,32 @@ public static class DependencyInjection
         });
 
         services.AddScoped<AuthDbInitializer>();
+        
+        // Add Authentication & JWT Bearer
+        var jwtSettings = new JwtSettings();
+        configuration.Bind("JwtSettings", jwtSettings);
+        services.AddSingleton(Microsoft.Extensions.Options.Options.Create(jwtSettings));
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.RequireHttpsMetadata = false; // For dev/docker
+            options.SaveToken = true;
+            options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtSettings.Audience,
+                ClockSkew = TimeSpan.Zero
+            };
+        });
 
         return services;
     }

@@ -4,6 +4,6 @@ namespace Auth.Application.Common.Interfaces;
 
 public interface ITokenService
 {
-    string GenerateAccessToken(User user);
+    (string AccessToken, int ExpiresIn) GenerateAccessToken(User user, Guid? appId = null, Guid? sessionId = null);
     string GenerateRefreshToken();
 }

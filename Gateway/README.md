@@ -1,12 +1,35 @@
-# API Gateway (YARP)
+# Gateway Service (API Gateway)
 
-The single entry point for all frontend client requests. Routes traffic to appropriate microservices.
+The entry point for all client requests, routing traffic to appropriate microservices and handling cross-cutting concerns.
 
-## Features
-- **Reverse Proxy**: Built with **YARP** (Yet Another Reverse Proxy).
-- **Routing**: Maps `/api/auth` -> `AuthService`, `/api/chat` -> `ChatService`, etc.
-- **Load Balancing**: Capable of distributing load (configured for single instances in Dev).
+## ✨ Features
+- **Reverse Proxy**: Powered by YARP (Yet Another Reverse Proxy).
+- **Route Management**: Centralized routing configuration.
+- **Authentication Hand-off**: Validates JWTs at the edge (optional configuration).
+- **CORS Handling**: Centralized CORS policies.
 
-## Tech Stack
-- **.NET 8**
-- **YARP**
+## 🏗 Technology Stack
+- **Framework**: .NET 8 (ASP.NET Core)
+- **Library**: YARP
+- **Documentation**: Swagger / OpenAPI
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Docker & Docker Compose
+- .NET 8 SDK
+
+### Running Locally
+```bash
+cd Gateway/Gateway.API
+dotnet run
+```
+
+### Running via Docker
+```bash
+docker-compose up -d gateway-api
+```
+
+## 🔌 API Documentation
+- **Swagger UI**: http://localhost:7032/swagger
+- **Health Check**: http://localhost:7032/health

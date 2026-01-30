@@ -1,15 +1,19 @@
-# SharedUI Library
+# Shared UI Library
 
-A shared library of UI components to ensure design consistency across all portals.
+A shared React component library used across all frontend applications (Admin Dashboards and App Portal).
 
-## Components
-- **Buttons**: Standard, Outline, Ghost variants.
-- **Cards**: Layout containers.
-- **Inputs**: Text, Select, Checkbox.
-- **Layouts**: DashboardShell, Sidebar, Header.
+## 📦 content
+- **Components**: Reusable UI elements (Buttons, Inputs, Modals, etc.).
+- **Hooks**: Common React hooks (e.g., `useAuth`, `useTheme`).
+- **Utils**: Helper functions (date formatting, validation).
+- **Styles**: Base TailwindCSS configuration.
 
-## Usage
-Import components directly into Admin projects:
-```typescript
+## 🔨 Usage
+Import components directly into the consumer apps:
+```tsx
 import { Button } from '@shared/ui';
 ```
+*(assuming alias configuration)*
+
+## 🚀 Development
+Changes here reflect immediately across all consuming apps in the monorepo structure.

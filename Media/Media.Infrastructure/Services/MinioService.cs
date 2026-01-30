@@ -74,4 +74,13 @@ public class MinioService : IMediaService
         memoryStream.Position = 0;
         return memoryStream;
     }
+    public async Task<string> GetPresignedUrlAsync(string fileName, int expirySeconds = 3600)
+    {
+        var args = new PresignedGetObjectArgs()
+            .WithBucket(_settings.BucketName)
+            .WithObject(fileName)
+            .WithExpiry(expirySeconds);
+
+        return await _minioClient.PresignedGetObjectAsync(args);
+    }
 }

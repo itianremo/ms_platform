@@ -1,13 +1,35 @@
-# Search Service (Discoverability)
+# Search Service (Full-Text Search)
 
-Enables users to search for other profiles across the platform.
+Dedicated service for high-performance search across platform entities (Users, Apps).
 
-## Features
-- **User Index**: Maintains a query-optimized copy of User Profiles.
-- **Synchronization**: Listens for `UserProfileCreated` and `UserProfileUpdated` events from the Users Service to keep the index fresh.
-- **Full-Text Search**: Uses PostgreSQL FTS (or accessible via API).
+## ✨ Features
+- **Full-Text Search**: Optimized text queries using PostgreSQL capabilities.
+- **Data Synchronization**: Listens to domain events to keep index updated in near real-time.
+- **Filtering**: Advanced filtering capabilities.
 
-## Tech Stack
-- **.NET 8**
-- **PostgreSQL**
-- **MassTransit**
+## 🏗 Technology Stack
+- **Framework**: .NET 8 (ASP.NET Core)
+- **Database**: PostgreSQL (PostGIS enabled container used)
+- **Messaging**: MassTransit (RabbitMQ)
+- **Documentation**: Swagger / OpenAPI
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Docker & Docker Compose
+- .NET 8 SDK
+
+### Running Locally
+```bash
+cd Search/Search.API
+dotnet run
+```
+
+### Running via Docker
+```bash
+docker-compose up -d search-api
+```
+
+## 🔌 API Documentation
+- **Swagger UI**: http://localhost:5009/swagger
+- **Health Check**: http://localhost:5009/health

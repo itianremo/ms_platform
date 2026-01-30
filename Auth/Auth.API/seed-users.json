@@ -1,10 +1,16 @@
 [
     {
+        "Id": "cabbfc49-4488-47d1-9379-33dd46049139",
         "Email": "admin@platform.com",
-        "Password": "SuperSecretPassword123!",
-        "Phone": "+15550000000",
+        "Password": "Password123!",
+        "Phone": "+1234567890",
         "Roles": [
             "SuperAdmin"
-        ]
+        ],
+        "IsSealed": true,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
     }
 ]

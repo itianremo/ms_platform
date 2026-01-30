@@ -9,7 +9,7 @@ public class ImageModerationService : IImageModerationService
         // Mock Logic: Flag if filename contains "unsafe"
         if (fileName.ToLowerInvariant().Contains("unsafe"))
         {
-            return Task.FromResult((true, "Filename indicates unsafe content."));
+            return Task.FromResult((true, (string?)"Filename indicates unsafe content."));
         }
         
         // In real world: Call AWS Rekognition / Azure Vision here using imageStream

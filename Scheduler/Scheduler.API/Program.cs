@@ -42,8 +42,12 @@ builder.Services.AddHangfire(configuration => configuration
 // Hangfire Server
 builder.Services.AddHangfireServer();
 
+// Health Checks
+var dbConn = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
 builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    .AddSqlServer(dbConn);
 
 // MassTransit
 builder.Services.AddMassTransit(x =>
