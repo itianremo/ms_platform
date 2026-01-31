@@ -57,4 +57,35 @@ public class AppsController : ControllerBase
         if (!result) return NotFound();
         return NoContent();
     }
+
+    [HttpGet("{id}/packages")]
+    public async Task<IActionResult> GetPackages(Guid id)
+    {
+        var result = await _mediator.Send(new Apps.Application.Features.Apps.Queries.GetPackagesByApp.GetPackagesByAppQuery(id));
+        return Ok(result);
+    }
+
+    [HttpGet("{appId}/users/{userId}/subscriptions")]
+    public async Task<IActionResult> GetUserSubscriptions(Guid appId, Guid userId)
+    {
+        var result = await _mediator.Send(new Apps.Application.Features.Subscriptions.Queries.GetUserSubscriptions.GetUserSubscriptionsQuery(appId, userId));
+        return Ok(result);
+    }
+
+    [HttpPost("{appId}/users/{userId}/subscriptions")]
+    public async Task<IActionResult> GrantSubscription(Guid appId, Guid userId, [FromBody] Apps.Application.Features.Subscriptions.Commands.GrantSubscription.GrantSubscriptionCommand command)
+    {
+        if (appId != command.AppId || userId != command.UserId) return BadRequest();
+        var subId = await _mediator.Send(command);
+        return Ok(new { SubscriptionId = subId });
+    }
+
+    [HttpPut("{appId}/subscriptions/{id}/status")]
+    public async Task<IActionResult> ChangeSubscriptionStatus(Guid appId, Guid id, [FromBody] Apps.Application.Features.Subscriptions.Commands.ChangeStatus.ChangeSubscriptionStatusCommand command)
+    {
+        if (id != command.SubscriptionId) return BadRequest();
+        var result = await _mediator.Send(command);
+        if (!result) return NotFound();
+        return NoContent();
+    }
 }

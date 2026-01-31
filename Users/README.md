@@ -5,6 +5,8 @@ Manages User Profiles, Preferences, and User-specific data distinct from Identit
 ## ✨ Features
 - **Profile Management**: Stores Display Name, Avatar, and Personal Details.
 - **Preferences**: Manages User Settings (Theme, Notifications) synchronized with App defaults.
+- **Linked Accounts**: Manage Social Logins (Google/Microsoft).
+- **Audit History**: View personal audit logs (login history, profile changes).
 - **Search Synchronization**: Publishes profile updates to the Search Index.
 
 ## 🏗 Technology Stack

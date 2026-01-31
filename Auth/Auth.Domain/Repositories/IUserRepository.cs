@@ -21,6 +21,8 @@ public interface IUserRepository : IRepository<User>
     Task UpdateSessionAsync(UserSession session);
     Task AddSessionAsync(UserSession session);
     Task<List<Role>> GetRolesAsync(Guid? appId = null);
+    Task<User?> GetUserWithSessionsAsync(Guid userId);
+    Task<User?> GetUserWithLoginsAsync(Guid userId);
 }
 
 public record AppRequirement(Guid AppId, VerificationType VerificationType, bool RequiresAdminApproval, int MembershipStatus);

@@ -1,0 +1,31 @@
+[
+    {
+        "Name": "SuperAdmin",
+        "Permissions": [
+            "AccessAll",
+            "VipSubscription",
+            "ManageSubscription"
+        ],
+        "IsSealed": true
+    },
+    {
+        "Name": "ManageUsers",
+        "Permissions": [
+            "EditUsers",
+            "ResetPassword",
+            "AssignApps",
+            "AssignRoles",
+            "AssignRoles",
+            "VipSubscription",
+            "ManageSubscription"
+        ],
+        "IsSealed": false
+    },
+    {
+        "Name": "Visitor",
+        "Permissions": [
+            "FreeSubscription"
+        ],
+        "IsSealed": false
+    }
+]

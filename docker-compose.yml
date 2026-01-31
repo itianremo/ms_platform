@@ -79,6 +79,24 @@ services:
     volumes:
       - postgis_data:/var/lib/postgresql/data
 
+  healthchecks-ui:
+    image: xabarilcoding/healthchecksui:latest
+    container_name: ms_healthchecks
+    ports:
+      - "5000:80"
+    environment:
+      - HealthChecksUI__HealthChecks__0__Name=Auth API
+      - HealthChecksUI__HealthChecks__0__Uri=http://ms_auth:8080/health
+      - HealthChecksUI__HealthChecks__1__Name=Gateway API
+      - HealthChecksUI__HealthChecks__1__Uri=http://ms_gateway:8080/health
+      - HealthChecksUI__HealthChecks__2__Name=Users API
+      - HealthChecksUI__HealthChecks__2__Uri=http://ms_users:8080/health
+      - HealthChecksUI__HealthChecks__3__Name=Apps API
+      - HealthChecksUI__HealthChecks__3__Uri=http://ms_apps:8080/health
+    depends_on:
+      - ms-auth-api
+      - gateway-api
+
   # Microservices
   ms-auth-api:
     build:
@@ -88,9 +106,11 @@ services:
     ports:
       - "5001:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=AuthDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
       - RabbitMq__Host=rabbitmq
+      - ConnectionStrings__Redis=redis:6379,password=,abortConnect=false
+      - SeqServerUrl=http://seq:5341
       - JwtSettings__Secret=ThisIsSuperSecretKeyForAuthService123!
       - JwtSettings__Issuer=ms-auth
       - JwtSettings__Audience=ms-platform
@@ -98,6 +118,8 @@ services:
     depends_on:
       - sqlserver
       - rabbitmq
+      - redis
+      - seq
 
   apps-api:
     build:
@@ -107,11 +129,15 @@ services:
     ports:
       - "5002:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=AppsDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
       - RabbitMq__Host=rabbitmq
+      - SeqServerUrl=http://seq:5341
+      - RedisConnectionString=redis:6379
     depends_on:
       - sqlserver
+      - seq
+      - redis
 
   users-api:
     build:
@@ -121,12 +147,20 @@ services:
     ports:
       - "5003:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=UsersDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
       - RabbitMq__Host=rabbitmq
+      - SeqServerUrl=http://seq:5341
+      - RedisConnectionString=redis:6379
+      - JwtSettings__Secret=ThisIsSuperSecretKeyForAuthService123!
+      - JwtSettings__Issuer=ms-auth
+      - JwtSettings__Audience=ms-platform
+      - JwtSettings__ExpiryMinutes=60
     depends_on:
       - sqlserver
       - rabbitmq
+      - seq
+      - redis
 
   notifications-api:
     build:
@@ -136,13 +170,15 @@ services:
     ports:
       - "5004:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - RabbitMq__Host=rabbitmq
       - RabbitMq__Username=guest
       - RabbitMq__Password=guest
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=NotificationsDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+      - SeqServerUrl=http://seq:5341
     depends_on:
       - rabbitmq
+      - seq
 
   media-api:
     build:
@@ -152,12 +188,14 @@ services:
     ports:
       - "5005:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - MinioSettings__Endpoint=minio:9000
       - MinioSettings__AccessKey=minioadmin
       - MinioSettings__SecretKey=minioadmin
+      - SeqServerUrl=http://seq:5341
     depends_on:
       - minio
+      - seq
 
   chat-api:
     build:
@@ -167,10 +205,12 @@ services:
     ports:
       - "5006:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__MongoConnection=mongodb://ms_mongo:27017
+      - SeqServerUrl=http://seq:5341
     depends_on:
       - exclude_mongo
+      - seq
 
   payments-api:
     build:
@@ -180,12 +220,14 @@ services:
     ports:
       - "5007:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=PaymentsDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
       - RabbitMq__Host=rabbitmq
+      - SeqServerUrl=http://seq:5341
     depends_on:
       - sqlserver
       - rabbitmq
+      - seq
 
   gateway-api:
     build:
@@ -193,16 +235,21 @@ services:
       dockerfile: Gateway/Gateway.API/Dockerfile
     container_name: ms_gateway
     ports:
-      - "7032:8080" # Mapping 8080 internal to 7032 external to match frontend config
+      - "7032:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
       - JwtSettings__Secret=ThisIsSuperSecretKeyForAuthService123!
       - JwtSettings__Issuer=ms-auth
       - JwtSettings__Audience=ms-platform
+      - SeqServerUrl=http://seq:5341
+      - SeqServerUrl=http://seq:5341
+      - ConnectionStrings__Redis=redis:6379,password=,abortConnect=false
     depends_on:
       - ms-auth-api
       - apps-api
       - users-api
+      - seq
+      - redis
 
   audit-api:
     build:
@@ -212,12 +259,14 @@ services:
     ports:
       - "5008:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=AuditDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
       - RabbitMq__Host=rabbitmq
+      - SeqServerUrl=http://seq:5341
     depends_on:
       - sqlserver
       - rabbitmq
+      - seq
 
   search-api:
     build:
@@ -227,12 +276,14 @@ services:
     ports:
       - "5009:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__DefaultConnection=Server=postgis;Database=SearchDb;User Id=postgres;Password=Password123!;
       - RabbitMq__Host=rabbitmq
+      - SeqServerUrl=http://seq:5341
     depends_on:
       - postgis
       - rabbitmq
+      - seq
 
   scheduler-api:
     build:
@@ -242,10 +293,12 @@ services:
     ports:
       - "5010:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=SchedulerDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+      - SeqServerUrl=http://seq:5341
     depends_on:
       - sqlserver
+      - seq
 
   geo-api:
     build:
@@ -255,12 +308,14 @@ services:
     ports:
       - "5011:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Docker
       - ConnectionStrings__DefaultConnection=Server=postgis;Database=GeoDb;User Id=postgres;Password=Password123!;
       - RabbitMq__Host=rabbitmq
+      - SeqServerUrl=http://seq:5341
     depends_on:
       - postgis
       - rabbitmq
+      - seq
 
   recommendation-api:
     build:
@@ -270,8 +325,10 @@ services:
     ports:
       - "5012:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-    # depends_on: No external db yet, strictly in-memory
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - SeqServerUrl=http://seq:5341
+    depends_on:
+      - seq
 
   global-admin:
     build:
@@ -280,6 +337,8 @@ services:
     container_name: global_admin
     ports:
       - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:7032/api
     depends_on:
       - gateway-api
 
@@ -303,8 +362,6 @@ services:
     depends_on:
       - gateway-api
 
-
-
 volumes:
   rabbitmq_data:
   sqlserver_data:
@@ -314,3 +371,5 @@ volumes:
   minio_data:
   postgis_data:
   elastic_data:
+
+

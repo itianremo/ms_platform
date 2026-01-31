@@ -167,13 +167,13 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
 
     private async Task AddMembershipAsync(User user, Guid appId, bool requiresAdminApproval)
     {
-        var userRole = await _userRepository.GetRoleByNameAsync(appId, "NormalUser") 
+        var userRole = await _userRepository.GetRoleByNameAsync(appId, "Visitor") 
                        ?? await _userRepository.GetRoleByNameAsync(appId, "User"); // Fallback
 
         if (userRole == null)
         {
             // Create default role if missing
-            userRole = new Role(appId, "NormalUser");
+            userRole = new Role(appId, "Visitor");
             await _userRepository.AddRoleAsync(userRole);
         }
 

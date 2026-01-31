@@ -3,7 +3,7 @@ import { UI_DEFAULTS } from '../config/uiDefaults';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Sidebar } from '../components/Sidebar';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../components/theme-provider';
 import { NotificationDrawer } from '../components/NotificationDrawer';
 import { Notification } from '../types/notification';
 import axios from 'axios';
@@ -21,7 +21,7 @@ const DashboardLayout = () => {
 
 
     // Theme Context
-    const { isDark, toggleTheme, setTheme } = useTheme();
+    const { theme, setTheme } = useTheme();
     const [profile, setProfile] = useState<any>(null); // For storing full profile data
 
     // Notification State
@@ -95,12 +95,12 @@ const DashboardLayout = () => {
     // Wrappers
     const handleSetCollapsed = (val: boolean) => {
         setCollapsed(val);
-        savePreferences(val, isDark);
+        savePreferences(val, theme === 'dark');
     };
 
     const handleToggleTheme = () => {
-        const newDark = !isDark;
-        setTheme(newDark); // Update Global State (Context handles DOM)
+        const newDark = theme !== 'dark';
+        setTheme(newDark ? 'dark' : 'light'); // Update Global State (Context handles DOM)
         savePreferences(collapsed, newDark);
     };
 
@@ -160,7 +160,7 @@ const DashboardLayout = () => {
                             onClick={handleToggleTheme}
                             className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
                         >
-                            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                         </button>
 
                         <button

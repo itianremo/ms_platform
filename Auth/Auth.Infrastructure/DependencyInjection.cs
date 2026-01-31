@@ -14,15 +14,31 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<AuthDbContext>(options =>
+        services.AddScoped<Shared.Kernel.Interfaces.ICurrentUserService, Shared.Infrastructure.Services.CurrentUserService>();
+        services.AddScoped<Shared.Infrastructure.Persistence.Interceptors.AuditableEntitySaveChangesInterceptor>();
+
+        services.AddDbContext<AuthDbContext>((sp, options) =>
+        {
+            var interceptor = sp.GetRequiredService<Shared.Infrastructure.Persistence.Interceptors.AuditableEntitySaveChangesInterceptor>();
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
-                builder => builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)));
+                builder => builder.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null))
+                   .AddInterceptors(interceptor);
+        });
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IMaintenanceService, MaintenanceService>();
         services.AddScoped<Shared.Kernel.IRepository<Auth.Domain.Entities.UserOtp>, Auth.Infrastructure.Repositories.UserOtpRepository>();
+        
+        // Caching
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
+            options.InstanceName = "Auth_";
+        });
+        services.AddScoped<Shared.Kernel.Interfaces.ICacheService, Shared.Infrastructure.Caching.RedisCacheService>();
+
 
 
         
@@ -67,6 +83,24 @@ public static class DependencyInjection
                 ClockSkew = TimeSpan.Zero
             };
         });
+        
+        if (!string.IsNullOrEmpty(configuration["Authentication:Google:ClientId"]))
+        {
+            services.AddAuthentication().AddGoogle(options =>
+            {
+                options.ClientId = configuration["Authentication:Google:ClientId"]!;
+                options.ClientSecret = configuration["Authentication:Google:ClientSecret"]!;
+            });
+        }
+
+        if (!string.IsNullOrEmpty(configuration["Authentication:Microsoft:ClientId"]))
+        {
+            services.AddAuthentication().AddMicrosoftAccount(options =>
+            {
+                options.ClientId = configuration["Authentication:Microsoft:ClientId"]!;
+                options.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"]!;
+            });
+        }
 
         return services;
     }

@@ -132,6 +132,20 @@ public class UserRepository : IUserRepository
         return await _context.Roles.FirstOrDefaultAsync(r => r.AppId == appId && r.Name == roleName);
     }
 
+    public async Task<User?> GetUserWithSessionsAsync(Guid userId)
+    {
+        return await _context.Users
+            .Include(u => u.Sessions)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+    }
+
+    public async Task<User?> GetUserWithLoginsAsync(Guid userId)
+    {
+        return await _context.Users
+            .Include(u => u.Logins)
+            .FirstOrDefaultAsync(u => u.Id == userId);
+    }
+
     public async Task AddRoleAsync(Role role)
     {
         await _context.Roles.AddAsync(role);
@@ -193,6 +207,7 @@ public class UserRepository : IUserRepository
             .ThenInclude(u => u.Memberships)
             .ThenInclude(m => m.Role)
             .ThenInclude(r => r.Permissions)
+            .Include(s => s.User.Sessions) // Include Sessions for cleanup
             .FirstOrDefaultAsync(s => s.RefreshToken == refreshToken);
     }
 

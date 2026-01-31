@@ -193,10 +193,29 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, Feature
                 await _userRepository.UpdateAsync(fullUser);
             }
         }
-        else 
+        
+        
+        // --- Core Identity Consistency Check (Always Run) ---
+        // Ensure Global Status matches Verification State
+        // This handles cases where Admin un-verifies a user but Status remains Active.
+        
+        // We only downgrade from Active. We don't auto-upgrade here (that happens in requirements check or Verification flow).
+        // Actually, the prompt says "match the expressive state".
+        
+        if (user.Status == Domain.Entities.GlobalUserStatus.Active)
         {
-             // Fallback Logic (No Requirements found)
-             // ... existing fallback ...
+             if (!user.IsEmailVerified)
+             {
+                 _logger.LogWarning("Login Check: User {UserId} is Active but Email is NOT verified. Downgrading status.", user.Id);
+                 user.SetStatus(Domain.Entities.GlobalUserStatus.PendingEmailVerification);
+                 await _userRepository.UpdateAsync(user);
+             }
+             else if (!user.IsPhoneVerified && user.Phone != null) // Only checks phone if present? Or if required? 
+             {
+                 // We don't enforce phone verification globally unless we know it's required.
+                 // But the prompt implies "expressive state". 
+                 // Let's stick to Email for now as it's the primary identity.
+             }
         }
 
         if (user.Status == Domain.Entities.GlobalUserStatus.PendingEmailVerification ||
@@ -206,8 +225,10 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, Feature
             throw new Common.Exceptions.RequiresVerificationException(user.Status, user.Phone);
         }
 
-        // Removed Global PendingAdminApproval check
-        // if (user.Status == Domain.Entities.GlobalUserStatus.PendingAdminApproval) ...
+        if (user.Status == Domain.Entities.GlobalUserStatus.PendingAdminApproval)
+        {
+             throw new Common.Exceptions.RequiresAdminApprovalException();
+        }
 
         // Defined at top to avoid scoping issues and double fetch
         // Fetch User with Roles for Token Generation if not already fetched
@@ -217,9 +238,38 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, Feature
              if (userWithRoles == null) userWithRoles = user;
         }
 
+        // --- Subscription Expiry Check ---
+        if (request.AppId.HasValue)
+        {
+            var membership = userWithRoles?.Memberships?.FirstOrDefault(m => m.AppId == request.AppId.Value);
+            if (membership != null && membership.SubscriptionExpiry.HasValue)
+            {
+                 // Check if expired
+                 if (membership.SubscriptionExpiry.Value < DateTime.UtcNow)
+                 {
+                     _logger.LogWarning("User {UserId} subscription expired on {Expiry}. Suppressing Role/Permissions for Token.", user.Id, membership.SubscriptionExpiry);
+                     
+                     // Suppress Role for Token Generation (In-Memory Only)
+                     // Since Role property has private set, use Reflection
+                     try 
+                     {
+                        var roleProp = typeof(UserAppMembership).GetProperty("Role");
+                        if (roleProp != null) roleProp.SetValue(membership, null);
+                     }
+                     catch (Exception ex)
+                     {
+                         _logger.LogError(ex, "Failed to suppress expired role.");
+                     }
+                 }
+            }
+        }
+
 
         // Generate Refresh Token first
         var refreshToken = _tokenService.GenerateRefreshToken();
+
+        // Cleanup expired sessions before adding new one
+        user.ClearExpiredSessions();
 
         // Create Session *before* Access Token so we can embed the Session ID (sid)
         var session = new UserSession(

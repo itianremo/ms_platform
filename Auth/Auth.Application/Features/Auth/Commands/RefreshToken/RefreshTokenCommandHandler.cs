@@ -43,9 +43,12 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
         
         // Generate NEW Access Token
         // Session.User should be populated due to .Include in Repository
-        // Generate NEW Access Token
-        // Session.User should be populated due to .Include in Repository
         var (accessToken, expiresIn) = _tokenService.GenerateAccessToken(session.User, request.AppId, session.Id);
+
+        // Cleanup expired sessions
+        session.User.ClearExpiredSessions();
+        // We must save the user/sessions to persist value
+        await _userRepository.UpdateAsync(session.User);
         
         // Return same refresh token? Or rotate?
         // Using same for now to minimize DB writes on every refresh (performance).

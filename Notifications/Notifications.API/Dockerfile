@@ -7,8 +7,10 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 COPY ["Notifications/Notifications.API/Notifications.API.csproj", "Notifications/Notifications.API/"]
 COPY ["Notifications/Notifications.Application/Notifications.Application.csproj", "Notifications/Notifications.Application/"]
+COPY ["Notifications/Notifications.Domain/Notifications.Domain.csproj", "Notifications/Notifications.Domain/"]
 COPY ["Notifications/Notifications.Infrastructure/Notifications.Infrastructure.csproj", "Notifications/Notifications.Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
+COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
 COPY ["Shared/Shared.Messaging/Shared.Messaging.csproj", "Shared/Shared.Messaging/"]
 RUN dotnet restore "Notifications/Notifications.API/Notifications.API.csproj"
 COPY . .

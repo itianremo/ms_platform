@@ -1,36 +1,14 @@
-# Apps Service (Tenant Management)
+# Apps Service
 
-Manages Tenant configuration, App-specific rules, and Feature Flags as the central control plane for multitenancy.
+## Overview
+Manages Applications, Subscription Packages, and User Subscriptions.
 
-## ✨ Features
-- **Tenant Configuration**: Manage App details, Descriptions, and Base URLs.
-- **Feature Flags**: Toggle features per App.
-- **Theming**: Store and serve UI theme preferences (JSON).
-- **Security Policy**: Define Verification Types (Email/Phone) and Admin Approval rules.
+## Features
+- **Subscription Packages**: Defines tiered packages (Weekly, Monthly, Yearly) with features.
+- **User Subscriptions**: Tracks active user subscriptions and validity periods.
+- **Payment Consumer**: Consumes `PaymentSucceededEvent` to automatically grant/extend subscriptions.
+- **Role Management**: Assigns VIP/Premium roles based on active subscriptions.
 
-## 🏗 Technology Stack
-- **Framework**: .NET 8 (ASP.NET Core)
-- **Database**: PostgreSQL (`AppsDb`)
-- **Messaging**: MassTransit (RabbitMQ)
-- **Documentation**: Swagger / OpenAPI
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Docker & Docker Compose
-- .NET 8 SDK
-
-### Running Locally
-```bash
-cd Apps/Apps.API
-dotnet run
-```
-
-### Running via Docker
-```bash
-docker-compose up -d apps-api
-```
-
-## 🔌 API Documentation
-- **Swagger UI**: http://localhost:5002/swagger
-- **Health Check**: http://localhost:5002/health
+## Events
+- **Consumes**: `PaymentSucceededEvent`
+- **Publishes**: `SubscriptionGrantedEvent`

@@ -6,7 +6,6 @@ Provides real-time chat functionality, message history, and user presence for th
 - **Real-time Messaging**: SignalR-based WebSocket communication.
 - **Message Persistence**: stores chat history in MongoDB for scalability.
 - **Presence**: Tracks User Online/Offline status.
-- **Presence**: Tracks User Online/Offline status.
 - **Channels**: Supports 1:1 and Group Chat scenarios (Match Groups).
 - **Match Integration**: Dedicated channels for matched users.
 

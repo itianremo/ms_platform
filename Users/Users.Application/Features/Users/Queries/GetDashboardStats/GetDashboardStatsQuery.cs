@@ -1,30 +1,44 @@
 using MediatR;
 using Users.Application.Common.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+
+using Users.Domain.Repositories;
 
 namespace Users.Application.Features.Users.Queries.GetDashboardStats;
-
-
-
-public record DashboardStatsDto(
-    int TotalUsers, 
-    int ActiveUsers, 
-    int NewUsersLast24h,
-    List<AppUserCountDto> UsersPerApp
-);
-
-public record AppUserCountDto(string AppName, int Count);
 
 public record GetDashboardStatsQuery : IRequest<DashboardStatsDto>;
 
 public class GetDashboardStatsQueryHandler : IRequestHandler<GetDashboardStatsQuery, DashboardStatsDto>
 {
-    public GetDashboardStatsQueryHandler()
+    private readonly IUserProfileRepository _profileRepository;
+
+    public GetDashboardStatsQueryHandler(IUserProfileRepository profileRepository)
     {
+        _profileRepository = profileRepository;
     }
 
-    public Task<DashboardStatsDto> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
+    public async Task<DashboardStatsDto> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
     {
-        // Stubbed to fix build: Repo reference issue in Users.Application
-        return Task.FromResult(new DashboardStatsDto(0, 0, 0, new List<AppUserCountDto>()));
+        // Fetch all profiles (Not efficient for large scale, but fine for MVP)
+        // Ideally Repo should have CountActive, CountTotal, etc.
+        var profiles = await _profileRepository.ListAsync();
+
+        var totalUsers = profiles.Select(p => p.UserId).Distinct().Count(); // Unique Identities
+        var activeUsers = profiles.Count(); // Total profiles across all apps = "Active Enrollments"
+        
+        // New Users Last 24h
+        var oneDayAgo = DateTime.UtcNow.AddHours(-24);
+        var newUsers = profiles.Where(p => p.Created >= oneDayAgo).Select(p => p.UserId).Distinct().Count();
+
+        // Users Per App
+        var usersPerApp = profiles
+            .GroupBy(p => p.AppId)
+            .Select(g => new AppUserCountDto(g.Key.ToString(), g.Count()))
+            .ToList();
+
+        return new DashboardStatsDto(totalUsers, activeUsers, newUsers, usersPerApp);
     }
 }

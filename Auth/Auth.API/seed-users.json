@@ -1,12 +1,141 @@
 [
     {
         "Id": "cabbfc49-4488-47d1-9379-33dd46049139",
-        "Email": "admin@platform.com",
+        "Email": "admin@globaldashboard.com",
         "Password": "Password123!",
         "Phone": "+1234567890",
         "Roles": [
             "SuperAdmin"
         ],
+        "IsSealed": true,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Email": "manager@globaldashboard.com",
+        "Password": "Password123!",
+        "Phone": "+1987654321",
+        "Roles": [
+            "ManageUsers"
+        ],
+        "IsSealed": false,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Email": "active@globaldashboard.com",
+        "Password": "Password123!",
+        "Phone": "+1122334455",
+        "Roles": [
+            "Visitor"
+        ],
+        "IsSealed": false,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Email": "inactive@globaldashboard.com",
+        "Password": "Password123!",
+        "Phone": "+1554433221",
+        "Roles": [
+            "Visitor"
+        ],
+        "IsSealed": false,
+        "Status": 0,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Email": "banned@globaldashboard.com",
+        "Password": "Password123!",
+        "Phone": "+1998877665",
+        "Roles": [
+            "Visitor"
+        ],
+        "IsSealed": false,
+        "Status": 5,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Email": "admin@fitit.com",
+        "Password": "Password123!",
+        "Phone": "+1000000001",
+        "Roles": [],
+        "IsSealed": true,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Email": "admin@wissler.com",
+        "Password": "Password123!",
+        "Phone": "+1000000002",
+        "Roles": [],
+        "IsSealed": true,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Email": "admin@demo.com",
+        "Password": "Password123!",
+        "Phone": "+1000000003",
+        "Roles": [],
+        "IsSealed": true,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Email": "visitor1@fitit.com",
+        "Password": "Password123!",
+        "Phone": "+1111111001",
+        "Roles": [],
+        "IsSealed": true,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Email": "visitor2@fitit.com",
+        "Password": "Password123!",
+        "Phone": "+1111111002",
+        "Roles": [],
+        "IsSealed": true,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Email": "visitor1@wissler.com",
+        "Password": "Password123!",
+        "Phone": "+2222222001",
+        "Roles": [],
+        "IsSealed": true,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Email": "visitor2@wissler.com",
+        "Password": "Password123!",
+        "Phone": "+2222222002",
+        "Roles": [],
         "IsSealed": true,
         "Status": 4,
         "IsEmailVerified": true,

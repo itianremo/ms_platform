@@ -3,8 +3,8 @@
 Centralized service for capturing, storing, and querying system-wide audit logs.
 
 ## ✨ Features
-- **Centralized Logging**: Captures user actions and system changes.
-- **Compliance**: Immutable audit trails.
+- **Advanced Audit Logging**: Captures detailed changes (Diffs), IP Addresses, and User Agents.
+- **Compliance**: Immutable audit trails for security and regulatory requirements.
 - **Searchable History**: Query logs by user, entity, or date.
 - **Async Processing**: High-throughput log ingestion via queues.
 

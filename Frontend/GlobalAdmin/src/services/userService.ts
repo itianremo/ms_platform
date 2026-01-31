@@ -12,7 +12,7 @@ export interface UserDto {
     roles: string[];
     isEmailVerified: boolean;
     isPhoneVerified: boolean;
-    memberships?: UserAppMembershipDto[];
+    memberships: UserAppMembershipDto[];
 }
 
 export const UserService = {
@@ -41,13 +41,18 @@ export const UserService = {
         await api.post('/auth/api/Auth/reactivate/request', { email });
     },
 
+    sendPasswordReset: async (email: string) => {
+        await api.post('/auth/api/Auth/otp/request', { email, type: 0 }); // 0 = Email
+    },
+
     verifyUserIdentity: async (userId: string, type: 'email' | 'phone', verified: boolean) => {
         await api.put(`/auth/api/Auth/users/${userId}/verify`, { type, verified });
     },
 
-    // Placeholder for Create user if needed
+    // Create user
     createUser: async (data: any) => {
-        // Implement when needed
+        const response = await api.post('/auth/api/Auth/register', data);
+        return response.data;
     },
 
     getProfile: async (userId: string, appId: string = "00000000-0000-0000-0000-000000000000"): Promise<UserProfile | null> => {
@@ -92,11 +97,9 @@ export const UserService = {
 };
 
 export interface UserAppMembershipDto {
-    id: string;
-    userId: string;
     appId: string;
     roleId: string;
-    roleName?: string; // Enhanced DTO usually needed
+    roleName: string;
     status: number;
 }
 

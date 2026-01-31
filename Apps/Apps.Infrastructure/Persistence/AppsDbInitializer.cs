@@ -126,6 +126,31 @@ public static class AppsDbInitializer
             // Log but don't crash if there's a duplicate key error
             logger.LogWarning(ex, "Error saving apps seed data (likely duplicates). Continuing...");
         }
+        // Seed Packages
+        var seedPackagesPath = Path.Combine(AppContext.BaseDirectory, "seed-packages.json");
+        if (File.Exists(seedPackagesPath))
+        {
+            var jsonPackages = await File.ReadAllTextAsync(seedPackagesPath);
+            var seedPackages = JsonSerializer.Deserialize<List<SeedPackageDto>>(jsonPackages);
+            
+            if (seedPackages != null)
+            {
+                foreach (var sp in seedPackages)
+                {
+                    // Check if package exists for this App by Name (Unique Name per App assumption)
+                    var existingPkg = await context.SubscriptionPackages
+                        .FirstOrDefaultAsync(p => p.AppId == sp.AppId && p.Name == sp.Name);
+                    
+                    if (existingPkg == null)
+                    {
+                        var pkg = new SubscriptionPackage(sp.AppId, sp.Name, sp.Description, sp.Price, sp.Discount, (SubscriptionPeriod)sp.Period);
+                        await context.SubscriptionPackages.AddAsync(pkg);
+                        logger.LogInformation("Seeded Package: {Name} for App {AppId}", sp.Name, sp.AppId);
+                    }
+                }
+                await context.SaveChangesAsync();
+            }
+        }
     }
 
     private class SeedAppDto
@@ -140,5 +165,15 @@ public static class AppsDbInitializer
         public bool IsActive { get; set; }
         public int VerificationType { get; set; }
         public bool RequiresAdminApproval { get; set; }
+    }
+
+    private class SeedPackageDto
+    {
+        public Guid AppId { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
+        public decimal Discount { get; set; }
+        public int Period { get; set; }
     }
 }

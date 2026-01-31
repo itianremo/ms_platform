@@ -34,6 +34,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import ExternalAuthConfigTab from '../components/apps/ExternalAuthConfigTab';
+import AppPackagesTab from '../components/apps/AppPackagesTab';
 
 const AppsPage = () => {
     const [apps, setApps] = useState<AppConfig[]>([]);
@@ -279,6 +280,7 @@ const AppsPage = () => {
                                 <TabsTrigger value="details">General Details</TabsTrigger>
                                 <TabsTrigger value="auth">External Auth</TabsTrigger>
                                 <TabsTrigger value="payment">Payment</TabsTrigger>
+                                <TabsTrigger value="packages">Packages</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="details" className="space-y-4 py-4">
@@ -326,6 +328,10 @@ const AppsPage = () => {
                                     <p>Payment Gateway Configuration (Stripe/PayPal)</p>
                                     <p className="text-xs mt-2">Coming Soon: Configure per-tenant API keys.</p>
                                 </div>
+                            </TabsContent>
+
+                            <TabsContent value="packages" className="py-4">
+                                {selectedApp && <AppPackagesTab app={selectedApp} />}
                             </TabsContent>
                         </Tabs>
                     </div>

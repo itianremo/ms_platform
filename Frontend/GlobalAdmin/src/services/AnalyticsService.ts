@@ -11,7 +11,7 @@ export const AnalyticsService = {
     getDashboardStats: async (): Promise<DashboardStats> => {
         try {
             // Gateway Proxy: /users -> Users.API
-            const response = await api.get('/users/api/Analytics/dashboard');
+            const response = await api.get('/users/api/Users/dashboard/stats');
             return response.data;
         } catch (error) {
             console.error("Failed to fetch dashboard stats", error);

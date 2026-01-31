@@ -7,5 +7,7 @@ public record AuditLogCreatedEvent(
     Guid? UserId,
     Guid? AppId,
     string ChangesJson,
+    string? IpAddress,
+    string? UserAgent,
     DateTime Timestamp
 );

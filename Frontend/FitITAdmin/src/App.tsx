@@ -3,6 +3,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 import PaymentSettings from './pages/PaymentSettings';
 import ModerationPage from './pages/ModerationPage';
 import LoginPage from './pages/LoginPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 
 
 import ProtectedRoute from './layouts/ProtectedRoute';
@@ -11,6 +12,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
       <Route path="/" element={
         <ProtectedRoute>

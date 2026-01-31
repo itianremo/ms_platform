@@ -78,25 +78,84 @@ public class AuthDbInitializer
             return;
         }
 
-        // Seed Permissions and Roles
-        var accessAllPermission = await context.Permissions.FirstOrDefaultAsync(p => p.Name == "AccessAll");
-        if (accessAllPermission == null)
+        // Helper to load JSON
+        async Task<T?> LoadJsonAsync<T>(string fileName)
         {
-            accessAllPermission = new Permission("AccessAll", "Grant full access to the system");
-            context.Permissions.Add(accessAllPermission);
+            var path = Path.Combine(AppContext.BaseDirectory, fileName);
+            if (!File.Exists(path))
+            {
+                 _logger.LogWarning("Seed file not found: {Path}", path);
+                 return default;
+            }
+            var text = await File.ReadAllTextAsync(path);
+            return JsonSerializer.Deserialize<T>(text);
+        }
+
+        // 1. Seed Permissions
+        var seedPermissions = await LoadJsonAsync<List<SeedPermissionDto>>("seed-permissions.json");
+        if (seedPermissions != null)
+        {
+            foreach (var sp in seedPermissions)
+            {
+                var existing = await context.Permissions.FirstOrDefaultAsync(p => p.Name == sp.Name);
+                if (existing == null)
+                {
+                    existing = new Permission(sp.Name, sp.Description);
+                    context.Permissions.Add(existing);
+                    _logger.LogInformation("Seeded Permission: {Name}", sp.Name);
+                }
+            }
             await context.SaveChangesAsync();
         }
 
-        // System App ID (Hardcoded for Global Admin purposes)
-        var systemAppId = Guid.Parse("00000000-0000-0000-0000-000000000001"); 
-
-        var superAdminRole = await context.Roles.Include(r => r.Permissions).FirstOrDefaultAsync(r => r.Name == "SuperAdmin" && r.AppId == systemAppId);
-        if (superAdminRole == null)
+        // 2. Seed Roles and Link Permissions for ALL Apps
+        // Initialize Roles for All Known Apps
+        var appIds = new[] 
         {
-            superAdminRole = new Role(systemAppId, "SuperAdmin");
-            superAdminRole.AddPermission(accessAllPermission);
-            superAdminRole.MarkAsSealed();
-            context.Roles.Add(superAdminRole);
+            Guid.Parse("00000000-0000-0000-0000-000000000001"), // Global
+            Guid.Parse("11111111-1111-1111-1111-111111111111"), // FitIT
+            Guid.Parse("22222222-2222-2222-2222-222222222222"), // Wissler
+            Guid.Parse("33333333-3333-3333-3333-333333333333")  // Demo
+        };
+        
+        var seedRoles = await LoadJsonAsync<List<SeedRoleDto>>("seed-roles.json");
+        
+        if (seedRoles != null)
+        {
+            foreach (var appId in appIds)
+            {
+                foreach (var sr in seedRoles)
+                {
+                    var role = await context.Roles
+                        .Include(r => r.Permissions)
+                        .FirstOrDefaultAsync(r => r.Name == sr.Name && r.AppId == appId);
+                        
+                    if (role == null)
+                    {
+                        role = new Role(appId, sr.Name);
+                        if (sr.IsSealed) role.MarkAsSealed();
+                        context.Roles.Add(role);
+                        await context.SaveChangesAsync(); // Save to get ID
+                        _logger.LogInformation("Seeded Role: {Role} for App {AppId}", sr.Name, appId);
+                    }
+                    
+                    // Sync Permissions
+                    if (sr.Permissions != null)
+                    {
+                        foreach (var permName in sr.Permissions)
+                        {
+                            // Avoid duplicates
+                            if (role.Permissions.Any(p => p.Name == permName)) continue;
+
+                            var perm = await context.Permissions.FirstOrDefaultAsync(p => p.Name == permName);
+                            if (perm != null)
+                            {
+                                role.AddPermission(perm);
+                            }
+                        }
+                    }
+                }
+            }
             await context.SaveChangesAsync();
         }
 
@@ -108,6 +167,11 @@ public class AuthDbInitializer
         foreach (var seedUser in seedUsers)
         {
             var user = await userRepository.GetByEmailAsync(seedUser.Email);
+            if (user == null && seedUser.Id.HasValue)
+            {
+                user = await userRepository.GetByIdAsync(seedUser.Id.Value);
+            }
+
             if (user == null)
             {
                 var hashedPassword = passwordHasher.Hash(seedUser.Password);
@@ -138,30 +202,94 @@ public class AuthDbInitializer
                 await userRepository.AddAsync(user);
                 _logger.LogInformation("Seeded user: {Email}", seedUser.Email);
             }
-            else 
+            else
             {
-               // If user exists, we might want to ensure they have the fixed ID? 
-               // Too risky to change ID of existing entity. Just skip.
+                // Ensure Password is correct for existing users (Dev/Demo convenience)
+                var hashedPassword = passwordHasher.Hash(seedUser.Password);
+                // We don't check Verify() here to avoid overhead, just overwrite to ensure known state.
+                user.UpdatePassword(hashedPassword);
+                
+                // Ensure Email matches Seed (fix for historic data mismatch)
+                if (!string.Equals(user.Email, seedUser.Email, StringComparison.OrdinalIgnoreCase))
+                {
+                    user.UpdateEmail(seedUser.Email);
+                    _logger.LogInformation("Updated email for user {Id} to {Email}", user.Id, seedUser.Email);
+                }
+
+                // Also ensure Status is correct if we want to enforce seed state
+                if (seedUser.Status > 0) user.SetStatus((GlobalUserStatus)seedUser.Status);
+                if (seedUser.IsEmailVerified) user.VerifyEmail(); // This will re-verify after UpdateEmail set it to false
+                if (seedUser.IsPhoneVerified) user.VerifyPhone();
+
+                await userRepository.UpdateAsync(user); // Ensure changes are saved
+                _logger.LogInformation("Updated existing seed user: {Email}", seedUser.Email);
             }
 
-            // Assign SuperAdmin Role if requested and not present
+            // Assign SuperAdmin Role if requested
             if (seedUser.Roles != null && seedUser.Roles.Contains("SuperAdmin"))
             {
-                // Check if membership exists
-                // Note: user.Memberships might not be loaded if we just got it from AddAsync above or GetByEmailAsync (repository detail dependent).
-                // Safest to check DB context directly for existence.
-                var exists = await context.UserAppMemberships.AnyAsync(m => m.UserId == user.Id && m.AppId == systemAppId && m.RoleId == superAdminRole.Id);
-                if (!exists)
+                // Assign to ALL apps for simplicity in this dev/demo environment
+                foreach (var appId in appIds)
                 {
-                    var membership = new UserAppMembership(user.Id, systemAppId, superAdminRole.Id);
-                    // We can add via context or user.
-                    // If user is tracked, user.AddMembership might work if collection loaded.
-                    // Safest: Add to context directly.
-                    context.UserAppMemberships.Add(membership);
-                    await context.SaveChangesAsync();
-                    _logger.LogInformation("Assigned SuperAdmin role to user: {Email}", seedUser.Email);
+                    var superAdminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "SuperAdmin" && r.AppId == appId);
+                    if (superAdminRole == null) continue; // Should not happen
+
+                    var exists = await context.UserAppMemberships.AnyAsync(m => m.UserId == user.Id && m.AppId == appId && m.RoleId == superAdminRole.Id);
+                    if (!exists)
+                    {
+                        var membership = new UserAppMembership(user.Id, appId, superAdminRole.Id);
+                        context.UserAppMemberships.Add(membership);
+                        _logger.LogInformation("Assigned SuperAdmin role to user: {Email} for App {AppId}", seedUser.Email, appId);
+                    }
                 }
+                await context.SaveChangesAsync();
             }
+
+            // Assign App-Specific SuperAdmin Roles
+            if (seedUser.Email == "admin@fitit.com")
+            {
+                var fitItAppId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+                await AssignRoleToUser(user, fitItAppId, "SuperAdmin", context);
+            }
+            else if (seedUser.Email == "admin@wissler.com")
+            {
+                var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+                await AssignRoleToUser(user, wisslerAppId, "SuperAdmin", context);
+            }
+            else if (seedUser.Email == "admin@demo.com")
+            {
+                 var demoAppId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+                 await AssignRoleToUser(user, demoAppId, "SuperAdmin", context);
+            }
+            // Assign Visitor Roles
+            else if (seedUser.Email.Contains("@fitit.com") && seedUser.Email.Contains("visitor"))
+            {
+                 var fitItAppId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+                 await AssignRoleToUser(user, fitItAppId, "Visitor", context);
+            }
+            else if (seedUser.Email.Contains("@wissler.com") && seedUser.Email.Contains("visitor"))
+            {
+                 var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+                 await AssignRoleToUser(user, wisslerAppId, "Visitor", context);
+            }
+        }
+    }
+
+    private async Task AssignRoleToUser(User user, Guid appId, string roleName, AuthDbContext context)
+    {
+        var role = await context.Roles.FirstOrDefaultAsync(r => r.AppId == appId && r.Name == roleName);
+        if (role == null) return;
+
+        // Check using context directly since user.Memberships might not be loaded if we didn't include it
+        var exists = await context.UserAppMemberships.AnyAsync(m => m.UserId == user.Id && m.AppId == appId && m.RoleId == role.Id);
+        
+        if (!exists)
+        {
+            var membership = new UserAppMembership(user.Id, appId, role.Id);
+            membership.SetStatus(AppUserStatus.Active);
+            context.UserAppMemberships.Add(membership);
+            await context.SaveChangesAsync();
+            _logger.LogInformation("Assigned {Role} to {Email} for App {AppId}", roleName, user.Email, appId);
         }
     }
 
@@ -177,5 +305,18 @@ public class AuthDbInitializer
         public bool IsEmailVerified { get; set; }
         public bool IsPhoneVerified { get; set; }
         public DateTime? OtpBlockedUntil { get; set; }
+    }
+
+    private class SeedRoleDto
+    {
+        public string Name { get; set; }
+        public List<string> Permissions { get; set; }
+        public bool IsSealed { get; set; }
+    }
+
+    private class SeedPermissionDto
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
     }
 }

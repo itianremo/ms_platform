@@ -26,7 +26,8 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<Us
             u.Status == Domain.Entities.GlobalUserStatus.Active,
             u.Memberships.Select(m => m.Role.Name).Distinct().ToList(),
             u.IsEmailVerified,
-            u.IsPhoneVerified
+            u.IsPhoneVerified,
+            u.Memberships.Select(m => new UserAppMembershipDto(m.AppId, m.RoleId, m.Role.Name, (int)m.Status)).ToList()
         )).ToList();
     }
 }

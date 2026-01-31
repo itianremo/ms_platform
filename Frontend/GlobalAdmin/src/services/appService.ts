@@ -8,6 +8,16 @@ export interface AppConfig {
     isActive: boolean;
 }
 
+export interface SubscriptionPackage {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    discount: number;
+    currency: string;
+    period: number;
+}
+
 export const AppService = {
     getAllApps: async (): Promise<AppConfig[]> => {
         try {
@@ -40,6 +50,29 @@ export const AppService = {
     updateExternalAuth: async (id: string, json: string) => {
         const response = await api.patch(`/apps/api/Apps/${id}/external-auth`, { id, externalLoginsJson: json });
         return response.data;
+    },
+
+    getPackages: async (appId: string): Promise<SubscriptionPackage[]> => {
+        const response = await api.get(`/apps/api/Apps/${appId}/packages`);
+        return response.data;
+    },
+
+    getUserSubscriptions: async (appId: string, userId: string): Promise<any[]> => {
+        const response = await api.get(`/apps/api/Apps/${appId}/users/${userId}/subscriptions`);
+        return response.data;
+    },
+
+    grantSubscription: async (appId: string, userId: string, packageId: string, startDate?: string, endDate?: string): Promise<string> => {
+        const response = await api.post(`/apps/api/Apps/${appId}/users/${userId}/subscriptions`, {
+            userId, appId, packageId, startDate, endDate
+        });
+        return response.data.subscriptionId;
+    },
+
+    changeSubscriptionStatus: async (appId: string, subscriptionId: string, isActive: boolean): Promise<void> => {
+        await api.put(`/apps/api/Apps/${appId}/subscriptions/${subscriptionId}/status`, {
+            subscriptionId, isActive
+        });
     }
 };
 

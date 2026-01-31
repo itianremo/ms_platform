@@ -1,4 +1,5 @@
 using Auth.Application.Features.Auth.Commands.RegisterUser;
+using Auth.Application.Features.Auth.Commands.LogoutUser;
 using Auth.Application.Features.Auth.Commands.LoginUser;
 using MediatR;
 using Auth.Application.Common.Exceptions;
@@ -238,9 +239,23 @@ public class AuthController : ControllerBase
     // ... existing ...
 
     [HttpPost("logout")]
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout()
     {
+        // cleanup cookies
         Response.Cookies.Delete("jwt_token");
+        Response.Cookies.Delete("refresh_token");
+
+        var userId = GetUserIdFromClaims();
+        if (userId != Guid.Empty)
+        {
+            // Try to get SessionId from claims
+            var sessionIdClaim = User.FindFirst("sid");
+            if (sessionIdClaim != null && Guid.TryParse(sessionIdClaim.Value, out var sessionId))
+            {
+                 await _mediator.Send(new LogoutUserCommand(userId, sessionId));
+            }
+        }
+
         return Ok(new { Message = "Logged out" });
     }
 

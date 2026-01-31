@@ -6,6 +6,7 @@ The entry point for all client requests, routing traffic to appropriate microser
 - **Reverse Proxy**: Powered by YARP (Yet Another Reverse Proxy).
 - **Route Management**: Centralized routing configuration.
 - **Authentication Hand-off**: Validates JWTs at the edge (optional configuration).
+- **Rate Limiting**: Redis-based rate limiting for API protection.
 - **CORS Handling**: Centralized CORS policies.
 
 ## 🏗 Technology Stack

@@ -10,6 +10,7 @@ COPY ["Users/Users.Application/Users.Application.csproj", "Users/Users.Applicati
 COPY ["Users/Users.Domain/Users.Domain.csproj", "Users/Users.Domain/"]
 COPY ["Users/Users.Infrastructure/Users.Infrastructure.csproj", "Users/Users.Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
+COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
 COPY ["Shared/Shared.Messaging/Shared.Messaging.csproj", "Shared/Shared.Messaging/"]
 RUN dotnet restore "Users/Users.API/Users.API.csproj"
 COPY . .

@@ -11,6 +11,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import VerificationPage from './pages/VerificationPage';
+import AuthCallbackPage from './pages/AuthCallbackPage';
 import Dashboard from './pages/Dashboard';
 import PreferencesPage from './pages/PreferencesPage';
 import UsersPage from './pages/UsersPage';
@@ -68,6 +69,7 @@ function App() {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     <Route path="/verify" element={<VerificationPage />} />
+                    <Route path="/auth/callback" element={<AuthCallbackPage />} />
                 </Route>
 
                 {/* Protected Routes */}

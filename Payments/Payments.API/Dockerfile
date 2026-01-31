@@ -10,6 +10,7 @@ COPY ["Payments/Payments.Application/Payments.Application.csproj", "Payments/Pay
 COPY ["Payments/Payments.Domain/Payments.Domain.csproj", "Payments/Payments.Domain/"]
 COPY ["Payments/Payments.Infrastructure/Payments.Infrastructure.csproj", "Payments/Payments.Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
+COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
 COPY ["Shared/Shared.Messaging/Shared.Messaging.csproj", "Shared/Shared.Messaging/"]
 RUN dotnet restore "Payments/Payments.API/Payments.API.csproj"
 COPY . .

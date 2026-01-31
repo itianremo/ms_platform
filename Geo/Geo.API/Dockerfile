@@ -10,6 +10,7 @@ COPY ["Geo/Geo.Application/Geo.Application.csproj", "Geo/Geo.Application/"]
 COPY ["Geo/Geo.Domain/Geo.Domain.csproj", "Geo/Geo.Domain/"]
 COPY ["Geo/Geo.Infrastructure/Geo.Infrastructure.csproj", "Geo/Geo.Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
+COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
 COPY ["Shared/Shared.Messaging/Shared.Messaging.csproj", "Shared/Shared.Messaging/"]
 RUN dotnet restore "Geo/Geo.API/Geo.API.csproj"
 COPY . .

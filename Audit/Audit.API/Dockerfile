@@ -10,6 +10,7 @@ COPY ["Audit/Audit.Application/Audit.Application.csproj", "Audit/Audit.Applicati
 COPY ["Audit/Audit.Domain/Audit.Domain.csproj", "Audit/Audit.Domain/"]
 COPY ["Audit/Audit.Infrastructure/Audit.Infrastructure.csproj", "Audit/Audit.Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
+COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
 COPY ["Shared/Shared.Messaging/Shared.Messaging.csproj", "Shared/Shared.Messaging/"]
 RUN dotnet restore "Audit/Audit.API/Audit.API.csproj"
 COPY . .

@@ -11,6 +11,7 @@ COPY ["Apps/Apps.Domain/Apps.Domain.csproj", "Apps/Apps.Domain/"]
 COPY ["Apps/Apps.Infrastructure/Apps.Infrastructure.csproj", "Apps/Apps.Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
 COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
+COPY ["Shared/Shared.Messaging/Shared.Messaging.csproj", "Shared/Shared.Messaging/"]
 RUN dotnet restore "Apps/Apps.API/Apps.API.csproj"
 COPY . .
 WORKDIR "/src/Apps/Apps.API"
@@ -22,4 +23,6 @@ RUN dotnet publish "Apps.API.csproj" -c Release -o /app/publish /p:UseAppHost=fa
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY ["Apps/Apps.API/seed-apps.json", "."]
+COPY ["Apps/Apps.API/seed-packages.json", "."]
 ENTRYPOINT ["dotnet", "Apps.API.dll"]

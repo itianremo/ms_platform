@@ -5,7 +5,7 @@ interface User {
     id: string;
     email: string;
     name: string;
-    role: string;
+    roles: string[];
     phone?: string;
     avatarUrl?: string;
     bio?: string;
@@ -49,12 +49,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const payload = parseJwt(token);
         if (payload) {
             // Map claims
-            const role = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || payload.role || 'User';
+            const roleClaim = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || payload.role || [];
+            const roles = Array.isArray(roleClaim) ? roleClaim : [roleClaim];
+
             setUser({
                 id: payload.sub,
                 email: payload.email,
                 name: payload.name || payload.email.split('@')[0], // Fallback name
-                role: role,
+                roles: roles,
                 phone: payload.phone,
                 isEmailVerified: payload.email_verified === 'true',
                 isPhoneVerified: payload.phone_verified === 'true'

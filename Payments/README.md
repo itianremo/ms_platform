@@ -1,36 +1,14 @@
-# Payments Service (Financial Integration)
+# Payments Service
 
-Manages subscriptions, payment strategies, and transaction history.
+## Overview
+Handles payment processing and webhook events from payment providers (Stripe, PayPal).
 
-## ✨ Features
-- **Strategy Pattern**: Pluggable gateways (e.g., Stripe, Mock).
-- **Multi-Tenant Config**: Different payment providers per tenant app.
-- **Subscriptions**: Recurring billing and plan management.
-- **Webhooks**: Handling gateway callbacks securely.
+## Features
+- **Stripe Checkout**: Real Payment Gateway integration using `Stripe.Checkout.Session` for subscriptions.
+- **Stripe Webhooks**: Idempotent handling of `invoice.payment_succeeded` and `checkout.session.completed` events.
+- **Event Publishing**: Publishes `PaymentSucceededEvent` to Message Bus upon successful payment.
+- **Infrastructure**: Uses `MassTransit` for event propagation.
 
-## 🏗 Technology Stack
-- **Framework**: .NET 8 (ASP.NET Core)
-- **Database**: SQL Server
-- **Messaging**: MassTransit (RabbitMQ)
-- **Documentation**: Swagger / OpenAPI
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Docker & Docker Compose
-- .NET 8 SDK
-
-### Running Locally
-```bash
-cd Payments/Payments.API
-dotnet run
-```
-
-### Running via Docker
-```bash
-docker-compose up -d payments-api
-```
-
-## 🔌 API Documentation
-- **Swagger UI**: http://localhost:5007/swagger
-- **Health Check**: http://localhost:5007/health
+## Configuration
+- **Stripe**: Configure `StripeSettings:WebhookSecret` in `appsettings.json`.
+- **Message Bus**: RabbitMQ connection required.

@@ -1,8 +1,16 @@
-using Chat.Application;
+using Shared.Infrastructure.Extensions;
 using Chat.Infrastructure;
+using Chat.Application;
 using Chat.API.Hubs;
+using Serilog;
+
+ObservabilityExtensions.ConfigureSerilog(new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .AddEnvironmentVariables()
+    .Build());
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -13,8 +21,7 @@ builder.Services.AddSignalR();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 
-builder.Services.AddHealthChecks()
-    .AddMongoDb(builder.Configuration.GetConnectionString("MongoConnection") ?? "mongodb://localhost:27017", name: "mongodb");
+builder.Services.AddSharedHealthChecks(builder.Configuration);
 
 var app = builder.Build();
 
@@ -29,11 +36,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-{
-    Predicate = _ => true,
-    ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
-});
+app.UseSharedHealthChecks();
 
 app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");

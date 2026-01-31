@@ -1,0 +1,90 @@
+[
+    {
+        "AppId": "11111111-1111-1111-1111-111111111111",
+        "Name": "Monthly",
+        "Description": "FitIT Monthly Subscription",
+        "Price": 9.99,
+        "Discount": 0,
+        "Period": 2
+    },
+    {
+        "AppId": "11111111-1111-1111-1111-111111111111",
+        "Name": "Quarterly",
+        "Description": "FitIT 3 Months",
+        "Price": 24.99,
+        "Discount": 0,
+        "Period": 3
+    },
+    {
+        "AppId": "11111111-1111-1111-1111-111111111111",
+        "Name": "Semi-Annual",
+        "Description": "FitIT 6 Months",
+        "Price": 49.99,
+        "Discount": 0,
+        "Period": 6
+    },
+    {
+        "AppId": "11111111-1111-1111-1111-111111111111",
+        "Name": "Annual",
+        "Description": "FitIT Yearly Subscription",
+        "Price": 89.99,
+        "Discount": 0,
+        "Period": 12
+    },
+    {
+        "AppId": "11111111-1111-1111-1111-111111111111",
+        "Name": "Unlimited",
+        "Description": "FitIT Lifetime Access",
+        "Price": 199.99,
+        "Discount": 0,
+        "Period": 99
+    },
+    {
+        "AppId": "11111111-1111-1111-1111-111111111111",
+        "Name": "VIP",
+        "Description": "VIP Access. Features: Exclusive workouts, Personal Nutrition Plan, Ad-free experience.",
+        "Price": 29.99,
+        "Discount": 5.00,
+        "Period": 2
+    },
+    {
+        "AppId": "22222222-2222-2222-2222-222222222222",
+        "Name": "Weekly",
+        "Description": "Wissler Weekly Pass",
+        "Price": 4.99,
+        "Discount": 0,
+        "Period": 1
+    },
+    {
+        "AppId": "22222222-2222-2222-2222-222222222222",
+        "Name": "Bi-Weekly",
+        "Description": "Wissler 2 Weeks",
+        "Price": 8.99,
+        "Discount": 0,
+        "Period": 1
+    },
+    {
+        "AppId": "22222222-2222-2222-2222-222222222222",
+        "Name": "Monthly",
+        "Description": "Wissler Monthly",
+        "Price": 14.99,
+        "Discount": 0,
+        "Period": 2
+    },
+    {
+        "AppId": "22222222-2222-2222-2222-222222222222",
+        "Name": "Unlimited",
+        "Description": "Wissler Lifetime",
+        "Price": 49.99,
+        "Discount": 0,
+        "Period": 99
+    },
+    {
+        "AppId": "22222222-2222-2222-2222-222222222222",
+        "Name": "VIP",
+        "Description": "VIP Access. Features: Unlimited Swipes, See who liked you, Boost profile.",
+        "Price": 19.99,
+        "Discount": 2.00,
+        "Period": 2
+    }
+]

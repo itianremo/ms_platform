@@ -22,4 +22,7 @@ RUN dotnet publish "Auth.API.csproj" -c Release -o /app/publish /p:UseAppHost=fa
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY ["Auth/Auth.API/seed-users.json", "."]
+COPY ["Auth/Auth.API/seed-roles.json", "."]
+COPY ["Auth/Auth.API/seed-permissions.json", "."]
 ENTRYPOINT ["dotnet", "Auth.API.dll"]

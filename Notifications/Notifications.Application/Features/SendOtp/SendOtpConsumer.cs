@@ -34,7 +34,7 @@ public class SendOtpConsumer : IConsumer<SendOtpEvent>
             else if (message.Type == "Email")
             {
                 // Send Email
-                string emailBody = $"Your Verification Code is: {message.Code}. It expires in 5 minutes.";
+                string emailBody = GetOtpEmail(message.Code);
                 await _emailService.SendEmailAsync(message.Destination, "Verification Code", emailBody);
             }
             else if (message.Type == "Reactivation")
@@ -48,8 +48,41 @@ public class SendOtpConsumer : IConsumer<SendOtpEvent>
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to send OTP.");
-            // Ideally publish a Failed event or retry?
-            throw; // Let MassTransit retry
+            throw; 
         }
+    }
+
+    private string GetOtpEmail(string otpCode)
+    {
+        var body = $@"
+            <p>Hello,</p>
+            <p>You requested a verification code for your account. Please use the following code to complete your request:</p>
+            <div style='font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #2563eb; margin: 20px 0; text-align: center; background: #f0f7ff; padding: 15px; border-radius: 4px;'>{otpCode}</div>
+            <p>This code will expire in 10 minutes.</p>
+            <p>If you did not request this code, please ignore this email.</p>";
+
+        return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <style>
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }}
+        .header {{ background-color: #2563eb; color: white; padding: 10px; text-align: center; }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>Verification Code</h1>
+        </div>
+        <div class='content'>
+            {body}
+        </div>
+        <p>&copy; {DateTime.Now.Year} MS Platform</p>
+    </div>
+</body>
+</html>";
     }
 }

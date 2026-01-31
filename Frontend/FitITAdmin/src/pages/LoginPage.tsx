@@ -31,32 +31,9 @@ const LoginPage: React.FC = () => {
         }
     };
 
-    const handleSocialLogin = async (provider: string) => {
-        try {
-            // Mock OAuth flow: Immediately call backend with a "fake" successful provider key
-            const payload = {
-                loginProvider: provider,
-                providerKey: `${provider.toLowerCase()}_user_123`, // Mock ID from provider
-                email: `user@${provider.toLowerCase()}.com` // In real flow, we get this from provider
-            };
-
-            const res = await fetch('http://localhost:5002/api/auth/external-login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await res.json();
-            if (res.ok && data.token) {
-                login(data.token);
-                navigate('/');
-            } else {
-                setError(`${provider} login failed`);
-            }
-        } catch (err) {
-            console.error(err);
-            setError('Social login network error');
-        }
+    const handleSocialLogin = (provider: string) => {
+        // Redirect to Backend for OAuth flow
+        window.location.href = `http://localhost:7032/api/externalauth/login/${provider}`;
     };
 
     return (

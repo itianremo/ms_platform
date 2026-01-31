@@ -45,6 +45,33 @@ public static class DependencyInjection
         });
 
         services.AddScoped<UsersDbInitializer>();
+        
+        // JWT Authentication
+        var jwtSettings = new Users.Infrastructure.Authentication.JwtSettings();
+        configuration.Bind("JwtSettings", jwtSettings);
+        services.AddSingleton(Microsoft.Extensions.Options.Options.Create(jwtSettings));
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+            options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtSettings.Audience,
+                ClockSkew = TimeSpan.Zero
+            };
+        });
+
         return services;
     }
 }

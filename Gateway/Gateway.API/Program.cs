@@ -1,6 +1,18 @@
+using Shared.Infrastructure;
+using Shared.Infrastructure.Extensions;
+using Serilog;
+
+ObservabilityExtensions.ConfigureSerilog(new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .AddEnvironmentVariables()
+    .Build());
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 // Add services to the container.
+builder.Services.AddSharedInfrastructure(builder.Configuration);
+
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
@@ -55,6 +67,19 @@ builder.Services.AddAuthentication(options =>
                 context.Token = accessToken;
             }
             return Task.CompletedTask;
+        },
+        OnTokenValidated = async context => 
+        {
+             var cache = context.HttpContext.RequestServices.GetRequiredService<Shared.Kernel.Interfaces.ICacheService>();
+             var sid = context.Principal?.FindFirst("sid")?.Value;
+             if (!string.IsNullOrEmpty(sid))
+             {
+                 var isRevoked = await cache.GetAsync<bool?>($"blacklist:session:{sid}");
+                 if (isRevoked == true)
+                 {
+                     context.Fail("Session revoked");
+                 }
+             }
         }
     };
 });
@@ -67,6 +92,8 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddHealthChecksUI()
     .AddInMemoryStorage();
+    
+builder.Services.AddSharedHealthChecks(builder.Configuration);
 
 var app = builder.Build();
 
@@ -77,6 +104,8 @@ app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSharedHealthChecks();
 
 app.Use(async (context, next) =>
 {
@@ -127,6 +156,7 @@ app.Use(async (context, next) =>
 });
 
 app.UseMiddleware<Gateway.API.Middleware.TenantHeaderMiddleware>();
+app.UseMiddleware<Gateway.API.Middleware.RedisRateLimitMiddleware>();
 
 app.MapReverseProxy();
 

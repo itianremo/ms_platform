@@ -1,7 +1,16 @@
-using Apps.Application;
+using Shared.Infrastructure.Extensions;
 using Apps.Infrastructure;
+using Apps.Infrastructure;
+using Apps.Application;
+using Serilog;
+
+ObservabilityExtensions.ConfigureSerilog(new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .AddEnvironmentVariables()
+    .Build());
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -11,9 +20,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") 
-        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found."));
+builder.Services.AddSharedHealthChecks(builder.Configuration);
 
 builder.Services.AddCors(options =>
 {
@@ -47,11 +54,7 @@ app.UseCors("AllowFrontend");
 
 app.UseAuthorization();
 
-app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-{
-    Predicate = _ => true,
-    ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
-});
+app.UseSharedHealthChecks();
 
 app.MapControllers();
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { cn } from '../lib/utils';
 import {
     LayoutDashboard, Users, Grid, CreditCard, Activity, FileText,
@@ -43,8 +44,25 @@ const SidebarItem = ({ to, icon: Icon, label, collapsed }: SidebarItemProps) => 
     );
 };
 
+// Permission Logic
 export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
     const token = localStorage.getItem('admin_token');
+    const { user } = useAuth(); // Assuming useAuth provides user object with roles
+
+    // Check if user has access to specific modules
+    // If user has NO roles or specific permissions, they might only see Dashboard (or nothing)
+
+    // For now, let's assume "active" users with no roles can only see Dashboard.
+    // Users with "ManageUsers" or "SuperAdmin" can see Users menu.
+    // "SuperAdmin" sees everything.
+
+    const hasRole = (roleName: string) => {
+        if (!user || !user.roles) return false;
+        return user.roles.includes('SuperAdmin') || user.roles.includes(roleName);
+    };
+
+    const canManageUsers = hasRole('ManageUsers');
+    const isSuperAdmin = hasRole('SuperAdmin');
 
     return (
         <aside
@@ -79,17 +97,23 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
                     <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" collapsed={collapsed} />
                 </div>
 
-                <div className="space-y-1">
-                    {!collapsed && <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">Management</div>}
-                    <SidebarItem to="/users" icon={Users} label="Users" collapsed={collapsed} />
-                    <SidebarItem to="/apps" icon={Grid} label="Applications" collapsed={collapsed} />
-                    <SidebarItem to="/audit-logs" icon={FileText} label="Audit Logs" collapsed={collapsed} />
-                    <SidebarItem to="/subscriptions" icon={CreditCard} label="Subscriptions" collapsed={collapsed} />
-                </div>
+                {(canManageUsers || isSuperAdmin) && (
+                    <div className="space-y-1">
+                        {!collapsed && <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">Management</div>}
+                        <SidebarItem to="/users" icon={Users} label="Users" collapsed={collapsed} />
+                        {isSuperAdmin && (
+                            <>
+                                <SidebarItem to="/apps" icon={Grid} label="Applications" collapsed={collapsed} />
+                                <SidebarItem to="/audit-logs" icon={FileText} label="Audit Logs" collapsed={collapsed} />
+                                <SidebarItem to="/subscriptions" icon={CreditCard} label="Subscriptions" collapsed={collapsed} />
+                            </>
+                        )}
+                    </div>
+                )}
 
                 <div className="space-y-1 mt-auto">
                     {!collapsed && <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">Configurations</div>}
-                    <SidebarItem to="/configurations" icon={Settings} label="Configurations" collapsed={collapsed} />
+                    {isSuperAdmin && <SidebarItem to="/configurations" icon={Settings} label="Configurations" collapsed={collapsed} />}
 
                     <a
                         href={`http://localhost:7032/health-dashboard?token=${token}`}

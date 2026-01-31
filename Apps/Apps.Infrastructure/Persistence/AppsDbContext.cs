@@ -11,6 +11,8 @@ public class AppsDbContext : DbContext
     }
 
     public DbSet<AppConfig> Apps { get; set; }
+    public DbSet<SubscriptionPackage> SubscriptionPackages { get; set; }
+    public DbSet<UserSubscription> UserSubscriptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -1,11 +1,19 @@
-using Auth.Application;
-using Auth.Infrastructure;
+using Shared.Infrastructure.Extensions;
+using Shared.Infrastructure.Middlewares;
+using Microsoft.AspNetCore.RateLimiting;
 using Auth.Infrastructure.Persistence;
 using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.RateLimiting;
-using Auth.API.Middlewares;
+using Auth.Infrastructure;
+using Auth.Application;
+using Serilog;
+
+ObservabilityExtensions.ConfigureSerilog(new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .AddEnvironmentVariables()
+    .Build());
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllers()
@@ -15,11 +23,14 @@ builder.Services.AddControllers()
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddSharedHealthChecks(builder.Configuration);
 
 builder.Services.AddScoped<Auth.API.Filters.SessionValidationFilter>();
+builder.Services.AddTransient<GlobalExceptionHandler>();
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -42,9 +53,6 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowCredentials());
 });
-
-builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 
 var app = builder.Build();
 
@@ -71,11 +79,7 @@ app.UseMiddleware<GlobalExceptionHandler>();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-{
-    Predicate = _ => true,
-    ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
-});
+app.UseSharedHealthChecks();
 
 app.MapControllers();
 

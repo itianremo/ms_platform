@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../components/theme-provider';
 import { useToast } from '../context/ToastContext';
 import { UserService } from '../services/userService';
 import { AuthService } from '../services/authService';
@@ -19,7 +19,7 @@ type Tab = 'profile' | 'account' | 'logins' | 'appearance' | 'notifications';
 
 const PreferencesPage = () => {
     const { user, updateUser, logout } = useAuth();
-    const { isDark, setTheme } = useTheme();
+    const { theme, setTheme } = useTheme();
     const { showToast } = useToast();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<Tab>('profile');
@@ -228,9 +228,9 @@ const PreferencesPage = () => {
         }
     };
 
-    const handleThemeChange = (dark: boolean) => {
-        setTheme(dark);
-        setUserPrefs(prev => ({ ...prev, theme: dark ? 'dark' : 'light' }));
+    const handleThemeChange = (newTheme: 'light' | 'dark') => {
+        setTheme(newTheme);
+        setUserPrefs(prev => ({ ...prev, theme: newTheme }));
     };
 
     const NavItem = ({ id, label, icon: Icon }: { id: Tab, label: string, icon: any }) => (
@@ -544,9 +544,9 @@ const PreferencesPage = () => {
                                     <div
                                         className={cn(
                                             "cursor-pointer rounded-lg border-2 p-2 hover:border-primary transition-all",
-                                            !isDark ? "border-primary bg-primary/5" : "border-muted"
+                                            theme === 'light' ? "border-primary bg-primary/5" : "border-muted"
                                         )}
-                                        onClick={() => handleThemeChange(false)}
+                                        onClick={() => handleThemeChange('light')}
                                     >
                                         <div className="space-y-2 rounded-md bg-[#ecedef] p-2">
                                             <div className="space-y-2 rounded-md bg-white p-2 shadow-sm">
@@ -563,9 +563,9 @@ const PreferencesPage = () => {
                                     <div
                                         className={cn(
                                             "cursor-pointer rounded-lg border-2 p-2 hover:border-primary transition-all",
-                                            isDark ? "border-primary bg-primary/5" : "border-muted"
+                                            theme === 'dark' ? "border-primary bg-primary/5" : "border-muted"
                                         )}
-                                        onClick={() => handleThemeChange(true)}
+                                        onClick={() => handleThemeChange('dark')}
                                     >
                                         <div className="space-y-2 rounded-md bg-slate-950 p-2">
                                             <div className="space-y-2 rounded-md bg-slate-800 p-2 shadow-sm">

@@ -41,6 +41,35 @@ export default function Dashboard() {
         fetchStats();
     }, []);
 
+    // Permission Logic
+    const hasRole = (roleName: string) => {
+        if (!user || !user.roles) return false;
+        return user.roles.includes('SuperAdmin') || user.roles.includes(roleName);
+    };
+
+    const isAdmin = hasRole('SuperAdmin') || hasRole('FitITAdmin') || hasRole('WisslerAdmin');
+    const canViewStats = isAdmin || hasRole('ManageUsers');
+
+    if (!canViewStats) {
+        return (
+            <div className="p-8 space-y-8 animate-fade-in flex flex-col items-center justify-center h-[80vh]">
+                <div className="bg-muted p-8 rounded-lg text-center max-w-md">
+                    <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+                    <h2 className="text-2xl font-bold mb-2">Access Restricted</h2>
+                    <p className="text-muted-foreground mb-6">
+                        You do not have permission to view the global dashboard statistics.
+                        Please contact your system administrator to request access.
+                    </p>
+                    <div className="text-sm text-muted-foreground bg-background p-4 rounded border">
+                        <p>User ID: {user?.id}</p>
+                        <p>Email: {user?.email}</p>
+                        <p>Roles: {user?.roles?.join(', ') || 'None'}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="p-4 md:p-8 pt-6 space-y-8 animate-fade-in">
             <div className="flex items-center justify-between space-y-2">

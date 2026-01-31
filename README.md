@@ -1,73 +1,35 @@
-# MS Platform (Microservices Architecture)
+# FitIT Microservices Platform
 
-A scalable, modular microservices platform built with **.NET 8 (Backend)** and **React + Vite (Frontend)**. This project demonstrates a Clean Architecture approach with a focus on multitenancy, RBAC, and high scalability.
+## Overview
+A comprehensive microservices ecosystem for fitness and wellness management, featuring advanced RBAC, subscription handling, and real-time notifications.
 
-## 🚀 Features
+## Architecture
+- **Gateway**: YARP-based Reverse Proxy with Rate Limiting (Redis).
+- **Auth**: JWT Authentication, Social Login (Google/Microsoft), and RBAC.
+- **Apps**: Application & Subscription Management (Weekly/Monthly/Yearly/Unlimited).
+- **Payments**: Stripe/PayPal Webhook integration.
+- **Notifications**: Real-time updates (SignalR) and Email/SMS dispatch.
+- **Users**: User profile, preferences, and linked accounts.
+- **Search**: Full-text search across the platform.
+- **Audit**: Advanced logging and compliance.
 
-- **Microservices Architecture**: 14+ isolated services communicating via RabbitMQ (MassTransit) and HTTP (YARP Gateway).
-- **Identity & Access**: OIDC-compliant Auth service with JWT, Cookie Sharing, and Sealed Superadmin support.
-- **Real-time Communication**: SignalR-based Chat and Notifications.
-- **Content Management**: MinIO-based Media storage with automatic Image Resizing and Moderation.
-- **Search**: PostgreSQL Full-Text Search synchronized via Events.
-- **Dynamic Payments**: Strategy-based Payment Gateway (Stripe/Mock) with configurable providers per Tenant.
-- **Geo-Location**: PostGIS-powered proximity search and location tracking.
-- **Matching Engine**: ML-based user recommendation and swipe logic.
-- **Frontend**: 
-  - **GlobalAdmin**: Superadmin Dashboard.
-  - **App**: User-facing Mobile Web App.
-- **Identity Features**:
-  - **Cross-App Registration**: Seamless logic for users joining multiple apps with shared identity.
-  - **Account Reactivation**: Secure email-based restoration for deleted accounts.
-  - **Dynamic Profile Enforcement**: Status-based profile completion gates.
+## Infrastructure
+- **Message Bus**: RabbitMQ (MassTransit)
+- **Database**: SQL Server (EF Core)
+- **Caching**: Redis (StackExchange.Redis)
+- **Logging**: Serilog -> Seq
+- **Frontend**: React (Global Admin, FitIT Admin, Wissler Admin)
 
-## 📂 Architecture Overview
+## Getting Started
+1. **Prerequisites**: Docker Desktop, .NET 8 SDK, Node.js.
+2. **Run Infrastructure**: `docker-compose up -d sqlserver rabbitmq redis seq`
+3. **Run Services**: `docker-compose up -d`
+4. **Access**:
+   - Global Admin: http://localhost:3000
+   - Seq Logs: http://localhost:5341
+   - Health Checks: http://localhost:5000/health-ui
 
-### Core Services
-| Service | Tech Stack | Responsibility |
-| :--- | :--- | :--- |
-| **Auth** | .NET 8, SQL Server | Identity, SSO, Roles (RBAC), Permissions. |
-| **Users** | .NET 8, PostgreSQL | User Profiles, Settings. |
-| **Apps** | .NET 8, PostgreSQL | Tenant Configuration, App Rules. |
-| **Gateway** | YARP | API Gateway, Reverse Proxy. |
-| **Shared** | .NET Class Library | Kernel, EventBus, Caching, Common Types. |
-
-### Feature Services
-| Service | Tech Stack | Responsibility |
-| :--- | :--- | :--- |
-| **Chat** | .NET 8, MongoDB | Real-time Messaging, History. |
-| **Media** | .NET 8, MinIO | File Uploads, Resizing, Moderation. |
-| **Search** | .NET 8, PostgreSQL | User Search (Syncs with Users/Apps). |
-| **Payments** | .NET 8, PostgreSQL | Subscriptions, Plans, Gateways. |
-| **Notifications** | .NET 8, RabbitMQ | Email/SMS Dispatch, In-App Alerts. |
-| **Audit** | .NET 8, MongoDB | centralized Audit Logging. |
-| **Geo** | .NET 8, PostGIS | Location Services, Proximity Search. |
-| **Recommendation**| Python / ML.NET | AI-driven User Matching. |
-| **Scheduler** | Hangfire | Recurring Jobs, Maintenance. |
-
-## 🛠️ Infrastructure
-
-- **Docker Compose**: Orchestrates all services and infrastructure dependencies.
-- **RabbitMQ**: Message Broker for Asynchronous Events.
-- **Redis**: Distributed Caching.
-- **PostgreSQL / SQL Server / MongoDB**: Polyglot Persistence.
-
-## 🏁 Getting Started
-
-Detailed instructions for Local, AWS, and Azure deployment can be found in the **[Deployment Guide](file:///C:/Users/ramim/.gemini/antigravity/brain/cea935a0-32cf-4cce-a420-d14139c1a197/deployment_guide.md)**.
-
-### Running Locally (Quick Start)
-1. **Clone the Repository**
-2. **Start Infrastructure**
-   ```bash
-   docker-compose up -d --build
-   ```
-3. **Access Services**
-   - **FitIT Admin**: http://localhost:3001
-   - **Global Admin**: http://localhost:3000
-   - **Gateway**: http://localhost:7032
-
-## 🔐 Credentials (Default Seeding)
-- **Superadmin**: `admin@fitit.com` / *(Check Seed Config)*
-
-## 📄 License
-[Proprietary/Internal]
+## Recent Updates
+- **Social Login**: Integrated Google & Microsoft OAuth.
+- **Payments**: Added Stripe Webhook handling for automated subscriptions.
+- **Monitoring**: Added HealthChecks UI and Seq Centralized Logging.

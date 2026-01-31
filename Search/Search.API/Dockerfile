@@ -10,6 +10,7 @@ COPY ["Search/Search.Application/Search.Application.csproj", "Search/Search.Appl
 COPY ["Search/Search.Domain/Search.Domain.csproj", "Search/Search.Domain/"]
 COPY ["Search/Search.Infrastructure/Search.Infrastructure.csproj", "Search/Search.Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
+COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
 COPY ["Shared/Shared.Messaging/Shared.Messaging.csproj", "Shared/Shared.Messaging/"]
 RUN dotnet restore "Search/Search.API/Search.API.csproj"
 COPY . .

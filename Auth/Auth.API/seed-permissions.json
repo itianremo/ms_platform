@@ -1,0 +1,34 @@
+[
+    {
+        "Name": "AccessAll",
+        "Description": "Full System Access"
+    },
+    {
+        "Name": "EditUsers",
+        "Description": "Ability to edit user details"
+    },
+    {
+        "Name": "ResetPassword",
+        "Description": "Ability to reset user passwords"
+    },
+    {
+        "Name": "AssignApps",
+        "Description": "Ability to assign users to apps"
+    },
+    {
+        "Name": "AssignRoles",
+        "Description": "Ability to change user roles"
+    },
+    {
+        "Name": "VipSubscription",
+        "Description": "Grants VIP level subscription access"
+    },
+    {
+        "Name": "ManageSubscription",
+        "Description": "Allows granting and managing user subscriptions"
+    },
+    {
+        "Name": "FreeSubscription",
+        "Description": "Default free tier access"
+    }
+]

@@ -4,6 +4,7 @@ Centralized service for dispatching emails, SMS, and in-app notifications.
 
 ## ✨ Features
 - **Multi-Channel Dispatch**: Support for Email (SMTP), SMS, and In-App alerts.
+- **Real-Time Alerts**: SignalR Hub for instant frontend notifications (Toast/In-App).
 - **Templates**: Dynamic template rendering for notifications.
 - **Event-Driven**: Listens to system events (e.g., `UserRegistered`) to trigger notifications.
 - **User Preferences**: Respects user opt-in/opt-out settings.

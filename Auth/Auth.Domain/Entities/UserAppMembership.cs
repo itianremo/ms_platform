@@ -17,6 +17,7 @@ public class UserAppMembership : Entity
     public virtual Role Role { get; private set; } // Navigation Property
     public AppUserStatus Status { get; private set; }
     public string SettingsJson { get; private set; } // Flexible settings per app membership
+    public DateTime? SubscriptionExpiry { get; private set; } // For VIP/Subscription checks
 
     private UserAppMembership() { }
 
@@ -38,4 +39,5 @@ public class UserAppMembership : Entity
     public void Ban() => Status = AppUserStatus.Banned;
     public void Activate() => Status = AppUserStatus.Active;
     public void SetStatus(AppUserStatus status) => Status = status;
+    public void UpdateSubscriptionExpiry(DateTime? expiry) => SubscriptionExpiry = expiry;
 }

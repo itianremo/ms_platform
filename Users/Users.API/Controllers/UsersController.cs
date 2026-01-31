@@ -38,4 +38,12 @@ public class UsersController : ControllerBase
         var result = await _mediator.Send(query);
         return Ok(result);
     }
+
+    [HttpGet("dashboard/stats")]
+    public async Task<IActionResult> GetDashboardStats()
+    {
+        var query = new Users.Application.Features.Users.Queries.GetDashboardStats.GetDashboardStatsQuery();
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
 }

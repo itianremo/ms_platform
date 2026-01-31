@@ -1,8 +1,16 @@
-using Audit.Application;
+using Shared.Infrastructure.Extensions;
 using Audit.Infrastructure;
+using Audit.Application;
 using Audit.Infrastructure.Persistence;
+using Serilog;
+
+ObservabilityExtensions.ConfigureSerilog(new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .AddEnvironmentVariables()
+    .Build());
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -12,8 +20,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddHealthChecks()
-    .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+builder.Services.AddSharedHealthChecks(builder.Configuration);
 
 var app = builder.Build();
 
@@ -34,11 +41,7 @@ using (var scope = app.Services.CreateScope())
     await initializer.InitializeAsync();
 }
 
-app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-{
-    Predicate = _ => true,
-    ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
-});
+app.UseSharedHealthChecks();
 
 app.MapControllers();
 

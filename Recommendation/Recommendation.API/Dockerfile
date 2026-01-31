@@ -10,6 +10,7 @@ COPY ["Recommendation/Recommendation.Application/Recommendation.Application.cspr
 COPY ["Recommendation/Recommendation.Domain/Recommendation.Domain.csproj", "Recommendation/Recommendation.Domain/"]
 COPY ["Recommendation/Recommendation.Infrastructure/Recommendation.Infrastructure.csproj", "Recommendation/Recommendation.Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
+COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
 RUN dotnet restore "Recommendation/Recommendation.API/Recommendation.API.csproj"
 COPY . .
 WORKDIR "/src/Recommendation/Recommendation.API"

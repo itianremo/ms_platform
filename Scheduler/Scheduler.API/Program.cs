@@ -1,8 +1,15 @@
+using Shared.Infrastructure.Extensions;
 using Hangfire;
-using Hangfire.SqlServer;
 using MassTransit;
+using Hangfire.SqlServer;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+ObservabilityExtensions.ConfigureSerilog(builder.Configuration);
+
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -29,7 +36,6 @@ catch (Exception ex)
 builder.Services.AddHangfire(configuration => configuration
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
     .UseSimpleAssemblyNameTypeSerializer()
-    .UseRecommendedSerializerSettings()
     .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"), new SqlServerStorageOptions
     {
         CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
@@ -43,11 +49,7 @@ builder.Services.AddHangfire(configuration => configuration
 builder.Services.AddHangfireServer();
 
 // Health Checks
-var dbConn = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
-builder.Services.AddHealthChecks()
-    .AddSqlServer(dbConn);
+builder.Services.AddSharedHealthChecks(builder.Configuration);
 
 // MassTransit
 builder.Services.AddMassTransit(x =>
@@ -73,11 +75,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 
-app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
-{
-    Predicate = _ => true,
-    ResponseWriter = HealthChecks.UI.Client.UIResponseWriter.WriteHealthCheckUIResponse
-});
+app.UseSharedHealthChecks();
 
 app.UseHangfireDashboard(); // /hangfire
 

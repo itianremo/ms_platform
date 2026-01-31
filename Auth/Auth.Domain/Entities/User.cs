@@ -130,6 +130,24 @@ public class User : Entity
         _sessions.Add(session);
     }
 
+    public void RemoveSession(Guid sessionId)
+    {
+        var session = _sessions.FirstOrDefault(s => s.Id == sessionId);
+        if (session != null)
+        {
+            _sessions.Remove(session);
+        }
+    }
+
+    public void ClearExpiredSessions()
+    {
+        var expiredSessions = _sessions.Where(s => s.ExpiresAt < DateTime.UtcNow).ToList();
+        foreach (var session in expiredSessions)
+        {
+            _sessions.Remove(session);
+        }
+    }
+
     public void MarkAsSealed()
     {
         IsSealed = true;

@@ -18,6 +18,7 @@ public class UserProfile : Entity
     // Additional standard fields
     public DateTime? DateOfBirth { get; private set; }
     public string? Gender { get; private set; }
+    public DateTime Created { get; private set; } = DateTime.UtcNow;
 
     private UserProfile() { }
 
