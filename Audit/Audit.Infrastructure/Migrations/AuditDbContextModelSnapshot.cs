@@ -32,8 +32,8 @@ namespace Audit.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("AppId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("AppId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ChangesJson")
                         .IsRequired()
@@ -49,8 +49,8 @@ namespace Audit.Infrastructure.Migrations
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 

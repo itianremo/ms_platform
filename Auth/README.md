@@ -1,17 +1,20 @@
 # Auth Service
 
 ## Overview
-Central Authentication and Authorization service using JWT.
+Central Authentication and Authorization service for the FitIT Platform. Handles user identity, token issuance, and permission management.
 
-## Features
+## Tech Stack
+- **Framework**: .NET 8 (ASP.NET Core Web API)
+- **Database**: SQL Server (EF Core)
+- **Caching**: Redis (StackExchange.Redis)
+- **Messaging**: RabbitMQ (MassTransit)
+
+## Key Features
 - **JWT Authentication**: Issues Access and Refresh tokens.
-- **Social Login**: Google and Microsoft OAuth2 support.
-- **RBAC**: Role-based access control with dynamic permissions.
-- **Events**: Listens for `SubscriptionGrantedEvent` to update user claims.
-- **Security**: Rate Limiting (Redis), Session Blacklisting (Revocation), and Advanced Audit Logging (IP/UserAgent).
-- **Session Management**: Revoke active sessions via API.
-- **Caching**: Redis caching for permissions and user data.
+- **Social Login**: Google and Microsoft OAuth2 integration.
+- **RBAC**: Dynamic Role-Based Access Control and Permission management.
+- **Security**: Rate Limiting, Session Management (Revocation), and Audit Logging.
+- **User Stats**: Provides analytics on Admin vs Visitor counts per application.
 
-## Configuration
-- **OAuth**: Requires `Google` and `Microsoft` ClientIds/Secrets in `appsettings.json`.
-- **Redis**: Required for Rate Limiting and Token Revocation.
+## API Documentation
+Swagger UI: http://localhost:5001/swagger (via Gateway: http://localhost:5000/auth/swagger)

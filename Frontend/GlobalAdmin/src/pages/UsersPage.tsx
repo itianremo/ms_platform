@@ -12,9 +12,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../co
 import { Plus, MoreHorizontal, CheckCircle2, User as UserIcon, Shield, Lock, Trash2, Edit } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { UserService, UserDto } from '../services/userService';
-import { RoleService, RoleDto } from '../services/roleService';
+import { AppService, AppConfig } from '../services/appService';
 import { useToast } from '../context/ToastContext';
 import { cn } from '../lib/utils';
+import { formatDistanceToNow } from 'date-fns';
+
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -37,11 +39,43 @@ import { Label } from "../components/ui/label";
 
 const UsersPage = () => {
     const [users, setUsers] = useState<UserDto[]>([]);
-    const [roles, setRoles] = useState<RoleDto[]>([]);
+    const [apps, setApps] = useState<AppConfig[]>([]);
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
     const [filter, setFilter] = useState<'all' | 'pending'>('all');
     const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [usersData, appsData, profilesData] = await Promise.all([
+                UserService.getAllUsers(),
+                AppService.getAllApps(),
+                UserService.getAllProfiles()
+            ]);
+
+            // Merge profiles into users
+            const mergedUsers = usersData.map(user => {
+                const profile = profilesData.find(p => p.userId === user.id);
+                return {
+                    ...user,
+                    displayName: profile?.displayName || user.displayName // Prefer profile name, fallback to existing or undefined
+                };
+            });
+
+            setUsers(mergedUsers);
+            setApps(appsData);
+        } catch (error) {
+            console.error("Failed to fetch data", error);
+            showToast("Failed to load users", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const toggleUser = (userId: string) => {
         const newSelected = new Set(selectedUsers);
@@ -111,42 +145,6 @@ const UsersPage = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const [usersData, rolesData, profilesData] = await Promise.all([
-                UserService.getAllUsers(),
-                RoleService.getAllRoles(),
-                UserService.getAllProfiles()
-            ]);
-
-            // Merge profiles into users
-            const mergedUsers = usersData.map(user => {
-                const profile = profilesData.find(p => p.userId === user.id);
-                return {
-                    ...user,
-                    displayName: profile?.displayName || user.displayName // Prefer profile name, fallback to existing or undefined
-                };
-            });
-
-            setUsers(mergedUsers);
-            setRoles(rolesData);
-        } catch (error) {
-            showToast("Failed to fetch data", "error");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const getRolePermissions = (roleName: string) => {
-        const role = roles.find(r => r.name === roleName);
-        return role ? role.permissions : [];
     };
 
     // ... useEffect ...
@@ -265,10 +263,9 @@ const UsersPage = () => {
                                         onChange={toggleAll}
                                     />
                                 </TableHead>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Phone</TableHead>
-                                <TableHead>Roles</TableHead>
+                                <TableHead>User / Email</TableHead>
+                                <TableHead>Joined</TableHead>
+                                <TableHead>Last Platform Usage</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -284,58 +281,44 @@ const UsersPage = () => {
                                             onChange={() => toggleUser(user.id)}
                                         />
                                     </TableCell>
-                                    <TableCell className="font-medium">
-                                        <div className="flex items-center gap-2">
-                                            <Avatar className="h-8 w-8">
-                                                <AvatarImage src={undefined} alt={user.displayName} /> {/* No profile data in list yet */}
-                                                <AvatarFallback className="text-xs">
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-9 w-9">
+                                                <AvatarImage src="" alt={user.displayName || "User"} />
+                                                <AvatarFallback className="text-xs font-medium">
                                                     {(() => {
-                                                        const isValidName = (n?: string) => n && n !== 'N/A' && n !== 'n/a';
-                                                        const name = isValidName(user.displayName) ? user.displayName : (isValidName(user.firstName) && isValidName(user.lastName) ? `${user.firstName} ${user.lastName}` : '');
+                                                        const isValidName = (n?: string) => n && n !== 'N/A' && n !== 'n/a' && n.trim().length > 0;
+                                                        // Priority: DisplayName -> FirstName + LastName -> Email
+                                                        let nameToUse = isValidName(user.displayName) ? user.displayName : '';
 
-                                                        if (name) {
-                                                            const parts = name.split(' ');
-                                                            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-                                                            return name.substring(0, 2).toUpperCase();
+                                                        if (!nameToUse && isValidName(user.firstName) && isValidName(user.lastName)) {
+                                                            nameToUse = `${user.firstName} ${user.lastName}`;
                                                         }
+
+                                                        if (nameToUse) {
+                                                            const parts = nameToUse.trim().split(/[\s._-]+/); // Split by space, dot, underscore, dash
+                                                            if (parts.length >= 2) {
+                                                                return (parts[0][0] + parts[1][0]).toUpperCase();
+                                                            }
+                                                            return nameToUse.substring(0, 2).toUpperCase();
+                                                        }
+
                                                         // Fallback to Email Initials
                                                         if (user.email && user.email.includes('@')) {
-                                                            const [local, domain] = user.email.split('@');
-                                                            const domainName = domain.split('.')[0];
-                                                            if (local && domainName) {
-                                                                return (local[0] + domainName[0]).toUpperCase();
+                                                            const [local] = user.email.split('@');
+                                                            if (local && local.length >= 2) {
+                                                                return local.substring(0, 2).toUpperCase();
                                                             }
-                                                            return user.email.substring(0, 2).toUpperCase();
+                                                            return local[0].toUpperCase();
                                                         }
                                                         return 'U';
                                                     })()}
                                                 </AvatarFallback>
                                             </Avatar>
-                                            <div className="flex flex-col">
-                                                <span>
-                                                    {(() => {
-                                                        const isValidName = (n?: string) => n && n !== 'N/A' && n !== 'n/a';
-                                                        if (isValidName(user.displayName)) return user.displayName;
-                                                        if (isValidName(user.firstName) && isValidName(user.lastName)) return `${user.firstName} ${user.lastName}`;
-                                                        if (isValidName(user.firstName)) return user.firstName;
-
-                                                        // Email Fallback
-                                                        if (user.email && user.email.includes('@')) {
-                                                            const [local, domain] = user.email.split('@');
-                                                            const domainName = domain.split('.')[0];
-                                                            const capitalize = (s: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-                                                            return `${capitalize(local)} ${capitalize(domainName)}`;
-                                                        }
-                                                        return 'Unknown User';
-                                                    })()}
-                                                </span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-medium text-sm">{user.email}</span>
+                                                {user.isEmailVerified && <span title="Verified"><CheckCircle2 className="h-4 w-4 text-green-500" /></span>}
                                             </div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            {user.email}
-                                            {user.isEmailVerified && <span title="Verified"><CheckCircle2 className="h-4 w-4 text-green-500" /></span>}
                                         </div>
                                     </TableCell>
                                     <TableCell>
@@ -345,35 +328,20 @@ const UsersPage = () => {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex gap-1 flex-wrap">
-                                            {user.roles.map(roleName => {
-                                                const permissions = getRolePermissions(roleName);
-                                                return (
-                                                    <div key={roleName} className="group relative">
-                                                        <span className="cursor-help inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
-                                                            {roleName}
-                                                        </span>
-                                                        {/* Tooltip */}
-                                                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-48 z-50">
-                                                            <div className="bg-popover text-popover-foreground text-xs rounded-md border shadow-md p-2">
-                                                                <p className="font-bold mb-1 border-b pb-1">{roleName} Permissions:</p>
-                                                                {permissions.length > 0 ? (
-                                                                    <ul className="list-disc list-inside space-y-0.5 text-[10px] text-muted-foreground">
-                                                                        {permissions.map(p => (
-                                                                            <li key={p}>{p}</li>
-                                                                        ))}
-                                                                    </ul>
-                                                                ) : (
-                                                                    <span className="text-muted-foreground italic">No specific permissions</span>
-                                                                )}
-                                                            </div>
-                                                            {/* Arrow */}
-                                                            <div className="absolute left-1/2 -translate-x-1/2 top-full -mt-1 h-2 w-2 bg-popover border-b border-r border-popover transform rotate-45"></div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
+                                        {(() => {
+                                            if (!user.lastLoginUtc) return <span className="text-muted-foreground text-xs">Never</span>;
+
+                                            const app = user.lastLoginAppId ? apps.find(a => a.id.toLowerCase() === user.lastLoginAppId?.toLowerCase()) : null;
+                                            const appName = app ? app.name : (user.lastLoginAppId ? 'Unknown App' : 'System');
+                                            const timeAgo = formatDistanceToNow(new Date(user.lastLoginUtc), { addSuffix: true });
+
+                                            return (
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium text-sm">{appName}</span>
+                                                    <span className="text-xs text-muted-foreground">{timeAgo}</span>
+                                                </div>
+                                            );
+                                        })()}
                                     </TableCell>
                                     <TableCell>
                                         <span className={cn(

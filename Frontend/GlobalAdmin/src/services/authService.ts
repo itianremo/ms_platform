@@ -53,14 +53,27 @@ export const AuthService = {
     },
 
     updateProfile: async (data: any) => {
-        // Assuming Users API is mounted, but usually via Gateway.
-        // UpdateProfileCommandHandler in Users API.
-        // Route: PUT /api/Users/profile (Need to verify Generic Controller or specific)
-        // Or if it's CQRS, maybe POST /api/Users/profile/update
-        // Let's assume standard PUT /api/Users/profile for now based on Plan.
-        // NOTE: The previous context showed UsersController with GetMyNotifications... wait that was NotificationsController.
-        // I haven't seen UsersController yet. Assuming standard REST.
         const response = await api.put('/users/api/users/profile', data);
+        return response.data;
+    },
+
+    forgotPassword: async (email: string) => {
+        const response = await api.post('/auth/api/auth/password/forgot', { email });
+        return response.data;
+    },
+
+    resetPassword: async (data: { email: string, code: string, newPassword: string }) => {
+        const response = await api.post('/auth/api/auth/password/reset', data);
+        return response.data;
+    },
+
+    initiateReactivation: async (oldEmail: string, newEmail: string) => {
+        const response = await api.post('/auth/api/auth/reactivate/initiate', { oldEmail, newEmail });
+        return response.data;
+    },
+
+    verifyReactivation: async (email: string, code: string) => {
+        const response = await api.post('/auth/api/auth/reactivate/verify', { email, code });
         return response.data;
     }
 };

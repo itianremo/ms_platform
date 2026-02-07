@@ -45,7 +45,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
             if (existingUser.Status == GlobalUserStatus.SoftDeleted)
             {
                 // Throwing specific exception for UI to handle "Restore" flow
-                throw new Common.Exceptions.UserSoftDeletedException("Account is deleted. Restoration is available.");
+                throw new global::Auth.Domain.Exceptions.UserSoftDeletedException("Account is deleted. Restoration is available.");
             }
 
             // Reload User with Roles/Memberships to ensure we have the latest state

@@ -6,6 +6,8 @@ using Users.Application.Features.Users.EventConsumers;
 using Users.Domain.Repositories;
 using Users.Infrastructure.Persistence;
 using Users.Infrastructure.Repositories;
+using Shared.Infrastructure.Caching;
+using Shared.Kernel.Interfaces;
 
 namespace Users.Infrastructure;
 
@@ -17,7 +19,17 @@ public static class DependencyInjection
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+        services.AddHttpContextAccessor();
+        services.AddScoped<Shared.Kernel.Interfaces.ICurrentUserService, Shared.Infrastructure.Services.CurrentUserService>();
         services.AddScoped<Users.Application.Common.Interfaces.IMaintenanceService, Users.Infrastructure.Services.MaintenanceService>();
+
+        // Cache
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis") ?? configuration["RedisConnectionString"] ?? "localhost:6379";
+            options.InstanceName = "FitIT_";
+        });
+        services.AddScoped<Shared.Kernel.Interfaces.ICacheService, Shared.Infrastructure.Caching.RedisCacheService>();
 
         services.AddMassTransit(x =>
         {

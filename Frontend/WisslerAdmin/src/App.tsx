@@ -1,29 +1,29 @@
 import { Routes, Route } from 'react-router-dom';
 import DashboardLayout from './layouts/DashboardLayout';
+import UsersPage from './pages/UsersPage';
+import PreferencesPage from './pages/PreferencesPage';
+import LoginPage from './pages/LoginPage';
+import AuthCallbackPage from './pages/AuthCallbackPage'; import Dashboard from './pages/Dashboard';
+
+import ProtectedRoute from './layouts/ProtectedRoute';
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<DashboardLayout />}>
-        <Route index element={
-          <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-            <p>Welcome to Wissler Admin.</p>
-            <div style={{ marginTop: '1rem', padding: '1rem', border: '1px solid #ddd', borderRadius: '8px', display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-              <div style={{ padding: '1rem', backgroundColor: '#fdf2f8', borderRadius: '8px' }}>
-                <h3>New Matches</h3>
-                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#db2777' }}>450</p>
-              </div>
-              <div style={{ padding: '1rem', backgroundColor: '#fdf2f8', borderRadius: '8px' }}>
-                <h3>Dates Planned</h3>
-                <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#db2777' }}>89</p>
-              </div>
-            </div>
-          </div>
-        } />
-        <Route path="users" element={<div>Profiles List (Coming Soon)</div>} />
-        <Route path="matches" element={<div>Matches List (Coming Soon)</div>} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
+
+      <Route path="/" element={
+        <ProtectedRoute>
+          <DashboardLayout />
+        </ProtectedRoute>
+      }>
+        <Route index element={<Dashboard />} />
+        {/* Placeholder for Users Route */}
+        <Route path="users" element={<UsersPage />} />
+        <Route path="settings" element={<PreferencesPage />} />
       </Route>
-    </Routes>
+    </Routes >
   );
 }
 

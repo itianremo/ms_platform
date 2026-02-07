@@ -71,6 +71,9 @@ const ExternalAuthConfigTab = ({ app, onSave }: ExternalAuthConfigTabProps) => {
     const PROVIDERS = [
         { id: 'google', name: 'Google', icon: Globe, color: 'bg-red-500', fields: ['clientId', 'clientSecret'] },
         { id: 'facebook', name: 'Facebook', icon: Facebook, color: 'bg-blue-600', fields: ['clientId', 'clientSecret'] }, // FB calls them App ID/Secret usually, but mapping to generic keys is easier or labelling them UI side
+        { id: 'microsoft', name: 'Microsoft', icon: Globe, color: 'bg-orange-500', fields: ['clientId', 'clientSecret', 'tenantId'] },
+        { id: 'linkedin', name: 'LinkedIn', icon: Globe, color: 'bg-blue-700', fields: ['clientId', 'clientSecret'] },
+        { id: 'twitter', name: 'Twitter', icon: Globe, color: 'bg-sky-500', fields: ['clientId', 'clientSecret'] },
         { id: 'apple', name: 'Apple', icon: Smartphone, color: 'bg-black', fields: ['serviceId', 'teamId', 'keyId'] } // Apple is complex, simplified for MVP
     ];
 

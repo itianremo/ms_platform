@@ -1,24 +1,26 @@
-# Global Admin (Superadmin Dashboard)
+# Global Admin Portal
 
-The central management console for the platform owner.
+## Overview
+The central management interface for the FitIT Platform. Allows Super Admins to manage applications, tenants, system-wide settings, and view global analytics.
 
-## ✨ Features
-- **Tenant Management**: Create and configure Tenants/Apps.
-- **User Management**: View comprehensive user list across the platform.
-- **System Monitoring**: Access Audit Logs (Advanced Diffs), System Health, and Background Jobs.
-- **Bulk Actions**: Manage users efficiently (Ban, Delete, Add to App).
-- **Dark Mode**: Toggle between light and dark themes.
-- **Settings**: Configure Global Defaults.
+## Tech Stack
+- **Framework**: React 19 (Vite)
+- **Styling**: TailwindCSS
+- **UI Components**: Shadcn UI (Radix Primitives)
+- **State Management**: React Context & Hooks
+- **Charts**: Recharts
 
-## 🚀 Getting Started
+## Key Features
+- **Dashboard**: System-wide analytics (Active Users, Admin Counts, Notifications).
+- **App Management**: Create, configure, and manage client applications.
+- **User Management**: Global user search and role assignment.
+- **System Settings**: Configure global preferences and defaults.
 
-### Development
-```bash
+## Getting Started
+\`\`\`bash
+# Install dependencies
 npm install
-npm run dev
-```
-Runs on: http://localhost:3000
 
-### Production Logic
-- Built via Docker (`nginx:alpine`).
-- Docker Port: 3000
+# Run development server
+npm run dev
+\`\`\`

@@ -44,6 +44,11 @@ public class SendOtpConsumer : IConsumer<SendOtpEvent>
                 string emailBody = $"<h3>Account Reactivation</h3><p>Your account was previously deleted.</p><p>Click the link below to restore your account:</p><p><a href=\"{link}\">Reactivate Account</a></p>";
                 await _emailService.SendEmailAsync(message.Destination, "Reactivate Account", emailBody);
             }
+            else if (message.Type == "PasswordReset")
+            {
+                string emailBody = GetOtpEmail(message.Code).Replace("Verification Code", "Reset Password Code").Replace("verification code for your account", "password reset code");
+                await _emailService.SendEmailAsync(message.Destination, "Reset Password Request", emailBody);
+            }
         }
         catch (Exception ex)
         {

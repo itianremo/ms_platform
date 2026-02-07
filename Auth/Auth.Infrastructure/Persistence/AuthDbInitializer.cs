@@ -115,7 +115,6 @@ public class AuthDbInitializer
             Guid.Parse("00000000-0000-0000-0000-000000000001"), // Global
             Guid.Parse("11111111-1111-1111-1111-111111111111"), // FitIT
             Guid.Parse("22222222-2222-2222-2222-222222222222"), // Wissler
-            Guid.Parse("33333333-3333-3333-3333-333333333333")  // Demo
         };
         
         var seedRoles = await LoadJsonAsync<List<SeedRoleDto>>("seed-roles.json");
@@ -256,11 +255,7 @@ public class AuthDbInitializer
                 var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
                 await AssignRoleToUser(user, wisslerAppId, "SuperAdmin", context);
             }
-            else if (seedUser.Email == "admin@demo.com")
-            {
-                 var demoAppId = Guid.Parse("33333333-3333-3333-3333-333333333333");
-                 await AssignRoleToUser(user, demoAppId, "SuperAdmin", context);
-            }
+
             // Assign Visitor Roles
             else if (seedUser.Email.Contains("@fitit.com") && seedUser.Email.Contains("visitor"))
             {
@@ -270,6 +265,34 @@ public class AuthDbInitializer
             else if (seedUser.Email.Contains("@wissler.com") && seedUser.Email.Contains("visitor"))
             {
                  var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+                 await AssignRoleToUser(user, wisslerAppId, "Visitor", context);
+            }
+            // Assign App Managers
+            else if (seedUser.Email == "manager@fitit.com")
+            {
+                 var fitItAppId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+                 await AssignRoleToUser(user, fitItAppId, "ManageUsers", context);
+            }
+            else if (seedUser.Email == "manager@wissler.com")
+            {
+                 var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+                 await AssignRoleToUser(user, wisslerAppId, "ManageUsers", context);
+            }
+
+            // Fallback: Ensure every user has a membership in the Global App
+            var globalAppId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var hasGlobalMembership = await context.UserAppMemberships.AnyAsync(m => m.UserId == user.Id && m.AppId == globalAppId);
+            if (!hasGlobalMembership)
+            {
+                 // Default to "User" role for Global App
+                 await AssignRoleToUser(user, globalAppId, "User", context);
+            }
+            // Assign Multi-App Visitor
+            else if (seedUser.Email == "visitor3@global.com")
+            {
+                 var fitItAppId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+                 var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+                 await AssignRoleToUser(user, fitItAppId, "Visitor", context);
                  await AssignRoleToUser(user, wisslerAppId, "Visitor", context);
             }
         }
@@ -296,10 +319,10 @@ public class AuthDbInitializer
     private class SeedUserDto
     {
         public Guid? Id { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string Phone { get; set; }
-        public List<string> Roles { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string Phone { get; set; } = string.Empty;
+        public List<string> Roles { get; set; } = new();
         public bool IsSealed { get; set; }
         public int Status { get; set; }
         public bool IsEmailVerified { get; set; }
@@ -309,14 +332,14 @@ public class AuthDbInitializer
 
     private class SeedRoleDto
     {
-        public string Name { get; set; }
-        public List<string> Permissions { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public List<string> Permissions { get; set; } = new();
         public bool IsSealed { get; set; }
     }
 
     private class SeedPermissionDto
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
     }
 }

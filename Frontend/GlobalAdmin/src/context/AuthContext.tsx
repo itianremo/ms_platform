@@ -20,6 +20,9 @@ interface AuthContextType {
     login: (identifier: string, password: string) => Promise<void>;
     register: (email: string, phone: string, password: string, verificationType?: 'None' | 'Email' | 'Phone' | 'Both') => Promise<void>;
     forgotPassword: (email: string) => Promise<void>;
+    resetPassword: (email: string, code: string, newPw: string) => Promise<void>;
+    initiateReactivation: (oldEmail: string, newEmail: string) => Promise<void>;
+    verifyReactivation: (email: string, code: string) => Promise<void>;
     logout: () => void;
     isLoading: boolean;
     updateUser: (updates: Partial<User>) => void;
@@ -58,6 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 name: payload.name || payload.email.split('@')[0], // Fallback name
                 roles: roles,
                 phone: payload.phone,
+                avatarUrl: payload.avatar_url || payload.avatarUrl,
                 isEmailVerified: payload.email_verified === 'true',
                 isPhoneVerified: payload.phone_verified === 'true'
             });
@@ -89,7 +93,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (data && (data.token || data.accessToken)) {
                 const tokenToUse = data.accessToken || data.token;
                 setToken(tokenToUse);
-                // Also set localStorage immediately here to ensure persistence across reloads/navigations if state update is slow
                 localStorage.setItem('admin_token', tokenToUse);
                 setUserFromToken(tokenToUse);
             }
@@ -105,7 +108,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 email,
                 password,
                 phone,
-                appId: "00000000-0000-0000-0000-000000000001", // Default to System App for Global Admin registration
+                appId: "00000000-0000-0000-0000-000000000001",
                 verificationType
             });
         } catch (error) {
@@ -115,12 +118,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const forgotPassword = async (email: string) => {
-        console.warn("Forgot Password endpoint not implemented on backend yet.");
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await AuthService.forgotPassword(email);
+    };
+
+    const resetPassword = async (email: string, code: string, newPw: string) => {
+        await AuthService.resetPassword({ email, code, newPassword: newPw });
+    };
+
+    const initiateReactivation = async (oldEmail: string, newEmail: string) => {
+        await AuthService.initiateReactivation(oldEmail, newEmail);
+    };
+
+    const verifyReactivation = async (email: string, code: string) => {
+        await AuthService.verifyReactivation(email, code);
     };
 
     const logout = () => {
-        AuthService.logout();
+        // Fire and forget - do not wait for response
+        AuthService.logout().catch(e => console.error("Logout cleanup failed (non-blocking)", e));
+
         setToken(null);
         setUser(null);
         localStorage.removeItem('admin_token');
@@ -133,7 +149,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated: !!token, token, user, login, register, forgotPassword, logout, isLoading, updateUser }}>
+        <AuthContext.Provider value={{
+            isAuthenticated: !!token,
+            token,
+            user,
+            login,
+            register,
+            forgotPassword,
+            resetPassword,
+            initiateReactivation,
+            verifyReactivation,
+            logout,
+            isLoading,
+            updateUser
+        }}>
             {children}
         </AuthContext.Provider>
     );

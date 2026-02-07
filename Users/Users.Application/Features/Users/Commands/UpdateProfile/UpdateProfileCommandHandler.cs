@@ -7,10 +7,12 @@ namespace Users.Application.Features.Users.Commands.UpdateProfile;
 public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand>
 {
     private readonly IUserProfileRepository _profileRepository;
+    private readonly Shared.Kernel.Interfaces.ICurrentUserService _currentUserService;
 
-    public UpdateProfileCommandHandler(IUserProfileRepository profileRepository)
+    public UpdateProfileCommandHandler(IUserProfileRepository profileRepository, Shared.Kernel.Interfaces.ICurrentUserService currentUserService)
     {
         _profileRepository = profileRepository;
+        _currentUserService = currentUserService;
     }
 
     public async Task Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
@@ -20,7 +22,8 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand>
         if (profile == null)
         {
             // Create if not exists (Lazy creation)
-            profile = new UserProfile(request.UserId, request.AppId, request.DisplayName);
+            // Create if not exists (Lazy creation)
+            profile = new UserProfile(request.UserId, request.AppId, request.DisplayName, _currentUserService.Email ?? string.Empty);
             await _profileRepository.AddAsync(profile);
         }
 

@@ -18,6 +18,7 @@ public class UserAppMembership : Entity
     public AppUserStatus Status { get; private set; }
     public string SettingsJson { get; private set; } // Flexible settings per app membership
     public DateTime? SubscriptionExpiry { get; private set; } // For VIP/Subscription checks
+    public DateTime? LastLoginUtc { get; private set; }
 
     private UserAppMembership() { }
 
@@ -39,5 +40,7 @@ public class UserAppMembership : Entity
     public void Ban() => Status = AppUserStatus.Banned;
     public void Activate() => Status = AppUserStatus.Active;
     public void SetStatus(AppUserStatus status) => Status = status;
+
     public void UpdateSubscriptionExpiry(DateTime? expiry) => SubscriptionExpiry = expiry;
+    public void RecordLogin() => LastLoginUtc = DateTime.UtcNow;
 }

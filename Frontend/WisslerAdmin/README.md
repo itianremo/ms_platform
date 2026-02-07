@@ -1,21 +1,25 @@
-# Wissler Admin (Tenant Dashboard)
+# Wissler Admin Portal
 
-Tenant-specific administration dashboard for the Wissler application.
+## Overview
+Dedicated administration interface for the **Wissler** application. Allows App Admins to manage their specific user base, content, and application settings.
 
-## ✨ Features
-- **Dashboard**: Usage statistics.
-- **Menu Management**: (Hypothetical) Specific features for Wissler context.
-- **User Management**: Tenant-scoped user control.
+## Tech Stack
+- **Framework**: React 19 (Vite)
+- **Styling**: TailwindCSS
+- **UI Components**: Shadcn UI (Radix Primitives)
+- **State Management**: React Context & Hooks
+- **Charts**: Recharts
 
-## 🚀 Getting Started
+## Key Features
+- **Dashboard**: Application-specific analytics (User activity, Growth).
+- **User Management**: Manage Wissler users and their roles.
+- **Settings**: Configure application-specific preferences.
 
-### Development
-```bash
-npm install
+## Getting Started
+\`\`\`bash
+# Install dependencies
+npm install --legacy-peer-deps
+
+# Run development server
 npm run dev
-```
-Runs on: http://localhost:3002
-
-### Production Logic
-- Built via Docker (`nginx:alpine`).
-- Docker Port: 3002
+\`\`\`

@@ -1,37 +1,18 @@
-# Users Service (Profile Management)
+# Users Service
 
-Manages User Profiles, Preferences, and User-specific data distinct from Identity credentials.
+## Overview
+Manages user profiles, preferences, and personal information. Acts as the source of truth for user details beyond authentication credentials.
 
-## ✨ Features
-- **Profile Management**: Stores Display Name, Avatar, and Personal Details.
-- **Preferences**: Manages User Settings (Theme, Notifications) synchronized with App defaults.
-- **Linked Accounts**: Manage Social Logins (Google/Microsoft).
-- **Audit History**: View personal audit logs (login history, profile changes).
-- **Search Synchronization**: Publishes profile updates to the Search Index.
+## Tech Stack
+- **Framework**: .NET 8 (ASP.NET Core Web API)
+- **Database**: SQL Server (EF Core)
+- **Messaging**: RabbitMQ (MassTransit)
 
-## 🏗 Technology Stack
-- **Framework**: .NET 8 (ASP.NET Core)
-- **Database**: PostgreSQL (`UsersDb`)
-- **Messaging**: MassTransit (RabbitMQ)
-- **Documentation**: Swagger / OpenAPI
+## Key Features
+- **Profiles**: Manages display names, avatars, and bio.
+- **Preferences**: Stores user settings (Theme, Sidebar state) per application via `customDataJson`.
+- **Integration**: Consumes `UserRegistered` events to create profiles automatically.
+- **Search**: Syncs user data to the Search service for discovery.
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Docker & Docker Compose
-- .NET 8 SDK
-
-### Running Locally
-```bash
-cd Users/Users.API
-dotnet run
-```
-
-### Running via Docker
-```bash
-docker-compose up -d users-api
-```
-
-## 🔌 API Documentation
-- **Swagger UI**: http://localhost:5003/swagger
-- **Health Check**: http://localhost:5003/health
+## API Documentation
+Swagger UI: http://localhost:5002/swagger (via Gateway: http://localhost:5000/users/swagger)

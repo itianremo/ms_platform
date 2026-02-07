@@ -13,6 +13,9 @@ export interface UserDto {
     isEmailVerified: boolean;
     isPhoneVerified: boolean;
     memberships: UserAppMembershipDto[];
+    linkedProviders: string[];
+    lastLoginUtc?: string; // ISO Date
+    lastLoginAppId?: string; // Guid
 }
 
 export const UserService = {
@@ -49,13 +52,17 @@ export const UserService = {
         await api.put(`/auth/api/Auth/users/${userId}/verify`, { type, verified });
     },
 
+    unlinkExternalAccount: async (userId: string, provider: string) => {
+        await api.delete(`/auth/api/ExternalAuth/users/${userId}/links/${provider}`);
+    },
+
     // Create user
     createUser: async (data: any) => {
         const response = await api.post('/auth/api/Auth/register', data);
         return response.data;
     },
 
-    getProfile: async (userId: string, appId: string = "00000000-0000-0000-0000-000000000000"): Promise<UserProfile | null> => {
+    getProfile: async (userId: string, appId: string = "00000000-0000-0000-0000-000000000001"): Promise<UserProfile | null> => {
         try {
             const response = await api.get(`/users/api/Users/profile?userId=${userId}&appId=${appId}`);
             return response.data;
@@ -68,7 +75,7 @@ export const UserService = {
         await api.put('/users/api/Users/profile', request);
     },
 
-    getAllProfiles: async (appId: string = "00000000-0000-0000-0000-000000000000"): Promise<UserProfile[]> => {
+    getAllProfiles: async (appId: string = "00000000-0000-0000-0000-000000000001"): Promise<UserProfile[]> => {
         try {
             const response = await api.get(`/users/api/Users/profiles?appId=${appId}`);
             return response.data;
@@ -101,6 +108,7 @@ export interface UserAppMembershipDto {
     roleId: string;
     roleName: string;
     status: number;
+    lastLogin?: string;
 }
 
 export interface UserProfile {

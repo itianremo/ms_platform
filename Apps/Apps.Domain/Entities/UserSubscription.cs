@@ -48,4 +48,10 @@ public class UserSubscription : Entity
     {
         return IsActive && DateTime.UtcNow >= StartDate && DateTime.UtcNow <= EndDate;
     }
+
+    public void ExpireNow()
+    {
+        EndDate = DateTime.UtcNow.AddDays(-1);
+        IsActive = false;
+    }
 }

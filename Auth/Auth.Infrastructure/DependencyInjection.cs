@@ -1,4 +1,5 @@
 using Auth.Application.Common.Interfaces;
+using Shared.Kernel;
 using Auth.Domain.Repositories;
 using Auth.Infrastructure.Persistence;
 using Auth.Infrastructure.Repositories;
@@ -30,6 +31,10 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IMaintenanceService, MaintenanceService>();
         services.AddScoped<Shared.Kernel.IRepository<Auth.Domain.Entities.UserOtp>, Auth.Infrastructure.Repositories.UserOtpRepository>();
+        services.AddScoped<Shared.Kernel.IRepository<Auth.Domain.Entities.UserAppMembership>, Auth.Infrastructure.Repositories.Repository<Auth.Domain.Entities.UserAppMembership>>();
+        services.AddScoped<Shared.Kernel.IRepository<Auth.Domain.Entities.Role>, Auth.Infrastructure.Repositories.Repository<Auth.Domain.Entities.Role>>();
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         
         // Caching
         services.AddStackExchangeRedisCache(options =>

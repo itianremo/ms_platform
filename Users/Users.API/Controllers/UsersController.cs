@@ -21,7 +21,7 @@ public class UsersController : ControllerBase
     {
         var query = new GetProfileQuery(userId, appId);
         var result = await _mediator.Send(query);
-        if (result == null) return NotFound();
+        if (result == null) return NoContent();
         return Ok(result);
     }
 

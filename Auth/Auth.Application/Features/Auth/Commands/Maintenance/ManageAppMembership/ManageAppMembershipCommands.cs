@@ -30,9 +30,15 @@ public class AddUserToAppCommandHandler : IRequestHandler<AddUserToAppCommand>
         Guid roleId = request.RoleId ?? Guid.Empty;
         if (roleId == Guid.Empty)
         {
-            var defaultRole = await _userRepository.GetRoleByNameAsync(request.AppId, "NormalUser") 
-                              ?? await _userRepository.GetRoleByNameAsync(request.AppId, "User");
-            if (defaultRole == null) throw new InvalidOperationException("Default role not found for app.");
+            var defaultRole = await _userRepository.GetRoleByNameAsync(request.AppId, "Visitor");
+            if (defaultRole == null) 
+            {
+                 // Fallback if Visitor doesn't exist, though it should.
+                 defaultRole = await _userRepository.GetRoleByNameAsync(request.AppId, "User") 
+                               ?? await _userRepository.GetRoleByNameAsync(request.AppId, "NormalUser");
+            }
+            
+            if (defaultRole == null) throw new InvalidOperationException("Default role (Visitor) not found for app.");
             roleId = defaultRole.Id;
         }
 
@@ -77,10 +83,12 @@ public record RemoveUserFromAppCommand(Guid UserId, Guid AppId) : IRequest;
 public class RemoveUserFromAppCommandHandler : IRequestHandler<RemoveUserFromAppCommand>
 {
     private readonly IUserRepository _userRepository;
+    private readonly MassTransit.IPublishEndpoint _publishEndpoint;
 
-    public RemoveUserFromAppCommandHandler(IUserRepository userRepository)
+    public RemoveUserFromAppCommandHandler(IUserRepository userRepository, MassTransit.IPublishEndpoint publishEndpoint)
     {
         _userRepository = userRepository;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task Handle(RemoveUserFromAppCommand request, CancellationToken cancellationToken)
@@ -88,8 +96,18 @@ public class RemoveUserFromAppCommandHandler : IRequestHandler<RemoveUserFromApp
          var targetUser = await _userRepository.GetUserWithRolesAsync(request.UserId);
          if (targetUser == null) throw new Shared.Kernel.Exceptions.NotFoundException(nameof(global::Auth.Domain.Entities.User), request.UserId);
          
-         targetUser.RemoveMembership(request.AppId);
-         
-         await _userRepository.UpdateAsync(targetUser);
+         var membership = targetUser.Memberships.FirstOrDefault(m => m.AppId == request.AppId);
+         if (membership != null)
+         {
+             var roleId = membership.RoleId;
+             // Try to get Role Name if loaded, otherwise empty
+             var roleName = membership.Role?.Name ?? "Unknown";
+
+             targetUser.RemoveMembership(request.AppId);
+             
+             await _userRepository.UpdateAsync(targetUser);
+
+             await _publishEndpoint.Publish(new Shared.Messaging.Events.UserRoleRemovedEvent(request.UserId, request.AppId, roleId, roleName), cancellationToken);
+         }
     }
 }

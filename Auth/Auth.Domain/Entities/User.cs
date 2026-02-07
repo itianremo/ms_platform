@@ -16,9 +16,9 @@ public enum GlobalUserStatus
 
 public class User : Entity
 {
-    public string Email { get; private set; }
-    public string Phone { get; private set; }
-    public string PasswordHash { get; private set; }
+    public string Email { get; private set; } = null!;
+    public string Phone { get; private set; } = null!;
+    public string PasswordHash { get; private set; } = null!;
 
     // Removed IsGlobalAdmin
     public bool IsSealed { get; private set; } // Cannot be deleted or modified
@@ -33,6 +33,9 @@ public class User : Entity
 
     private readonly List<UserSession> _sessions = new();
     public IReadOnlyCollection<UserSession> Sessions => _sessions.AsReadOnly();
+
+    public DateTime? LastLoginUtc { get; private set; }
+    public Guid? LastLoginAppId { get; private set; }
 
     private User() { }
 
@@ -71,8 +74,6 @@ public class User : Entity
 
     public bool IsEmailVerified { get; private set; }
     public bool IsPhoneVerified { get; private set; }
-
-    // ... existing constructors ...
 
     public void VerifyEmail()
     {
@@ -148,6 +149,15 @@ public class User : Entity
         }
     }
 
+    public void RemoveLogin(UserLogin login)
+    {
+        if (_logins.Contains(login))
+        {
+            _logins.Remove(login);
+        }
+    }
+
+
     public void MarkAsSealed()
     {
         IsSealed = true;
@@ -178,5 +188,37 @@ public class User : Entity
         {
             _memberships.Remove(membership);
         }
+    }
+
+    public void RecordLogin(Guid? appId = null)
+    {
+        LastLoginUtc = DateTime.UtcNow;
+        LastLoginAppId = appId;
+        ResetAccessFailedCount(); // Successful login resets the counter
+        if (appId.HasValue)
+        {
+            var membership = _memberships.FirstOrDefault(m => m.AppId == appId.Value);
+            membership?.RecordLogin();
+        }
+    }
+
+    // Brute Force Protection
+    public int AccessFailedCount { get; private set; }
+    public DateTime? LockoutEnd { get; private set; }
+
+    public void IncrementAccessFailedCount()
+    {
+        AccessFailedCount++;
+    }
+
+    public void ResetAccessFailedCount()
+    {
+        AccessFailedCount = 0;
+        LockoutEnd = null;
+    }
+
+    public void Lockout(DateTime until)
+    {
+        LockoutEnd = until;
     }
 }

@@ -23,14 +23,14 @@ public class GetDashboardStatsQueryHandler : IRequestHandler<GetDashboardStatsQu
     public async Task<DashboardStatsDto> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
     {
         // Fetch all profiles (Not efficient for large scale, but fine for MVP)
-        // Ideally Repo should have CountActive, CountTotal, etc.
         var profiles = await _profileRepository.ListAsync();
 
-        var totalUsers = profiles.Select(p => p.UserId).Distinct().Count(); // Unique Identities
-        var activeUsers = profiles.Count(); // Total profiles across all apps = "Active Enrollments"
+        var totalUsers = profiles.Select(p => p.UserId).Distinct().Count();
+        var activeUsers = totalUsers; // Currently, we count all unique users as active. TODO: Filter by Login/Status
         
         // New Users Last 24h
         var oneDayAgo = DateTime.UtcNow.AddHours(-24);
+        // Handle Created potentially being default/minvalue if not set correctly in older data
         var newUsers = profiles.Where(p => p.Created >= oneDayAgo).Select(p => p.UserId).Distinct().Count();
 
         // Users Per App

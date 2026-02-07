@@ -5,5 +5,7 @@ public enum VerificationType
     None,
     Email,
     Phone,
-    Both
+    Both,
+    PasswordReset,
+    Reactivation
 }

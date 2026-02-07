@@ -7,6 +7,7 @@ public class UserProfile : Entity
     public Guid UserId { get; private set; } // Global Identity ID
     public Guid AppId { get; private set; } // Scoped to App
     public string DisplayName { get; private set; }
+
     public string? AvatarUrl { get; private set; }
     public string? Bio { get; private set; }
     
@@ -28,6 +29,7 @@ public class UserProfile : Entity
         UserId = userId;
         AppId = appId;
         DisplayName = displayName;
+
         CustomDataJson = customDataJson;
     }
 

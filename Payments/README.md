@@ -1,14 +1,18 @@
 # Payments Service
 
 ## Overview
-Handles payment processing and webhook events from payment providers (Stripe, PayPal).
+Handles all financial transactions, subscription billing, and payment method management using external providers.
 
-## Features
-- **Stripe Checkout**: Real Payment Gateway integration using `Stripe.Checkout.Session` for subscriptions.
-- **Stripe Webhooks**: Idempotent handling of `invoice.payment_succeeded` and `checkout.session.completed` events.
-- **Event Publishing**: Publishes `PaymentSucceededEvent` to Message Bus upon successful payment.
-- **Infrastructure**: Uses `MassTransit` for event propagation.
+## Tech Stack
+- **Framework**: .NET 8 (ASP.NET Core Web API)
+- **Gateway**: Stripe / PayPal (SDKs)
+- **Messaging**: RabbitMQ (MassTransit)
 
-## Configuration
-- **Stripe**: Configure `StripeSettings:WebhookSecret` in `appsettings.json`.
-- **Message Bus**: RabbitMQ connection required.
+## Key Features
+- **Checkout**: Hosted checkout sessions for subscriptions.
+- **Webhooks**: Handles asynchronous updates from payment providers (PaymentSucceeded, SubscriptionUpdated).
+- **Invoicing**: Generates and stores transaction records.
+- **Wallet**: Manages saved payment methods.
+
+## API Documentation
+Swagger UI: http://localhost:5007/swagger (via Gateway: http://localhost:5000/payments/swagger)

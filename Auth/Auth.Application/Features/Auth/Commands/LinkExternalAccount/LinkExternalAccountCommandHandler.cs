@@ -25,7 +25,7 @@ public class LinkExternalAccountCommandHandler : IRequestHandler<LinkExternalAcc
             return true; // Already linked
         }
 
-        user.AddLogin(new UserLogin(request.Provider, request.ProviderKey, request.DisplayName));
+        user.AddLogin(new UserLogin(user.Id, request.Provider, request.ProviderKey, request.DisplayName));
         
         await _userRepository.UpdateAsync(user);
         return true;

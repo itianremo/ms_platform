@@ -4,6 +4,7 @@ using Apps.Application.Features.Apps.Commands.DeactivateApp;
 using Apps.Application.Features.Apps.Commands.UpdateExternalAuthConfig;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Apps.API.Controllers;
 
@@ -19,6 +20,7 @@ public class AppsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "ManageApps")]
     public async Task<IActionResult> CreateApp([FromBody] CreateAppCommand command)
     {
         var appId = await _mediator.Send(command);
@@ -33,6 +35,7 @@ public class AppsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = "ManageApps")]
     public async Task<IActionResult> UpdateApp(Guid id, [FromBody] UpdateAppCommand command)
     {
         if (id != command.Id) return BadRequest();
@@ -42,6 +45,7 @@ public class AppsController : ControllerBase
     }
 
     [HttpPatch("{id}/status")]
+    [Authorize(Policy = "ManageApps")]
     public async Task<IActionResult> ToggleStatus(Guid id, [FromBody] DeactivateAppCommand command)
     {
         if (id != command.Id) return BadRequest();
@@ -50,6 +54,7 @@ public class AppsController : ControllerBase
         return NoContent();
     }
     [HttpPatch("{id}/external-auth")]
+    [Authorize(Policy = "ManageApps")]
     public async Task<IActionResult> UpdateExternalAuth(Guid id, [FromBody] UpdateExternalAuthConfigCommand command)
     {
         if (id != command.Id) return BadRequest();

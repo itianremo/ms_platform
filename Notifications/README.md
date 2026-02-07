@@ -1,37 +1,19 @@
-# Notifications Service (Communication)
+# Notifications Service
 
-Centralized service for dispatching emails, SMS, and in-app notifications.
+## Overview
+Central hub for dispatching notifications to users via multiple channels (Real-time, Email, SMS).
 
-## ✨ Features
-- **Multi-Channel Dispatch**: Support for Email (SMTP), SMS, and In-App alerts.
-- **Real-Time Alerts**: SignalR Hub for instant frontend notifications (Toast/In-App).
-- **Templates**: Dynamic template rendering for notifications.
-- **Event-Driven**: Listens to system events (e.g., `UserRegistered`) to trigger notifications.
-- **User Preferences**: Respects user opt-in/opt-out settings.
+## Tech Stack
+- **Framework**: .NET 8 (ASP.NET Core Web API)
+- **Real-time**: SignalR (WebSockets)
+- **Email**: SMTP / SendGrid
+- **Messaging**: RabbitMQ (MassTransit) - Listens for `SendNotification` commands.
 
-## 🏗 Technology Stack
-- **Framework**: .NET 8 (ASP.NET Core)
-- **Messaging**: MassTransit (RabbitMQ)
-- **Database**: SQL Server (for logs/templates) - `NotificationsDb`
-- **Documentation**: Swagger / OpenAPI
+## Key Features
+- **Multi-channel**: Supports Web (SignalR), Email, and SMS (Twilio/Generic).
+- **Templates**: HTML email templates for system events (Welcome, Reset Password).
+- **User Preferences**: Check user settings before sending (Do Not Disturb).
+- **History**: Stores notification history and read status.
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Docker & Docker Compose
-- .NET 8 SDK
-
-### Running Locally
-```bash
-cd Notifications/Notifications.API
-dotnet run
-```
-
-### Running via Docker
-```bash
-docker-compose up -d notifications-api
-```
-
-## 🔌 API Documentation
-- **Swagger UI**: http://localhost:5004/swagger
-- **Health Check**: http://localhost:5004/health
+## API Documentation
+Swagger UI: http://localhost:5006/swagger (via Gateway: http://localhost:5000/notifications/swagger)

@@ -34,6 +34,12 @@ public class CheckPermissionCommandHandler : IRequestHandler<CheckPermissionQuer
         // 1. Check if global admin (SuperAdmin role)
         // Hardcoded System App ID for now
         var systemAppId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        // Check Global Permissions first
+        if (request.AppId == Guid.Parse("00000000-0000-0000-0000-000000000001"))
+        {
+             // Optimization: If asking for permissions ON the global app, just check membership
+        }
+        
         if (user.Memberships.Any(m => m.AppId == systemAppId && m.Role?.Name == "SuperAdmin")) 
         {
             result = true;

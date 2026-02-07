@@ -4,298 +4,143 @@ using Auth.Domain.Repositories;
 using Auth.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Auth.Application.Features.Auth.DTOs;
-using DomainUser = global::Auth.Domain.Entities.User;
+using global::Auth.Domain.Services;
+using MassTransit;
+using Shared.Messaging.Events;
+using global::Auth.Domain.Exceptions;
 
 namespace Auth.Application.Features.Auth.Commands.LoginUser;
 
-
-public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, Features.Auth.DTOs.AuthResponse>
+public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, AuthResponse>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
-    private readonly Microsoft.Extensions.Logging.ILogger<LoginUserCommandHandler> _logger;
+    private readonly ILogger<LoginUserCommandHandler> _logger;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public LoginUserCommandHandler(
         IUserRepository userRepository, 
         IPasswordHasher passwordHasher,
         ITokenService tokenService,
-        Microsoft.Extensions.Logging.ILogger<LoginUserCommandHandler> logger)
+        ILogger<LoginUserCommandHandler> logger,
+        IPublishEndpoint publishEndpoint)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
         _logger = logger;
+        _publishEndpoint = publishEndpoint;
     }
 
-    public async Task<Features.Auth.DTOs.AuthResponse> Handle(LoginUserCommand request, CancellationToken cancellationToken)
+    public async Task<AuthResponse> Handle(LoginUserCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByEmailOrPhoneAsync(request.Email);
-        DomainUser? userWithRoles = null;
         
         if (user == null)
         {
             _logger.LogWarning("Login failed: User not found for identifier '{Email}'", request.Email);
+            await Task.Delay(100, cancellationToken); 
             throw new UnauthorizedAccessException("Invalid credentials.");
         }
 
+        // 1. Brute Force Check
+        if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow)
+        {
+             _logger.LogWarning("Login blocked: User {UserId} is locked out until {LockoutEnd}", user.Id, user.LockoutEnd);
+             throw new AccountLockedException(user.LockoutEnd.Value);
+        }
+
+        // 2. Password Check
         if (!_passwordHasher.Verify(request.Password, user.PasswordHash))
         {
-            _logger.LogWarning("Login failed: Invalid password for user '{Email}'", request.Email);
-             throw new UnauthorizedAccessException("Invalid credentials.");
-        }
-
-        if (user.Status == Domain.Entities.GlobalUserStatus.SoftDeleted)
-        {
-            throw new Common.Exceptions.UserSoftDeletedException("Account is soft-deleted. Reactivation required.");
-        }
-
-        if (user.Status == Domain.Entities.GlobalUserStatus.Banned)
-        {
-            throw new Common.Exceptions.AccountBannedException();
-        }
-
-        if (request.AppId.HasValue)
-        {
-            // Verify App Exists and is Active
-            bool isAppActive = await _userRepository.IsAppActiveAsync(request.AppId.Value);
-            if (!isAppActive)
+            _logger.LogWarning("Login failed: Invalid password for user '{UserId}'", user.Id);
+            
+            user.IncrementAccessFailedCount();
+            
+            // Check Lockout Threshold
+            if (user.AccessFailedCount >= 5)
             {
-                _logger.LogWarning("Login failed: App {AppId} is not active.", request.AppId.Value);
-                throw new UnauthorizedAccessException("Application is not active.");
-            }
-
-            // Verify User Membership in this App
-            // We need to load memberships.
-            userWithRoles = await _userRepository.GetUserWithRolesAsync(user.Id);
-            if (userWithRoles == null || !userWithRoles.Memberships.Any(m => m.AppId == request.AppId.Value))
-            {
-                 _logger.LogWarning("Login failed: User {UserId} is not a member of App {AppId}", user.Id, request.AppId.Value);
-                 // Prompt asks to return "not exist" error
-                 throw new UnauthorizedAccessException("User not registered in this application.");
-            }
-        }
-
-        // Dynamic Verification Enforcement (Upgrade & Downgrade)
-        // 1. Fetch Requirements
-        _logger.LogInformation("Login Check: Fetching requirements for User {UserId} and App {AppId}", user.Id, request.AppId);
-        
-        var requirements = await _userRepository.GetMemberAppRequirementsAsync(user.Id);
-        _logger.LogInformation("Login Check: Found {Count} requirements.", requirements.Count);
-
-        // 2. Dynamic Enforcement & Check
-        bool enforcementSaved = false;
-        
-        if (requirements.Any())
-        {
-            GlobalUserStatus? pendingStatus = null;
-            bool identityIncomplete = false;
-
-            // Lazy Load Full User only if we need to update entities
-            User? fullUser = null; 
-
-            foreach (var req in requirements)
-            {
-                // A. Identity Verification Check
-                bool isIdentityReady = true;
-                if ((req.VerificationType == Shared.Kernel.VerificationType.Email || req.VerificationType == Shared.Kernel.VerificationType.Both) && !user.IsEmailVerified) 
-                {
-                    isIdentityReady = false;
-                    pendingStatus = Domain.Entities.GlobalUserStatus.PendingEmailVerification;
-                }
-                if ((req.VerificationType == Shared.Kernel.VerificationType.Phone || req.VerificationType == Shared.Kernel.VerificationType.Both) && !user.IsPhoneVerified)
-                {
-                    isIdentityReady = false; 
-                    pendingStatus = Domain.Entities.GlobalUserStatus.PendingMobileVerification;
-                }
-
-                if (!isIdentityReady) identityIncomplete = true;
-
-                // B. Admin Approval Enforcement (Per App)
-                // If App ID matches Request (or we want to enforce generally, but we only block the requested app usually)
-                // We update the data for ALL apps, but only block for the requested one.
+                var lockoutEnd = DateTime.UtcNow.AddMinutes(15);
+                user.Lockout(lockoutEnd);
+                _logger.LogWarning("User {UserId} locked out due to excessive failed attempts.", user.Id);
                 
-                var currentMembershipStatus = (AppUserStatus)req.MembershipStatus;
-                var targetMembershipStatus = currentMembershipStatus; // Default to current
-
-                if (isIdentityReady)
-                {
-                    // If Identity is ready, check Admin Approval
-                    if (req.RequiresAdminApproval)
-                    {
-                        if (currentMembershipStatus != AppUserStatus.Active)
-                        {
-                            // Enforce Pending if not explicitly Active
-                            targetMembershipStatus = AppUserStatus.PendingApproval;
-                        }
-                        // If already Active, we leave it Active (Grandfathered/Approved)
-                    }
-                    else
-                    {
-                        // If Approval NOT required, ensure Active (if not banned)
-                        if (currentMembershipStatus == AppUserStatus.PendingApproval)
-                        {
-                            targetMembershipStatus = AppUserStatus.Active;
-                        }
-                    }
-                }
-
-                // Apply Membership Update if needed
-                if (targetMembershipStatus != currentMembershipStatus && currentMembershipStatus != AppUserStatus.Banned)
-                {
-                    if (fullUser == null) fullUser = await _userRepository.GetUserWithRolesAsync(user.Id);
-                    if (fullUser != null)
-                    {
-                        fullUser.UpdateMembershipStatus(req.AppId, targetMembershipStatus);
-                        enforcementSaved = true;
-                        
-                        // Update local variable for the BLOCK check below
-                        if (req.AppId == request.AppId) currentMembershipStatus = targetMembershipStatus;
-                    }
-                }
-
-                // C. BLOCK CHECK (Generic for requested App)
-                if (request.AppId.HasValue && req.AppId == request.AppId.Value)
-                {
-                    if (currentMembershipStatus == AppUserStatus.PendingApproval)
-                    {
-                        // Save changes before throwing if needed?
-                        if (enforcementSaved && fullUser != null) await _userRepository.UpdateAsync(fullUser);
-                        throw new Common.Exceptions.RequiresAdminApprovalException(); // "Awaiting admin approval"
-                    }
-                    if (currentMembershipStatus == AppUserStatus.Banned)
-                    {
-                         throw new Common.Exceptions.AccountBannedException();
-                    }
-                }
+                await _publishEndpoint.Publish(new UserLockedOutEvent(
+                    user.Id, 
+                    user.Email, 
+                    lockoutEnd, 
+                    request.IpAddress ?? "Unknown"
+                ), cancellationToken);
             }
 
-            // Global Status Update (Identity Only)
-            var targetGlobalStatus = identityIncomplete 
-                ? (pendingStatus ?? Domain.Entities.GlobalUserStatus.PendingEmailVerification) 
-                : Domain.Entities.GlobalUserStatus.Active;
-
-            if (user.Status != targetGlobalStatus && user.Status != GlobalUserStatus.Banned && user.Status != GlobalUserStatus.SoftDeleted)
-            {
-                user.SetStatus(targetGlobalStatus);
-                // If we haven't loaded full user, we can save the light user? 
-                // Light user is tracked by context? GetByEmail uses context.
-                // Yes.
-                if (!enforcementSaved) await _userRepository.UpdateAsync(user); 
-                else if (fullUser != null) 
-                {
-                     fullUser.SetStatus(targetGlobalStatus);
-                     await _userRepository.UpdateAsync(fullUser);
-                }
-            }
-            else if (enforcementSaved && fullUser != null)
-            {
-                await _userRepository.UpdateAsync(fullUser);
-            }
+            await _userRepository.UpdateAsync(user);
+            throw new UnauthorizedAccessException("Invalid credentials.");
         }
-        
-        
-        // --- Core Identity Consistency Check (Always Run) ---
-        // Ensure Global Status matches Verification State
-        // This handles cases where Admin un-verifies a user but Status remains Active.
-        
-        // We only downgrade from Active. We don't auto-upgrade here (that happens in requirements check or Verification flow).
-        // Actually, the prompt says "match the expressive state".
-        
-        if (user.Status == Domain.Entities.GlobalUserStatus.Active)
+
+        // Reset counters on success
+        if (user.AccessFailedCount > 0 || user.LockoutEnd.HasValue)
         {
-             if (!user.IsEmailVerified)
-             {
-                 _logger.LogWarning("Login Check: User {UserId} is Active but Email is NOT verified. Downgrading status.", user.Id);
-                 user.SetStatus(Domain.Entities.GlobalUserStatus.PendingEmailVerification);
-                 await _userRepository.UpdateAsync(user);
-             }
-             else if (!user.IsPhoneVerified && user.Phone != null) // Only checks phone if present? Or if required? 
-             {
-                 // We don't enforce phone verification globally unless we know it's required.
-                 // But the prompt implies "expressive state". 
-                 // Let's stick to Email for now as it's the primary identity.
-             }
+            user.ResetAccessFailedCount();
         }
 
-        if (user.Status == Domain.Entities.GlobalUserStatus.PendingEmailVerification ||
-            user.Status == Domain.Entities.GlobalUserStatus.PendingMobileVerification ||
-            user.Status == Domain.Entities.GlobalUserStatus.PendingAccountVerification)
-        {
-            throw new Common.Exceptions.RequiresVerificationException(user.Status, user.Phone);
-        }
+        user.RecordLogin(request.AppId);
 
-        if (user.Status == Domain.Entities.GlobalUserStatus.PendingAdminApproval)
-        {
-             throw new Common.Exceptions.RequiresAdminApprovalException();
-        }
+        // 3. Policy Check
+        var requirements = await _userRepository.GetMemberAppRequirementsAsync(user.Id);
+        var policy = new UserLoginPolicy();
+        
+        var policyResult = policy.Evaluate(user, request.AppId, requirements);
 
-        // Defined at top to avoid scoping issues and double fetch
-        // Fetch User with Roles for Token Generation if not already fetched
-        if (userWithRoles == null)
-        {
-             userWithRoles = await _userRepository.GetUserWithRolesAsync(user.Id);
-             if (userWithRoles == null) userWithRoles = user;
-        }
-
-        // --- Subscription Expiry Check ---
+        // 4. Session Limit Check (1 per App)
         if (request.AppId.HasValue)
         {
-            var membership = userWithRoles?.Memberships?.FirstOrDefault(m => m.AppId == request.AppId.Value);
-            if (membership != null && membership.SubscriptionExpiry.HasValue)
+            var existingSessions = user.Sessions?
+                .Where(s => s.AppId == request.AppId.Value && s.ExpiresAt > DateTime.UtcNow && !s.IsRevoked)
+                .ToList() ?? new List<UserSession>();
+
+            if (existingSessions.Any())
             {
-                 // Check if expired
-                 if (membership.SubscriptionExpiry.Value < DateTime.UtcNow)
+                 _logger.LogInformation("Enforcing Single Session Limit for User {UserId} on App {AppId}. Revoking {Count} sessions.", user.Id, request.AppId.Value, existingSessions.Count);
+                 foreach (var s in existingSessions)
                  {
-                     _logger.LogWarning("User {UserId} subscription expired on {Expiry}. Suppressing Role/Permissions for Token.", user.Id, membership.SubscriptionExpiry);
-                     
-                     // Suppress Role for Token Generation (In-Memory Only)
-                     // Since Role property has private set, use Reflection
-                     try 
-                     {
-                        var roleProp = typeof(UserAppMembership).GetProperty("Role");
-                        if (roleProp != null) roleProp.SetValue(membership, null);
-                     }
-                     catch (Exception ex)
-                     {
-                         _logger.LogError(ex, "Failed to suppress expired role.");
-                     }
+                     s.Revoke();
                  }
             }
         }
+        
+        var userWithRoles = await _userRepository.GetUserWithRolesAsync(user.Id);
 
-
-        // Generate Refresh Token first
+        // 5. Generate Tokens
         var refreshToken = _tokenService.GenerateRefreshToken();
-
-        // Cleanup expired sessions before adding new one
-        user.ClearExpiredSessions();
-
-        // Create Session *before* Access Token so we can embed the Session ID (sid)
+        
         var session = new UserSession(
             userId: user.Id,
             appId: request.AppId,
             refreshToken: refreshToken,
-            expiresAt: DateTime.UtcNow.AddDays(7), // Refresh Token Expiry
+            expiresAt: DateTime.UtcNow.AddDays(7),
             ipAddress: request.IpAddress,
             userAgent: request.UserAgent
         );
 
-        // Generate Access Token with Session ID (sid)
-        var (accessToken, expiresIn) = _tokenService.GenerateAccessToken(userWithRoles ?? user, request.AppId, session.Id);
+        var (accessToken, expiresIn) = _tokenService.GenerateAccessToken(
+            userWithRoles ?? user, 
+            request.AppId, 
+            session.Id, 
+            suppressRoles: policyResult.SuppressRoles 
+        );
 
+        // Persist
         try
         {
-            // Direct insert to avoid concurrency issues on User entity
             await _userRepository.AddSessionAsync(session);
+            await _userRepository.UpdateAsync(user);
         }
         catch (Exception ex)
         {
-            // Non-blocking failure: If session persistence fails, we still return the token.
-            // However, immediate revocation won't work if session isn't in DB.
-            _logger.LogError(ex, "Failed to persist User Session. Immediate revocation will not work for this session.");
+            _logger.LogError(ex, "Failed to persist session/user updates.");
+            throw; 
         }
-        
+
         return new AuthResponse(accessToken, refreshToken, expiresIn);
     }
 }

@@ -27,8 +27,11 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
+      "@/*": [
+        "./src/*"
+      ],
       "sharedui": [
-        "../SharedUI/dist"
+        "../SharedUI/src/index.ts"
       ]
     },
     "noUncheckedSideEffectImports": true

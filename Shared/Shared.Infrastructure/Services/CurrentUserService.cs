@@ -27,4 +27,6 @@ public class CurrentUserService : ICurrentUserService
     public string? IpAddress => _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 
     public string? UserAgent => _httpContextAccessor.HttpContext?.Request?.Headers["User-Agent"].ToString();
+
+    public string? Email => _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Email)?.Value ?? _httpContextAccessor.HttpContext?.User?.FindFirst("email")?.Value;
 }

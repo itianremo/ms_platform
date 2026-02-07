@@ -15,18 +15,29 @@ public class RedisCacheService : ICacheService
 
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
     {
-        var cachedResponse = await _cache.GetStringAsync(key, cancellationToken);
-        return cachedResponse == null ? default : JsonSerializer.Deserialize<T>(cachedResponse);
+        try
+        {
+            var cachedResponse = await _cache.GetStringAsync(key, cancellationToken);
+            return cachedResponse == null ? default : JsonSerializer.Deserialize<T>(cachedResponse);
+        }
+        catch
+        {
+            return default;
+        }
     }
 
     public async Task SetAsync<T>(string key, T value, TimeSpan? expiration = null, CancellationToken cancellationToken = default)
     {
-        var options = new DistributedCacheEntryOptions
+        try
         {
-            AbsoluteExpirationRelativeToNow = expiration ?? TimeSpan.FromMinutes(60)
-        };
-        var response = JsonSerializer.Serialize(value);
-        await _cache.SetStringAsync(key, response, options, cancellationToken);
+            var options = new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = expiration ?? TimeSpan.FromMinutes(60)
+            };
+            var response = JsonSerializer.Serialize(value);
+            await _cache.SetStringAsync(key, response, options, cancellationToken);
+        }
+        catch { }
     }
 
     public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)

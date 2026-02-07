@@ -1,36 +1,18 @@
-# Audit Service (Logging & Compliance)
+# Audit Service
 
-Centralized service for capturing, storing, and querying system-wide audit logs.
+## Overview
+Responsible for comprehensive system-wide logging and audit trails. Tracks critical user actions and data changes for compliance and security.
 
-## ✨ Features
-- **Advanced Audit Logging**: Captures detailed changes (Diffs), IP Addresses, and User Agents.
-- **Compliance**: Immutable audit trails for security and regulatory requirements.
-- **Searchable History**: Query logs by user, entity, or date.
-- **Async Processing**: High-throughput log ingestion via queues.
+## Tech Stack
+- **Framework**: .NET 8 (ASP.NET Core Web API)
+- **Database**: SQL Server (EF Core)
+- **Messaging**: RabbitMQ (MassTransit) - Listens for `AuditLogCreated` events.
 
-## 🏗 Technology Stack
-- **Framework**: .NET 8 (ASP.NET Core)
-- **Database**: SQL Server
-- **Messaging**: MassTransit (RabbitMQ)
-- **Documentation**: Swagger / OpenAPI
+## Key Features
+- **Centralized Logging**: Aggregates logs from all microservices via message bus.
+- **Change Tracking**: Records entity changes (OldValue vs NewValue).
+- **Search**: Provides API for querying logs by User, App, or Timeframe.
+- **Compliance**: Immutable ledger of critical actions.
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Docker & Docker Compose
-- .NET 8 SDK
-
-### Running Locally
-```bash
-cd Audit/Audit.API
-dotnet run
-```
-
-### Running via Docker
-```bash
-docker-compose up -d audit-api
-```
-
-## 🔌 API Documentation
-- **Swagger UI**: http://localhost:5008/swagger
-- **Health Check**: http://localhost:5008/health
+## API Documentation
+Swagger UI: http://localhost:5004/swagger (via Gateway: http://localhost:5000/audit/swagger)

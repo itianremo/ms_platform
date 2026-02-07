@@ -1,36 +1,17 @@
-# Recommendation Service (AI/ML)
+# Recommendation Service
 
-Provides personalized recommendations and matching logic using ML.NET or external AI models.
+## Overview
+AI-driven service for personalized content and connection suggestions.
 
-## ✨ Features
-- **User Matching**: Suggests potential connections based on profile vectors (Matrix Factorization).
-- **Candidates API**: Returns ranked users based on scoring.
-- **Swipe Logic**: Handles Like/Pass actions and detects mutual matches.
-- **Hybrid Approach**: Content-based and Collaborative Filtering.
+## Tech Stack
+- **Framework**: .NET 8 (ASP.NET Core Web API) / Python (FastAPI - *Optional/Hybrid*)
+- **Database**: Neo4j (Graph DB) / SQL Server
+- **Engine**: Collaborative Filtering / Content-based Filtering
 
-## 🏗 Technology Stack
-- **Framework**: .NET 8 (ASP.NET Core)
-- **AI/ML**: Python integration or ML.NET (Experimental)
-- **Database**: In-Memory / Stateless (currently)
-- **Documentation**: Swagger / OpenAPI
+## Key Features
+- **Friend Suggestions**: "People you may know" based on mutual connections/interests.
+- **Content Feed**: Personalized activity feed ranking.
+- **Coach Matching**: Suggest trainers based on user goals (Weight Loss, Muscle Gain).
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Docker & Docker Compose
-- .NET 8 SDK
-
-### Running Locally
-```bash
-cd Recommendation/Recommendation.API
-dotnet run
-```
-
-### Running via Docker
-```bash
-docker-compose up -d recommendation-api
-```
-
-## 🔌 API Documentation
-- **Swagger UI**: http://localhost:5012/swagger
-- **Health Check**: http://localhost:5012/health
+## API Documentation
+Swagger UI: http://localhost:5010/swagger (via Gateway: http://localhost:5000/recommendation/swagger)

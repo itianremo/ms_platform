@@ -1,35 +1,17 @@
-# Search Service (Full-Text Search)
+# Search Service
 
-Dedicated service for high-performance search across platform entities (Users, Apps).
+## Overview
+Provides text-based search capabilities across Users, Apps, and Content.
 
-## ✨ Features
-- **Full-Text Search**: Optimized text queries using PostgreSQL capabilities.
-- **Data Synchronization**: Listens to domain events to keep index updated in near real-time.
-- **Filtering**: Advanced filtering capabilities.
+## Tech Stack
+- **Framework**: .NET 8 (ASP.NET Core Web API)
+- **Engine**: Elasticsearch / Solr / SQL Full-Text Search
+- **Messaging**: RabbitMQ (MassTransit) - Listens for data updates to index.
 
-## 🏗 Technology Stack
-- **Framework**: .NET 8 (ASP.NET Core)
-- **Database**: PostgreSQL (PostGIS enabled container used)
-- **Messaging**: MassTransit (RabbitMQ)
-- **Documentation**: Swagger / OpenAPI
+## Key Features
+- **Indexing**: Real-time indexing of User profiles and App metadata.
+- **Querying**: Fuzzy search, filtering, and facets.
+- **AutoComplete**: Type-ahead suggestions.
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Docker & Docker Compose
-- .NET 8 SDK
-
-### Running Locally
-```bash
-cd Search/Search.API
-dotnet run
-```
-
-### Running via Docker
-```bash
-docker-compose up -d search-api
-```
-
-## 🔌 API Documentation
-- **Swagger UI**: http://localhost:5009/swagger
-- **Health Check**: http://localhost:5009/health
+## API Documentation
+Swagger UI: http://localhost:5011/swagger (via Gateway: http://localhost:5000/search/swagger)

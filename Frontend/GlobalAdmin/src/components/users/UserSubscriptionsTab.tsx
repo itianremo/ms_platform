@@ -10,9 +10,12 @@ import { Input } from '../ui/input';
 import { Loader2, Plus, Ban, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { useAuth } from '../../context/AuthContext';
+
 interface UserSubscriptionsTabProps {
     appId: string;
     userId: string;
+    userRole?: string;
 }
 
 interface Subscription {
@@ -24,7 +27,12 @@ interface Subscription {
     pricePaid: number;
 }
 
-export function UserSubscriptionsTab({ appId, userId }: UserSubscriptionsTabProps) {
+export function UserSubscriptionsTab({ appId, userId, userRole }: UserSubscriptionsTabProps) {
+    const { user: currentUser } = useAuth();
+    const isSuperAdmin = currentUser?.roles?.includes('SuperAdmin');
+    const isTargetAdmin = userRole ? (userRole.includes('Admin') || userRole === 'SuperAdmin') : false;
+    const canEdit = isSuperAdmin || !isTargetAdmin;
+
     const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
     const [packages, setPackages] = useState<SubscriptionPackage[]>([]);
     const [loading, setLoading] = useState(true);
@@ -88,7 +96,7 @@ export function UserSubscriptionsTab({ appId, userId }: UserSubscriptionsTabProp
                 </div>
                 <Dialog open={grantDialogOpen} onOpenChange={setGrantDialogOpen}>
                     <DialogTrigger asChild>
-                        <Button><Plus className="mr-2 h-4 w-4" /> Grant Subscription</Button>
+                        <Button disabled={!canEdit}><Plus className="mr-2 h-4 w-4" /> Grant Subscription</Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
@@ -149,7 +157,7 @@ export function UserSubscriptionsTab({ appId, userId }: UserSubscriptionsTabProp
                                     </span>
                                 </TableCell>
                                 <TableCell>
-                                    <Button variant="ghost" size="icon" onClick={() => handleStatusChange(sub)}>
+                                    <Button variant="ghost" size="icon" onClick={() => handleStatusChange(sub)} disabled={!canEdit}>
                                         {sub.isActive ? <Ban className="h-4 w-4 text-red-500" /> : <CheckCircle className="h-4 w-4 text-green-500" />}
                                     </Button>
                                 </TableCell>

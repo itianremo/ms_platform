@@ -1,19 +1,22 @@
 # Shared UI Library
 
-A shared React component library used across all frontend applications (Admin Dashboards and App Portal).
+## Overview
+A shared component library used across all frontend applications (Global Admin, FitIT Admin, Wissler Admin) to ensure design consistency and code reusability.
 
-## 📦 content
-- **Components**: Reusable UI elements (Buttons, Inputs, Modals, etc.).
-- **Hooks**: Common React hooks (e.g., `useAuth`, `useTheme`).
-- **Utils**: Helper functions (date formatting, validation).
-- **Styles**: Base TailwindCSS configuration.
+## Tech Stack
+- **Framework**: React 19
+- **Build Tool**: Vite (Library Mode)
+- **Styling**: TailwindCSS
+- **Components**: Shadcn UI (Radix Primitives)
 
-## 🔨 Usage
-Import components directly into the consumer apps:
-```tsx
-import { Button } from '@shared/ui';
-```
-*(assuming alias configuration)*
+## Key Components
+- **UI Primitives**: Buttons, Cards, Inputs, Dialogs, etc.
+- **Layouts**: Dashboard Layout, Sidebar, Navbar.
+- **Hooks**: Shared React hooks for common functionality.
+- **Utils**: Helper functions (CN, formatters).
 
-## 🚀 Development
-Changes here reflect immediately across all consuming apps in the monorepo structure.
+## Usage
+Import components directly into the consumer applications:
+\`\`\`typescript
+import { Button } from 'sharedui';
+\`\`\`

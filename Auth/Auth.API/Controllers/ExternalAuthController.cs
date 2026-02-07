@@ -1,4 +1,5 @@
 using Auth.Application.Features.Auth.Commands.ExternalLogin;
+using Auth.Application.Features.Auth.Commands.LinkExternalAccount;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
@@ -42,16 +43,26 @@ public class ExternalAuthController : ControllerBase
                     ?? claims.FirstOrDefault(c => c.Type == "email")?.Value;
         
         var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+        var phone = claims.FirstOrDefault(c => c.Type == ClaimTypes.MobilePhone)?.Value 
+                    ?? claims.FirstOrDefault(c => c.Type == "phone_number")?.Value; // OIDC standard
         
         // Google/Microsoft usually provide a unique ID in NameIdentifier
         var providerKey = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-        if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(providerKey))
+        if (string.IsNullOrEmpty(email) && string.IsNullOrEmpty(phone)) // Allow if phone exists? 
         {
-            return BadRequest("Email or Provider Key missing from external claims.");
+            // If both missing, we can't do much. BUT originally we checked ProviderKey + Email/Phone logic.
+            // If ProviderKey exists, we might find an existing user.
+            // But if we need to CREATE, we need Email or Phone.
         }
 
-        var command = new ExternalLoginCommand(provider, providerKey, email, name);
+        if (string.IsNullOrEmpty(email) && string.IsNullOrEmpty(phone) && string.IsNullOrEmpty(providerKey))
+             return BadRequest("Identity missing from external claims.");
+
+        // If providerKey is present, we can try login. If fail, we need email or phone to register.
+        // Let Handler handle validation? Handier needs Email/Phone to register.
+        
+        var command = new ExternalLoginCommand(provider, providerKey ?? "MISSING", email ?? "", name, phone);
         try
         {
             var token = await _mediator.Send(command);
@@ -150,5 +161,14 @@ public class ExternalAuthController : ControllerBase
         {
             return Redirect($"{frontendUrl}/profile?status=link_failed");
         }
+    }
+    [HttpDelete("users/{userId}/links/{provider}")]
+    public async Task<IActionResult> Unlink(Guid userId, string provider)
+    {
+        var command = new Auth.Application.Features.Auth.Commands.UnlinkExternalAccount.UnlinkExternalAccountCommand(userId, provider);
+        var success = await _mediator.Send(command);
+        if (success)
+            return Ok();
+        return BadRequest("Failed to unlink or link not found.");
     }
 }

@@ -1,6 +1,6 @@
 using System.Net;
 using System.Text.Json;
-using Auth.Application.Common.Exceptions;
+using global::Auth.Domain.Exceptions;
 
 namespace Auth.API.Middlewares;
 

@@ -20,18 +20,33 @@ public class AuditController : ControllerBase
     {
         if (userId.HasValue)
         {
+            var userIdString = userId.Value.ToString();
+            
+            // Search for:
+            // 1. Actions performed BY the user (UserId == userId)
+            // 2. Actions performed ON the user (EntityId == userIdString AND EntityName is "User" or "UserProfile")
+            
             if (appId.HasValue)
             {
-                return await _repository.ListAsync(x => x.AppId == appId && x.UserId == userId);
+                return await _repository.ListAsync(x => 
+                    x.AppId == appId && 
+                    (x.UserId == userId || (x.EntityId == userIdString && (x.EntityName == "User" || x.EntityName == "UserProfile")))
+                );
             }
-            return await _repository.ListAsync(x => x.UserId == userId);
+            
+            return await _repository.ListAsync(x => 
+                x.UserId == userId || 
+                (x.EntityId == userIdString && (x.EntityName == "User" || x.EntityName == "UserProfile"))
+            );
         }
         else if (appId.HasValue)
         {
             return await _repository.ListAsync(x => x.AppId == appId);
         }
         
-        return await _repository.ListAsync(); // Should be paged in real app
+        // Return recent logs (limit 100 for safety)
+        var allLogs = await _repository.ListAsync();
+        return allLogs.OrderByDescending(x => x.Timestamp).Take(100).ToList();
     }
 
     [HttpGet("stats")]

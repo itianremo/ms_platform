@@ -77,6 +77,9 @@ namespace Auth.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -90,6 +93,15 @@ namespace Auth.Infrastructure.Migrations
 
                     b.Property<bool>("IsSealed")
                         .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastLoginAppId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("LastLoginUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LockoutEnd")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("OtpBlockedUntil")
                         .HasColumnType("datetime2");
@@ -122,6 +134,9 @@ namespace Auth.Infrastructure.Migrations
 
                     b.Property<Guid>("AppId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("LastLoginUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");

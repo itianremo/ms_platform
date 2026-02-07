@@ -2,7 +2,7 @@ using Auth.Application.Features.Auth.Commands.RegisterUser;
 using Auth.Application.Features.Auth.Commands.LogoutUser;
 using Auth.Application.Features.Auth.Commands.LoginUser;
 using MediatR;
-using Auth.Application.Common.Exceptions;
+using global::Auth.Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Auth.Domain.Entities;
 
@@ -91,19 +91,35 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("reactivate/request")]
-    public async Task<IActionResult> RequestReactivation([FromBody] Auth.Application.Features.Auth.Commands.ReactivateUser.RequestReactivationCommand command)
+    [HttpPost("password/forgot")]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("AuthPolicy")]
+    public async Task<IActionResult> ForgotPassword([FromBody] Auth.Application.Features.Auth.Commands.ForgotPassword.ForgotPasswordCommand command)
     {
         await _mediator.Send(command);
-        return Ok(new { Message = "If the account exists and is deleted, a reactivation email has been sent." });
+        return Ok(new { Message = "If an account exists, a reset code has been sent." });
     }
 
-    [HttpPost("reactivate/confirm")]
-    public async Task<IActionResult> ConfirmReactivation([FromBody] Auth.Application.Features.Auth.Commands.ReactivateUser.ConfirmReactivationCommand command)
+    [HttpPost("password/reset")]
+    [Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("AuthPolicy")]
+    public async Task<IActionResult> ResetPassword([FromBody] Auth.Application.Features.Auth.Commands.ResetPassword.ResetPasswordCommand command)
+    {
+        await _mediator.Send(command);
+        return Ok(new { Message = "Password reset successfully." });
+    }
+
+    [HttpPost("reactivate/initiate")]
+    public async Task<IActionResult> InitiateReactivation([FromBody] Auth.Application.Features.Auth.Commands.ReactivateUser.InitiateReactivationCommand command)
+    {
+        await _mediator.Send(command);
+        return Ok(new { Message = "If the account exists and matches, a verification code has been sent." });
+    }
+
+    [HttpPost("reactivate/verify")]
+    public async Task<IActionResult> VerifyReactivation([FromBody] Auth.Application.Features.Auth.Commands.ReactivateUser.VerifyReactivationCommand command)
     {
         var success = await _mediator.Send(command);
-        if (!success) return BadRequest(new { Message = "Invalid token or account status." });
-        return Ok(new { Message = "Account reactivated successfully." });
+        if (!success) return BadRequest(new { Message = "Invalid code or failed to reactivate." }); // Should throw usually
+        return Ok(new { Message = "Account reactivated successfully. Please login." });
     }
 
 

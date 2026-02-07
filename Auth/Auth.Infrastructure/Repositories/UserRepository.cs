@@ -31,7 +31,10 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByEmailOrPhoneAsync(string emailOrPhone)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Email == emailOrPhone || u.Phone == emailOrPhone);
+        return await _context.Users
+            .Include(u => u.Memberships)
+            .Include(u => u.Sessions)
+            .FirstOrDefaultAsync(u => u.Email == emailOrPhone || u.Phone == emailOrPhone);
     }
 
     public async Task<User?> GetByLoginAsync(string loginProvider, string providerKey)
@@ -55,6 +58,7 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .Include(u => u.Memberships)
             .ThenInclude(m => m.Role)
+            .Include(u => u.Logins)
             .ToListAsync();
     }
 
@@ -130,6 +134,11 @@ public class UserRepository : IUserRepository
     public async Task<Role?> GetRoleByNameAsync(Guid appId, string roleName)
     {
         return await _context.Roles.FirstOrDefaultAsync(r => r.AppId == appId && r.Name == roleName);
+    }
+
+    public async Task<Role?> GetRoleByIdAsync(Guid roleId)
+    {
+        return await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId);
     }
 
     public async Task<User?> GetUserWithSessionsAsync(Guid userId)

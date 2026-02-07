@@ -23,12 +23,20 @@ public class GetProfilesQueryHandler : IRequestHandler<GetProfilesQuery, List<Us
         
         return profiles.Select(p => new UserProfileDto(
             p.UserId,
-            p.DisplayName,
+            GetEffectiveDisplayName(p.DisplayName),
             p.AvatarUrl,
             p.Bio,
             p.DateOfBirth,
             p.Gender,
             p.CustomDataJson
         )).ToList();
+    }
+
+    private static string GetEffectiveDisplayName(string? displayName)
+    {
+        if (!string.IsNullOrWhiteSpace(displayName) && displayName != "N/A" && displayName != "n/a" && displayName != "Unknown")
+            return displayName;
+        
+        return "Unknown User";
     }
 }

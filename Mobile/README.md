@@ -1,42 +1,28 @@
-# Mobile App Monorepo (Flutter)
+# Mobile App
 
-This directory contains the Flutter mobile applications for **FitIt** and **Wissler**.
+## Overview
+The React Native mobile application for end-users of the FitIT Platform.
 
-## Structure
-- **apps/**
-    - `fitit`: Workouts App.
-    - `wissler`: Matching App.
-- **packages/**
-    - `shared_core`: Networking, Auth, State Management.
-    - `shared_ui`: Design System components.
-    - `api_client`: Generated API Client.
+## Tech Stack
+- **Framework**: React Native (Expo)
+- **Language**: TypeScript
+- **State Management**: React Query / Zustand
+- **Navigation**: React Navigation
 
-## Prerequisites
-- Flutter SDK (3.x or later)
+## Key Features
+- **User Profile**: View and edit profile.
+- **Workouts**: Track fitness activities.
+- **Social**: Connect with friends and share progress.
+- **Notifications**: Push notifications for updates.
 
-## Setup
-Since the folders were scaffolded manually, you may need to run `flutter create .` inside each app folder to generate the native Android/iOS directories.
+## Getting Started
+\`\`\`bash
+# Install dependencies
+npm install
 
-1. **Hydrate Dependencies**:
-    ```bash
-    cd packages/shared_core && flutter pub get
-    cd ../shared_ui && flutter pub get
-    cd ../api_client && flutter pub get
-    cd ../../apps/fitit && flutter pub get
-    cd ../wissler && flutter pub get
-    ```
+# Run on iOS Simulator
+npm run ios
 
-2. **Generate Native Code** (If missing android/ios folders):
-    ```bash
-    cd apps/fitit
-    flutter create . --platforms=android,ios
-    
-    cd ../wissler
-    flutter create . --platforms=android,ios
-    ```
-
-3. **Run**:
-    ```bash
-    flutter run -d chrome
-    # or select emulator
-    ```
+# Run on Android Emulator
+npm run android
+\`\`\`

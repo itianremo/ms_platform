@@ -17,6 +17,8 @@ import PreferencesPage from './pages/PreferencesPage';
 import UsersPage from './pages/UsersPage';
 import UserDetailsPage from './pages/UserDetailsPage';
 import AppsPage from './pages/AppsPage';
+import ReactivationInitPage from './pages/ReactivationInitPage';
+import ReactivationVerifyPage from './pages/ReactivationVerifyPage';
 
 
 import { Toaster } from './components/ui/sonner';
@@ -68,6 +70,8 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                    <Route path="/reactivate-init" element={<ReactivationInitPage />} />
+                    <Route path="/reactivate" element={<ReactivationVerifyPage />} />
                     <Route path="/verify" element={<VerificationPage />} />
                     <Route path="/auth/callback" element={<AuthCallbackPage />} />
                 </Route>

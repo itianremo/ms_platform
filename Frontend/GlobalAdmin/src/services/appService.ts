@@ -47,6 +47,11 @@ export const AppService = {
         return response.data;
     },
 
+    deleteApp: async (id: string) => {
+        const response = await api.delete(`/apps/api/Apps/${id}`);
+        return response.data;
+    },
+
     updateExternalAuth: async (id: string, json: string) => {
         const response = await api.patch(`/apps/api/Apps/${id}/external-auth`, { id, externalLoginsJson: json });
         return response.data;

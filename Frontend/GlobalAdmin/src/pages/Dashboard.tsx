@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Users, Activity, CreditCard, Bell, TrendingUp, AlertCircle, Server, Database, HardDrive, UserPlus } from 'lucide-react';
+import { Users, Activity, CreditCard, Bell, TrendingUp, AlertCircle, Server, Database, HardDrive, UserPlus, FileText, MessageSquare } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { cn } from '../lib/utils';
-import { AnalyticsService } from '../services/AnalyticsService';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AnalyticsService, type AppUserStats } from '../services/AnalyticsService';
+import { AppService } from '../services/appService';
+import { AuditService, type AuditLog } from '../services/AuditService';
+import { NotificationService, type Notification } from '../services/NotificationService';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 
 export default function Dashboard() {
     const { user } = useAuth();
@@ -15,31 +19,71 @@ export default function Dashboard() {
         totalUsers: 0,
         activeUsers: 0,
         newUsersLast24h: 0,
-        revenue: '$0', // Still mocked
-        pendingAlerts: 0, // Still mocked
-        usersPerApp: [] as { appName: string; count: number }[]
+        pendingAlerts: 0,
+        appUserStats: [] as AppUserStats[]
     });
+    const [logs, setLogs] = useState<AuditLog[]>([]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
 
     useEffect(() => {
-        const fetchStats = async () => {
+        const fetchData = async () => {
             try {
-                const data = await AnalyticsService.getDashboardStats();
-                setStats({
-                    totalUsers: data.totalUsers,
-                    activeUsers: data.activeUsers,
-                    newUsersLast24h: data.newUsersLast24h,
-                    revenue: '$0', // Keep mock
-                    pendingAlerts: 0, // Keep mock
-                    usersPerApp: data.usersPerApp || []
+                // Fetch independent data in parallel where possible, but handle failures gracefully
+                const [dashboardStats, appStats, auditLogs, notifsResult] = await Promise.allSettled([
+                    AnalyticsService.getDashboardStats(),
+                    AnalyticsService.getAppUserStats(),
+                    AuditService.getLogs(),
+                    user ? NotificationService.getMyNotifications(user.id) : Promise.resolve([])
+                ]);
+
+                // Fetch Apps separately to ensure it doesn't block critical stats if it fails
+                let appsData: any[] = [];
+                try {
+                    appsData = await AppService.getAllApps();
+                } catch (e) {
+                    console.error("Failed to load apps list", e);
+                }
+
+                // Process Results
+                const totalUsers = dashboardStats.status === 'fulfilled' ? dashboardStats.value.totalUsers : 0;
+                const activeUsers = dashboardStats.status === 'fulfilled' ? dashboardStats.value.activeUsers : 0;
+                const newUsersLast24h = dashboardStats.status === 'fulfilled' ? dashboardStats.value.newUsersLast24h : 0;
+
+                const rawAppStats = appStats.status === 'fulfilled' ? appStats.value : [];
+                const logsData = auditLogs.status === 'fulfilled' ? auditLogs.value : [];
+                const notifs = notifsResult.status === 'fulfilled' ? notifsResult.value : [];
+
+                // Map IDs to Names for App Stats
+                const mappedAppStats = rawAppStats.map(stat => {
+                    const app = appsData.find(a => a.id && stat.appId && a.id.toLowerCase() === stat.appId.toLowerCase());
+                    return {
+                        ...stat,
+                        appName: app ? app.name : stat.appName || `App ${stat.appId.substring(0, 8)}`
+                    };
                 });
+
+                setStats({
+                    totalUsers,
+                    activeUsers,
+                    newUsersLast24h,
+                    pendingAlerts: notifs.filter(n => !n.isRead).length,
+                    appUserStats: mappedAppStats
+                });
+
+                setLogs(logsData.slice(0, 5));
+                setNotifications(notifs.slice(0, 5));
+
             } catch (error) {
-                console.error("Failed to load dashboard stats", error);
+                console.error("Critical failure loading dashboard data", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchStats();
-    }, []);
+
+        if (user) {
+            fetchData();
+        }
+    }, [user]);
 
     // Permission Logic
     const hasRole = (roleName: string) => {
@@ -58,13 +102,7 @@ export default function Dashboard() {
                     <h2 className="text-2xl font-bold mb-2">Access Restricted</h2>
                     <p className="text-muted-foreground mb-6">
                         You do not have permission to view the global dashboard statistics.
-                        Please contact your system administrator to request access.
                     </p>
-                    <div className="text-sm text-muted-foreground bg-background p-4 rounded border">
-                        <p>User ID: {user?.id}</p>
-                        <p>Email: {user?.email}</p>
-                        <p>Roles: {user?.roles?.join(', ') || 'None'}</p>
-                    </div>
                 </div>
             </div>
         );
@@ -81,9 +119,8 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            {/* Bento Grid Layout */}
+            {/* Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Stat Cards */}
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -106,7 +143,7 @@ export default function Dashboard() {
                     <CardContent>
                         <div className="text-2xl font-bold">{loading ? "..." : stats.activeUsers.toLocaleString()}</div>
                         <p className="text-xs text-muted-foreground flex items-center mt-1">
-                            <span className="text-emerald-500">Currently Active</span>
+                            <span className="text-emerald-500">Online now</span>
                         </p>
                     </CardContent>
                 </Card>
@@ -132,94 +169,104 @@ export default function Dashboard() {
                     <CardContent>
                         <div className="text-2xl font-bold">{loading ? "..." : stats.pendingAlerts}</div>
                         <p className="text-xs text-muted-foreground flex items-center mt-1">
-                            <span className="text-amber-500">Requires attention</span>
+                            <span className="text-amber-500">Unread notifications</span>
                         </p>
                     </CardContent>
                 </Card>
+            </div>
 
-                {/* Second Row: Charts (Span 2) & Quick Actions */}
-                <Card className="col-span-1 md:col-span-2 lg:col-span-3">
+            {/* Charts Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
+                <Card className="col-span-1 md:col-span-2 lg:col-span-4">
                     <CardHeader>
-                        <CardTitle>User Distribution</CardTitle>
+                        <CardTitle>User Role Distribution</CardTitle>
                         <CardDescription>
-                            Users per application.
+                            Admins vs Visitors per Application
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="h-[300px]">
+                    <CardContent className="h-[350px]">
                         {loading ? (
                             <div className="flex h-full items-center justify-center">Loading...</div>
-                        ) : stats.usersPerApp.length === 0 ? (
-                            <div className="flex h-full items-center justify-center text-muted-foreground">No data available</div>
                         ) : (
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={stats.usersPerApp}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="appName" />
-                                    <YAxis allowDecimals={false} />
+                                <BarChart data={stats.appUserStats}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="appName" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}`} />
                                     <Tooltip
-                                        contentStyle={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                                        cursor={{ fill: 'transparent' }}
+                                        contentStyle={{ backgroundColor: 'white', borderRadius: '8px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                     />
-                                    <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                                    <Legend />
+                                    <Bar dataKey="visitorCount" name="Visitors" fill="#3b82f6" radius={[4, 4, 0, 0]} stackId="a" />
+                                    <Bar dataKey="adminCount" name="Admins" fill="#f59e0b" radius={[4, 4, 0, 0]} stackId="a" />
                                 </BarChart>
                             </ResponsiveContainer>
                         )}
                     </CardContent>
                 </Card>
 
-                {/* Right Column: Status & Actions */}
-                <div className="grid grid-cols-1 gap-4 lg:col-span-1">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-base">System Health</CardTitle>
+                {/* Recent Activity & Notifications Column */}
+                {/* Recent Activity & Notifications Column */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col gap-4 h-[350px]">
+                    {/* Recent Activity */}
+                    <Card className="flex-1 overflow-hidden flex flex-col">
+                        <CardHeader className="py-3">
+                            <CardTitle className="text-base flex items-center">
+                                <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
+                                Recent Activity
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-1">
-                                <div className="flex items-center justify-between text-xs">
-                                    <span className="text-muted-foreground flex items-center"><Server className="w-3 h-3 mr-1" /> CPU</span>
-                                    <span className="font-medium">45%</span>
-                                </div>
-                                <div className="h-1.5 w-full rounded-full bg-secondary">
-                                    <div className="h-full rounded-full bg-blue-500 w-[45%]" />
-                                </div>
-                            </div>
-                            <div className="space-y-1">
-                                <div className="flex items-center justify-between text-xs">
-                                    <span className="text-muted-foreground flex items-center"><HardDrive className="w-3 h-3 mr-1" /> Memory</span>
-                                    <span className="font-medium">62%</span>
-                                </div>
-                                <div className="h-1.5 w-full rounded-full bg-secondary">
-                                    <div className="h-full rounded-full bg-purple-500 w-[62%]" />
-                                </div>
-                            </div>
-                            <div className="space-y-1">
-                                <div className="flex items-center justify-between text-xs">
-                                    <span className="text-muted-foreground flex items-center"><Database className="w-3 h-3 mr-1" /> Storage</span>
-                                    <span className="font-medium">28%</span>
-                                </div>
-                                <div className="h-1.5 w-full rounded-full bg-secondary">
-                                    <div className="h-full rounded-full bg-emerald-500 w-[28%]" />
-                                </div>
+                        <CardContent className="overflow-y-auto flex-1 p-0 px-6 pb-2">
+                            <div className="space-y-4 pt-2">
+                                {logs.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground text-center py-4">No recent activity.</p>
+                                ) : (
+                                    logs.map((log, i) => (
+                                        <div key={i} className="flex items-start space-x-2 pb-2 border-b last:border-0 last:pb-0">
+                                            <div className="w-2 h-2 mt-1.5 rounded-full bg-blue-500 shrink-0" />
+                                            <div className="space-y-0.5">
+                                                <p className="text-sm font-medium leading-none">{log.action}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {log.entityName} • {new Date(log.timestamp).toLocaleTimeString()}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-base">Quick Actions</CardTitle>
+                    {/* Notifications */}
+                    <Card className="flex-1 overflow-hidden flex flex-col">
+                        <CardHeader className="py-3">
+                            <CardTitle className="text-base flex items-center">
+                                <Bell className="mr-2 h-4 w-4 text-muted-foreground" />
+                                Recent Notifications
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-2 gap-2">
-                            <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                                <Link to="/users">
-                                    <UserPlus className="h-5 w-5 text-blue-500" />
-                                    <span className="text-xs">Add User</span>
-                                </Link>
-                            </Button>
-                            <Button variant="outline" className="h-20 flex-col gap-2" asChild>
-                                <Link to="/sms-configs">
-                                    <AlertCircle className="h-5 w-5 text-orange-500" />
-                                    <span className="text-xs">SMS Config</span>
-                                </Link>
-                            </Button>
+                        <CardContent className="overflow-y-auto flex-1 p-0 px-6 pb-2">
+                            <div className="space-y-4 pt-2">
+                                {notifications.length === 0 ? (
+                                    <p className="text-sm text-muted-foreground text-center py-4">No new notifications.</p>
+                                ) : (
+                                    notifications.map((notif, i) => (
+                                        <div key={i} className="flex items-start space-x-2 pb-2 border-b last:border-0 last:pb-0">
+                                            <div className={`w-2 h-2 mt-1.5 rounded-full ${notif.isRead ? 'bg-gray-300' : 'bg-red-500'} shrink-0`} />
+                                            <div className="space-y-0.5 w-full">
+                                                <div className="flex justify-between">
+                                                    <p className="text-sm font-medium leading-none truncate">{notif.title}</p>
+                                                    <span className="text-[10px] text-muted-foreground">{new Date(notif.createdAt).toLocaleDateString()}</span>
+                                                </div>
+                                                <p className="text-xs text-muted-foreground line-clamp-1">
+                                                    {notif.message}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -227,3 +274,4 @@ export default function Dashboard() {
         </div>
     );
 }
+

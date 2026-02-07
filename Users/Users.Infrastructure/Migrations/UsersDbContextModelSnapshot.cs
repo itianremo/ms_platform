@@ -37,6 +37,9 @@ namespace Users.Infrastructure.Migrations
                     b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("CustomDataJson")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

@@ -1,36 +1,18 @@
-# Gateway Service (API Gateway)
+# Gateway Service
 
-The entry point for all client requests, routing traffic to appropriate microservices and handling cross-cutting concerns.
+## Overview
+The entry point for all external traffic to the FitIT Platform. Implements the Reverse Proxy pattern using YARP (Yet Another Reverse Proxy) to route requests to appropriate microservices.
 
-## ✨ Features
-- **Reverse Proxy**: Powered by YARP (Yet Another Reverse Proxy).
-- **Route Management**: Centralized routing configuration.
-- **Authentication Hand-off**: Validates JWTs at the edge (optional configuration).
-- **Rate Limiting**: Redis-based rate limiting for API protection.
-- **CORS Handling**: Centralized CORS policies.
+## Tech Stack
+- **Framework**: .NET 8 (YARP)
+- **Rate Limiting**: Redis-based distributed rate limiting.
+- **Cors**: Centralized Cross-Origin Resource Sharing policy.
 
-## 🏗 Technology Stack
-- **Framework**: .NET 8 (ASP.NET Core)
-- **Library**: YARP
-- **Documentation**: Swagger / OpenAPI
+## Key Features
+- **Routing**: dynamic routing to backend services based on path (`/auth`, `/apps`, `/users`, etc.).
+- **Load Balancing**: Distributes traffic across service instances (if scaled).
+- **Authentication**: Validates JWT tokens at the edge (optional, mostly pass-through).
+- **Rate Limiting**: Protects downstream services from abuse.
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Docker & Docker Compose
-- .NET 8 SDK
-
-### Running Locally
-```bash
-cd Gateway/Gateway.API
-dotnet run
-```
-
-### Running via Docker
-```bash
-docker-compose up -d gateway-api
-```
-
-## 🔌 API Documentation
-- **Swagger UI**: http://localhost:7032/swagger
-- **Health Check**: http://localhost:7032/health
+## Configuration
+Routes and Clusters are defined in `appsettings.json` or loaded dynamically.

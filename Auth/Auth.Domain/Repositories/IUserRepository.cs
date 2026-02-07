@@ -14,6 +14,7 @@ public interface IUserRepository : IRepository<User>
     Task<AppRequirement?> GetAppVerificationConfigAsync(Guid appId);
     Task<bool> IsAppActiveAsync(Guid appId);
     Task<Role?> GetRoleByNameAsync(Guid appId, string roleName);
+    Task<Role?> GetRoleByIdAsync(Guid roleId);
     Task AddRoleAsync(Role role);
     Task<List<UserSessionDto>> GetSessionsAsync(Guid userId);
     Task<UserSession?> GetSessionByIdAsync(Guid sessionId);

@@ -6,12 +6,12 @@ namespace Apps.Domain.Entities;
 
 public class AppConfig : Entity
 {
-    public string Name { get; private set; }
-    public string Description { get; private set; }
-    public string BaseUrl { get; private set; }
-    public string ThemeJson { get; private set; } // For storing UI theme settings
-    public string DefaultUserProfileJson { get; private set; } // Default settings for new users (e.g. valid JSON)
-    public string ExternalAuthProvidersJson { get; private set; } // JSON: { google: { clientId: "..." }, ... }
+    public string Name { get; private set; } = null!;
+    public string Description { get; private set; } = null!;
+    public string BaseUrl { get; private set; } = null!;
+    public string ThemeJson { get; private set; } = "{}";
+    public string DefaultUserProfileJson { get; private set; } = "{}";
+    public string ExternalAuthProvidersJson { get; private set; } = "{}";
     
     public bool IsActive { get; private set; }
     public VerificationType VerificationType { get; private set; }

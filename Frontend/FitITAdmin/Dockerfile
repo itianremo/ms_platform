@@ -10,7 +10,7 @@ RUN npm run build
 # Build App
 WORKDIR /app
 COPY Frontend/FitITAdmin/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY Frontend/FitITAdmin/ .
 RUN npm run build
 

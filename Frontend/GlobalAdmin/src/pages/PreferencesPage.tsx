@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn, getInitials } from '../lib/utils';
 import { resizeImage } from '../lib/imageUtils';
 import { Switch } from '../components/ui/switch';
+import { AppearanceSettingsCard } from '../components/settings/AppearanceSettingsCard';
 
 type Tab = 'profile' | 'account' | 'logins' | 'appearance' | 'notifications';
 
@@ -532,63 +533,7 @@ const PreferencesPage = () => {
                 )}
 
                 {activeTab === 'appearance' && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Appearance</CardTitle>
-                            <CardDescription>Customize the interface look and feel.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="space-y-4">
-                                <Label>Theme Preference</Label>
-                                <div className="grid grid-cols-2 gap-4 max-w-sm">
-                                    <div
-                                        className={cn(
-                                            "cursor-pointer rounded-lg border-2 p-2 hover:border-primary transition-all",
-                                            theme === 'light' ? "border-primary bg-primary/5" : "border-muted"
-                                        )}
-                                        onClick={() => handleThemeChange('light')}
-                                    >
-                                        <div className="space-y-2 rounded-md bg-[#ecedef] p-2">
-                                            <div className="space-y-2 rounded-md bg-white p-2 shadow-sm">
-                                                <div className="h-2 w-[80px] rounded-lg bg-[#ecedef]" />
-                                                <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
-                                            </div>
-                                            <div className="flex items-center space-x-2 rounded-md bg-white p-2 shadow-sm">
-                                                <div className="h-4 w-4 rounded-full bg-[#ecedef]" />
-                                                <div className="h-2 w-[100px] rounded-lg bg-[#ecedef]" />
-                                            </div>
-                                        </div>
-                                        <div className="mt-2 text-center text-sm font-medium">Light</div>
-                                    </div>
-                                    <div
-                                        className={cn(
-                                            "cursor-pointer rounded-lg border-2 p-2 hover:border-primary transition-all",
-                                            theme === 'dark' ? "border-primary bg-primary/5" : "border-muted"
-                                        )}
-                                        onClick={() => handleThemeChange('dark')}
-                                    >
-                                        <div className="space-y-2 rounded-md bg-slate-950 p-2">
-                                            <div className="space-y-2 rounded-md bg-slate-800 p-2 shadow-sm">
-                                                <div className="h-2 w-[80px] rounded-lg bg-slate-400" />
-                                                <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
-                                            </div>
-                                            <div className="flex items-center space-x-2 rounded-md bg-slate-800 p-2 shadow-sm">
-                                                <div className="h-4 w-4 rounded-full bg-slate-400" />
-                                                <div className="h-2 w-[100px] rounded-lg bg-slate-400" />
-                                            </div>
-                                        </div>
-                                        <div className="mt-2 text-center text-sm font-medium">Dark</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                        <CardFooter>
-                            <Button onClick={handleSaveProfile} disabled={loading} title="Save Preferences">
-                                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {!loading && <Save className="h-4 w-4" />}
-                            </Button>
-                        </CardFooter>
-                    </Card>
+                    <AppearanceSettingsCard />
                 )}
 
                 {activeTab === 'notifications' && (

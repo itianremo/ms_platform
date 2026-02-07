@@ -1,21 +1,26 @@
-# FitIT Admin (Tenant Dashboard)
+# FitIT Admin Portal
 
-Tenant-specific administration dashboard for the FitIT application.
+## Overview
+Dedicated administration interface for the **FitIT** application. Allows App Admins to manage their specific user base, content, and application settings.
 
-## ✨ Features
-- **Dashboard**: Usage statistics and overview.
-- **User Management**: Manage users within the FitIT tenant.
-- **Content Management**: Manage media and specific app content.
+## Tech Stack
+- **Framework**: React 19 (Vite)
+- **Styling**: TailwindCSS
+- **UI Components**: Shadcn UI (Radix Primitives)
+- **State Management**: React Context & Hooks
+- **Charts**: Recharts
 
-## 🚀 Getting Started
+## Key Features
+- **Dashboard**: Application-specific analytics (User activity, Growth).
+- **User Management**: Manage FitIT users and their roles.
+- **Content Moderation**: Tools for managing user-generated content.
+- **Settings**: Configure application-specific preferences.
 
-### Development
-```bash
-npm install
+## Getting Started
+\`\`\`bash
+# Install dependencies
+npm install --legacy-peer-deps
+
+# Run development server
 npm run dev
-```
-Runs on: http://localhost:3001
-
-### Production Logic
-- Built via Docker (`nginx:alpine`).
-- Docker Port: 3001
+\`\`\`

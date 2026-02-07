@@ -30,6 +30,8 @@ A comprehensive microservices ecosystem for fitness and wellness management, fea
    - Health Checks: http://localhost:5000/health-ui
 
 ## Recent Updates
+- **User Profiles**: Refactored logic to derive Display Names from email and removed redundant Email storage in Users DB.
+- **Admin UI**: Fixed "Unknown User" display in User Lists by enhancing Auht API projections.
 - **Social Login**: Integrated Google & Microsoft OAuth.
 - **Payments**: Added Stripe Webhook handling for automated subscriptions.
 - **Monitoring**: Added HealthChecks UI and Seq Centralized Logging.

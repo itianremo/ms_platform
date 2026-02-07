@@ -72,7 +72,7 @@ const LoginPage = () => {
                 }
 
                 if (errorCode === "AccountSoftDeleted") {
-                    setError('Your account is deactivated. Please contact support to reactivate.');
+                    navigate('/reactivate-init', { state: { email: identifier } });
                     return;
                 }
             }

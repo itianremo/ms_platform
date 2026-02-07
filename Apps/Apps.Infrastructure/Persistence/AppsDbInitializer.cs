@@ -60,6 +60,14 @@ public static class AppsDbInitializer
         {
             // Check if app exists by ID or Name to avoid duplicates
             var existingApp = await context.Apps.FirstOrDefaultAsync(a => a.Id == seed.Id || a.Name == seed.Name);
+            if (existingApp != null && seed.Id != Guid.Empty && existingApp.Id != seed.Id) 
+            {
+                logger.LogWarning("App {Name} exists with wrong ID {ExistingId}. Expecting {ExpectedId}. Deleting to re-seed.", seed.Name, existingApp.Id, seed.Id);
+                context.Apps.Remove(existingApp);
+                await context.SaveChangesAsync();
+                existingApp = null;
+            }
+
             if (existingApp == null)
             {
                 // Create New
@@ -151,6 +159,23 @@ public static class AppsDbInitializer
                 await context.SaveChangesAsync();
             }
         }
+
+        // Ensure VIP Unlimited Package exists for ALL Apps (for Admin Auto-Grant)
+        var allApps = await context.Apps.ToListAsync();
+        foreach (var app in allApps)
+        {
+            var vipPackage = await context.SubscriptionPackages
+                .FirstOrDefaultAsync(p => p.AppId == app.Id && p.Name == "VIP Unlimited");
+            
+            if (vipPackage == null)
+            {
+                // Create VIP Unlimited
+                var newVip = new SubscriptionPackage(app.Id, "VIP Unlimited", "Auto-granted to Admins", 0, 0, SubscriptionPeriod.Unlimited);
+                await context.SubscriptionPackages.AddAsync(newVip);
+                logger.LogInformation("Seeded VIP Unlimited Package for App {Name}", app.Name);
+            }
+        }
+        await context.SaveChangesAsync();
     }
 
     private class SeedAppDto

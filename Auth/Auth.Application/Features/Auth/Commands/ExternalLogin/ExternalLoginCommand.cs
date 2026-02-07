@@ -5,7 +5,7 @@ using Auth.Domain.Repositories;
 
 namespace Auth.Application.Features.Auth.Commands.ExternalLogin;
 
-public record ExternalLoginCommand(string LoginProvider, string ProviderKey, string Email, string? DisplayName) : IRequest<string>;
+public record ExternalLoginCommand(string LoginProvider, string ProviderKey, string Email, string? DisplayName, string? Phone) : IRequest<string>;
 
 public class ExternalLoginCommandHandler : IRequestHandler<ExternalLoginCommand, string>
 {
@@ -28,7 +28,7 @@ public class ExternalLoginCommandHandler : IRequestHandler<ExternalLoginCommand,
             // Login existing user
             // Optional: Activate if Pending? Social Logins usually verify email.
             if (user.Status == GlobalUserStatus.SoftDeleted)
-                throw new Common.Exceptions.UserSoftDeletedException("Account is soft-deleted.");
+                throw new global::Auth.Domain.Exceptions.UserSoftDeletedException("Account is soft-deleted.");
             
             if (user.Status == GlobalUserStatus.Banned)
                 throw new UnauthorizedAccessException("Account is banned.");
@@ -38,7 +38,18 @@ public class ExternalLoginCommandHandler : IRequestHandler<ExternalLoginCommand,
         }
 
         // 2. Check if user exists by Email (Link Account)
-        user = await _userRepository.GetByEmailAsync(request.Email);
+        if (!string.IsNullOrEmpty(request.Email))
+        {
+            user = await _userRepository.GetByEmailAsync(request.Email);
+        }
+
+        // 3. Check if user exists by Phone (Link Account) if not found by email
+        if (user == null && !string.IsNullOrEmpty(request.Phone)) 
+        {
+            // Assuming GetByEmailOrPhoneAsync checks phone column too
+            user = await _userRepository.GetByEmailOrPhoneAsync(request.Phone);
+        }
+
         if (user != null)
         {
             // Link new provider to existing account
@@ -49,16 +60,15 @@ public class ExternalLoginCommandHandler : IRequestHandler<ExternalLoginCommand,
             return token;
         }
 
-        // 3. Register new user
+        // 4. Register new user
         // Generate a random password or null (if allowed, but User entity might enforce it)
         // For now, using a placeholder secure-ish random string since they login via social
         var dummyPasswordHash = "SOCIAL_LOGIN_" + Guid.NewGuid(); 
         
-        user = new User(request.Email, "0000000000", dummyPasswordHash); // Phone is required in entity constructor currently
-        
-        // Auto-activate for social login? Or keep Pending? 
-        // Let's Activate since Email is usually verified by provider.
-        user.Activate(); 
+        // Use provided phone or placeholder
+        var phone = !string.IsNullOrEmpty(request.Phone) ? request.Phone : "0000000000";
+
+        user = new User(request.Email, phone, dummyPasswordHash); 
 
         user.AddLogin(new UserLogin(user.Id, request.LoginProvider, request.ProviderKey, request.DisplayName));
         

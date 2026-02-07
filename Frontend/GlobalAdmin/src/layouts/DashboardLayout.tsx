@@ -13,10 +13,14 @@ import {
 import { cn } from '../lib/utils';
 import { UserService } from '../services/userService';
 
+import { useUserPreferences } from '../context/UserPreferencesContext';
+
 const DashboardLayout = () => {
     const { user, logout, updateUser } = useAuth();
-    // Initialize from Config
-    const [collapsed, setCollapsed] = useState(UI_DEFAULTS.SIDEBAR_COLLAPSED);
+    // Context State
+    const { preferences, updatePreferences } = useUserPreferences();
+    const collapsed = preferences.sidebarCollapsed;
+
     const [profileOpen, setProfileOpen] = useState(false);
 
 
@@ -35,7 +39,7 @@ const DashboardLayout = () => {
         // Fetch Notifications
         fetchNotifications();
 
-        // Fetch User Profile & Preferences
+        // Fetch User Profile (Preferences handled by Context now)
         fetchUserProfile();
 
         // Poll every minute
@@ -74,34 +78,27 @@ const DashboardLayout = () => {
                         phone: user?.phone || ''
                     });
                 }
+            } else {
+                // Profile not found (404) - Expected for new users/admins who haven't saved profile yet.
+                // We rely on Token data (AuthContext) for now.
             }
         } catch (err) {
-            console.log("Profile fetch failed", err);
-        }
-    };
-
-    const savePreferences = async (newCollapsed: boolean, newDark: boolean) => {
-        try {
-            // Construct preference object
-            const prefs = { collapsed: newCollapsed, theme: newDark ? 'dark' : 'light' };
-            console.log("Saving prefs:", prefs);
-            // Logic to call backend:
-            // await axios.put('/api/users/profile', { ...profile, customDataJson: JSON.stringify(prefs) });
-        } catch (err) {
-            console.error("Failed to save prefs", err);
+            // Ignore network errors for profile fetch to avoid console noise
         }
     };
 
     // Wrappers
     const handleSetCollapsed = (val: boolean) => {
-        setCollapsed(val);
-        savePreferences(val, theme === 'dark');
+        updatePreferences({ sidebarCollapsed: val });
     };
 
     const handleToggleTheme = () => {
         const newDark = theme !== 'dark';
-        setTheme(newDark ? 'dark' : 'light'); // Update Global State (Context handles DOM)
-        savePreferences(collapsed, newDark);
+        // ThemeProvider handles the DOM class toggle via setTheme,
+        // UserPreferencesContext handles persistence implicitly via updatePreferences effect?
+        // Actually, UserPreferencesContext.updatePreferences calls setTheme if theme changes.
+        // So we should just call updatePreferences.
+        updatePreferences({ theme: newDark ? 'dark' : 'light' });
     };
 
     const markAsRead = async (id: string) => {

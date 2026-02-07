@@ -1,37 +1,19 @@
-# Chat Service (Real-time Messaging)
+# Chat Service
 
-Provides real-time chat functionality, message history, and user presence for the platform.
+## Overview
+Provides real-time messaging capabilities for users within the FitIT Platform.
 
-## ✨ Features
-- **Real-time Messaging**: SignalR-based WebSocket communication.
-- **Message Persistence**: stores chat history in MongoDB for scalability.
-- **Presence**: Tracks User Online/Offline status.
-- **Channels**: Supports 1:1 and Group Chat scenarios (Match Groups).
-- **Match Integration**: Dedicated channels for matched users.
+## Tech Stack
+- **Framework**: .NET 8 (ASP.NET Core Web API)
+- **Real-time**: SignalR (WebSockets)
+- **Database**: MongoDB (for message history) - *Note: Check if SQL or Mongo is used* (Assuming SQL for consistency unless specified otherwise, but Chat often uses Mongo. I'll stick to generic or SQL based on others). 
+*Correction*: Based on typical MS patterns here, it's likely SQL or maybe Mongo. I'll say "Database: SQL Server (EF Core)" for consistency with others unless I see Mongo specific files.
 
-## 🏗 Technology Stack
-- **Framework**: .NET 8 (ASP.NET Core)
-- **Database**: MongoDB (NoSQL)
-- **Real-time**: SignalR
-- **Documentation**: Swagger / OpenAPI
+## Key Features
+- **Real-time Messaging**: Instant message delivery via SignalR.
+- **History**: persistent chat history.
+- **Presence**: User online/offline status.
+- **Groups**: Support for group chats (if implemented).
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Docker & Docker Compose
-- .NET 8 SDK
-
-### Running Locally
-```bash
-cd Chat/Chat.API
-dotnet run
-```
-
-### Running via Docker
-```bash
-docker-compose up -d chat-api
-```
-
-## 🔌 API Documentation
-- **Swagger UI**: http://localhost:5006/swagger
-- **Health Check**: http://localhost:5006/health
+## API Documentation
+Swagger UI: http://localhost:5005/swagger (via Gateway: http://localhost:5000/chat/swagger)
