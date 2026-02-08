@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { UserService, UserProfile } from '../services/userService';
+import { AppService } from '../services/appService';
 import { useAuth } from './AuthContext';
 import { useTheme } from '../components/theme-provider';
 
@@ -29,35 +30,57 @@ export const UserPreferencesProvider = ({ children }: { children: React.ReactNod
 
     // Initial Load
     useEffect(() => {
-        if (user) {
-            loadPreferences();
-        } else {
-            setLoading(false);
-        }
+        loadPreferences();
     }, [user]);
 
-    const loadPreferences = async () => {
-        if (!user) return;
-        setLoading(true);
+    const loadAppDefaults = async () => {
         try {
-            // Assuming "System App" ID or current app context. 
-            // For Global Admin, we usually use a specific AppID or the "System" AppID.
-            // Let's use the default ID from UserService or passed in env.
-            // For now, hardcode the System App ID used in UserDetailsPage
             const SYSTEM_APP_ID = "00000000-0000-0000-0000-000000000001";
+            const app = await AppService.getAppById(SYSTEM_APP_ID);
 
+            if (app.themeJson) {
+                try {
+                    const themeData = JSON.parse(app.themeJson);
+                    setPreferences(prev => ({
+                        ...prev,
+                        ...themeData
+                    }));
+                    if (themeData.theme) {
+                        setTheme(themeData.theme);
+                    }
+                } catch { } // Ignore parse errors
+            }
+        } catch (e) {
+            console.error("Failed to load app defaults", e);
+        }
+    };
+
+    const loadPreferences = async () => {
+        // If not logged in, load from AppConfig
+        if (!user) {
+            // Reset to defaults first to avoid stale state from previous user
+            setPreferences({
+                theme: 'system',
+                sidebarCollapsed: false
+            });
+            await loadAppDefaults();
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+
+        const SYSTEM_APP_ID = "00000000-0000-0000-0000-000000000001";
+
+        try {
             const p = await UserService.getProfile(user.id, SYSTEM_APP_ID);
             setProfile(p);
 
             if (p && p.customDataJson) {
                 try {
                     const data = JSON.parse(p.customDataJson);
-                    setPreferences(prev => ({
-                        ...prev,
-                        ...data
-                    }));
+                    setPreferences(prev => ({ ...prev, ...data }));
 
-                    // Apply Theme immediately
                     if (data.theme) {
                         setTheme(data.theme);
                     }

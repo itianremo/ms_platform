@@ -1,50 +1,29 @@
-import { Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Users, LayoutDashboard, LogOut, Heart } from 'lucide-react';
-import { TENANT_CONFIG } from '../config/tenant';
+import { Outlet } from 'react-router-dom';
+import { Sidebar } from '../components/Sidebar';
+import { Header } from '../components/Header';
+import { useUserPreferences } from '../context/UserPreferencesContext';
 
 const DashboardLayout = () => {
-    const { logout } = useAuth();
-    const navigate = useNavigate();
+    const { preferences, updatePreferences } = useUserPreferences();
+    const collapsed = preferences.sidebarCollapsed;
+    const setCollapsed = (val: boolean) => updatePreferences({ sidebarCollapsed: val });
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+        <div className="flex min-h-screen bg-background text-foreground">
             {/* Sidebar */}
-            <aside style={{ width: '250px', backgroundColor: '#BE185D', color: 'white', padding: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem' }}>
-                    <div style={{ width: '32px', height: '32px', backgroundColor: 'white', borderRadius: '8px', marginRight: '0.75rem' }}></div>
-                    <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>{TENANT_CONFIG.appName}</h1>
-                </div>
+            <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
-                <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    <button onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
-                        <LayoutDashboard size={20} style={{ marginRight: '0.75rem' }} />
-                        Dashboard
-                    </button>
-                    <button onClick={() => navigate('/users')} style={{ display: 'flex', alignItems: 'center', padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: 'transparent', border: 'none', color: 'rgba(255,255,255,0.8)', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
-                        <Users size={20} style={{ marginRight: '0.75rem' }} />
-                        Profiles
-                    </button>
-                    <button onClick={() => navigate('/matches')} style={{ display: 'flex', alignItems: 'center', padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: 'transparent', border: 'none', color: 'rgba(255,255,255,0.8)', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
-                        <Heart size={20} style={{ marginRight: '0.75rem' }} />
-                        Matches
-                    </button>
-                </nav>
-
-                <div style={{ marginTop: 'auto', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '1rem' }}>
-                    <button onClick={logout} style={{ display: 'flex', alignItems: 'center', padding: '0.75rem', borderRadius: '0.5rem', backgroundColor: 'transparent', border: 'none', color: 'white', cursor: 'pointer', width: '100%', textAlign: 'left' }}>
-                        <LogOut size={20} style={{ marginRight: '0.75rem' }} />
-                        Log Out
-                    </button>
-                </div>
-            </aside>
-
-            {/* Main Content */}
-            <main style={{ flex: 1, padding: '2rem' }}>
-                <Outlet />
-            </main>
+            {/* Main Content Area */}
+            <div className="flex flex-1 flex-col transition-all duration-300">
+                <Header />
+                <main className="flex-1 overflow-y-auto bg-muted/10 p-6">
+                    <Outlet />
+                </main>
+            </div>
         </div>
     );
 };
+
+
 
 export default DashboardLayout;

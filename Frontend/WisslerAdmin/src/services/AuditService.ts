@@ -11,24 +11,28 @@ export interface AuditLog {
     timestamp: string;
 }
 
-export const AuditService = {
-    getLogs: async (appId?: string, userId?: string): Promise<AuditLog[]> => {
-        try {
-            // Gateway: /audit -> Audit.API /api/Audit
-            // Route match: /audit/{**} -> /audit/api/Audit
-            // Nginx stripping logic likely applies: /api/audit/api/Audit -> /audit/api/Audit
-            // Based on other services, we should use the full path expected by Gateway logic
-            // If AuthController was /api/auth/..., here we try /audit/api/Audit
+export interface PagedResult<T> {
+    items: T[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
 
+export const AuditService = {
+    getLogs: async (page: number = 1, pageSize: number = 25, appId?: string, userId?: string): Promise<PagedResult<AuditLog>> => {
+        try {
             const params = new URLSearchParams();
-            if (appId) params.append('appId', appId.toString());
-            if (userId) params.append('userId', userId.toString());
+            params.append('page', page.toString());
+            params.append('pageSize', pageSize.toString());
+            if (appId) params.append('appId', appId);
+            if (userId) params.append('userId', userId);
 
             const response = await api.get(`/audit/api/Audit?${params.toString()}`);
             return response.data;
         } catch (error) {
             console.error("Failed to fetch audit logs", error);
-            return [];
+            return { items: [], totalCount: 0, page: 1, pageSize: 25, totalPages: 0 };
         }
     }
 };

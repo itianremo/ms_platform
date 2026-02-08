@@ -24,12 +24,12 @@ export const DashboardService = {
             const [users, apps, logs] = await Promise.all([
                 UserService.getAllUsers().catch(() => []),
                 AppService.getAllApps().catch(() => []),
-                AuditService.getLogs().catch(() => [])
+                AuditService.getLogs() // Service handles error and returns PagedResult
             ]);
 
             // Map logs to Recent Activity
             // Take top 5 recent logs
-            const recentActivity: ActivityItem[] = logs.slice(0, 5).map(log => ({
+            const recentActivity: ActivityItem[] = logs.items.slice(0, 5).map(log => ({
                 id: log.id,
                 title: `${log.action} on ${log.entityName} ${log.entityId || ''}`,
                 time: new Date(log.timestamp).toLocaleString(), // Simple format for now, UI uses text

@@ -13,6 +13,8 @@ dependencies:
   flutter_riverpod: ^2.4.9
   json_annotation: ^4.8.1
   shared_preferences: ^2.2.2
+  api_client:
+    path: ../api_client
 
 dev_dependencies:
   flutter_test:

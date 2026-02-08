@@ -1,6 +1,7 @@
 using Audit.Domain.Entities;
 using Audit.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Kernel;
 
 namespace Audit.API.Controllers;
 
@@ -16,37 +17,19 @@ public class AuditController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<AuditLog>>> GetLogs([FromQuery] Guid? appId, [FromQuery] Guid? userId)
+    public async Task<ActionResult<PagedResult<AuditLog>>> GetLogs(
+        [FromQuery] int page = 1, 
+        [FromQuery] int pageSize = 25,
+        [FromQuery] Guid? appId = null, 
+        [FromQuery] Guid? userId = null)
     {
-        if (userId.HasValue)
-        {
-            var userIdString = userId.Value.ToString();
-            
-            // Search for:
-            // 1. Actions performed BY the user (UserId == userId)
-            // 2. Actions performed ON the user (EntityId == userIdString AND EntityName is "User" or "UserProfile")
-            
-            if (appId.HasValue)
-            {
-                return await _repository.ListAsync(x => 
-                    x.AppId == appId && 
-                    (x.UserId == userId || (x.EntityId == userIdString && (x.EntityName == "User" || x.EntityName == "UserProfile")))
-                );
-            }
-            
-            return await _repository.ListAsync(x => 
-                x.UserId == userId || 
-                (x.EntityId == userIdString && (x.EntityName == "User" || x.EntityName == "UserProfile"))
-            );
-        }
-        else if (appId.HasValue)
-        {
-            return await _repository.ListAsync(x => x.AppId == appId);
-        }
-        
-        // Return recent logs (limit 100 for safety)
-        var allLogs = await _repository.ListAsync();
-        return allLogs.OrderByDescending(x => x.Timestamp).Take(100).ToList();
+        // Ensure valid page/pageSize
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+        if (pageSize > 100) pageSize = 100;
+
+        var result = await _repository.GetPagedListAsync(page, pageSize, appId, userId);
+        return Ok(result);
     }
 
     [HttpGet("stats")]

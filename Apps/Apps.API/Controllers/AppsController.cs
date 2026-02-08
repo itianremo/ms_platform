@@ -34,6 +34,14 @@ public class AppsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetAppById(Guid id)
+    {
+        var result = await _mediator.Send(new Apps.Application.Features.Apps.Queries.GetAppById.GetAppByIdQuery(id));
+        if (result == null) return NotFound();
+        return Ok(result);
+    }
+
     [HttpPut("{id}")]
     [Authorize(Policy = "ManageApps")]
     public async Task<IActionResult> UpdateApp(Guid id, [FromBody] UpdateAppCommand command)

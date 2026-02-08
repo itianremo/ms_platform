@@ -6,6 +6,9 @@ export interface AppConfig {
     description: string;
     baseUrl: string;
     isActive: boolean;
+    themeJson?: string;
+    defaultUserProfileJson?: string;
+    externalAuthProvidersJson?: string;
 }
 
 export interface SubscriptionPackage {
@@ -25,6 +28,16 @@ export const AppService = {
             return response.data;
         } catch (error) {
             console.error("Failed to fetch apps", error);
+            throw error;
+        }
+    },
+
+    getAppById: async (id: string): Promise<AppConfig> => {
+        try {
+            const response = await api.get(`/apps/api/Apps/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error(`Failed to fetch app ${id}`, error);
             throw error;
         }
     },

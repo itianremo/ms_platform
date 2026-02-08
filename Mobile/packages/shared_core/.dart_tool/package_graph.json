@@ -7,6 +7,7 @@
       "name": "shared_core",
       "version": "0.0.1",
       "dependencies": [
+        "api_client",
         "dio",
         "flutter",
         "flutter_riverpod",
@@ -98,6 +99,14 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "api_client",
+      "version": "0.0.1",
+      "dependencies": [
+        "dio",
+        "flutter"
       ]
     },
     {

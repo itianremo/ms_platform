@@ -1,1 +1,1 @@
-{"version":2,"entries":[{"package":"shared_ui","rootUri":"../","packageUri":"lib/"}]}
+{"version":2,"entries":[{"package":"api_client","rootUri":"../../api_client/","packageUri":"lib/"},{"package":"shared_core","rootUri":"../../shared_core/","packageUri":"lib/"},{"package":"shared_ui","rootUri":"../","packageUri":"lib/"}]}

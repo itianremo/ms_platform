@@ -10,6 +10,7 @@ public interface IAuditRepository : IRepository<AuditLog>
 {
     // Custom query methods if needed
     Task<List<DailyActivityDto>> GetDailyStatsAsync(DateTime startDate);
+    Task<PagedResult<AuditLog>> GetPagedListAsync(int page, int pageSize, Guid? appId, Guid? userId);
 }
 
 public record DailyActivityDto(DateTime Date, int Count);
@@ -59,10 +60,6 @@ public class AuditRepository : IAuditRepository
 
     public async Task<List<DailyActivityDto>> GetDailyStatsAsync(DateTime startDate)
     {
-        // Simple grouping by Date
-        // Note: EF Core might need client evaluation if provider doesn't support Date truncation well
-        // But for SQL Server/Postgres, usually works with .Date property or DbFunctions.
-        
         var query = await _context.AuditLogs
             .Where(x => x.Timestamp >= startDate)
             .GroupBy(x => x.Timestamp.Date)
@@ -70,5 +67,35 @@ public class AuditRepository : IAuditRepository
             .ToListAsync();
             
         return query;
+    }
+
+    public async Task<PagedResult<AuditLog>> GetPagedListAsync(int page, int pageSize, Guid? appId, Guid? userId)
+    {
+        var query = _context.AuditLogs.AsQueryable();
+
+        if (userId.HasValue)
+        {
+            var userIdString = userId.Value.ToString();
+            // User actions OR actions on user
+            query = query.Where(x => 
+                x.UserId == userId || 
+                (x.EntityId == userIdString && (x.EntityName == "User" || x.EntityName == "UserProfile"))
+            );
+        }
+
+        if (appId.HasValue)
+        {
+            query = query.Where(x => x.AppId == appId);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .OrderByDescending(x => x.Timestamp)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PagedResult<AuditLog>(items, totalCount, page, pageSize);
     }
 }

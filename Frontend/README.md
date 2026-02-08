@@ -19,6 +19,10 @@ Contains the React-based frontend applications for the MS Platform.
 - **State**: React Query / Context
 - **Routing**: React Router DOM
 
+## 🎨 Theme & Settings
+- **Public/Logout**: Apps load default theme (Dark/Light) from App Configuration.
+- **Authenticated**: Theme and Menu state are synced with User Profile settings.
+
 ## 🚀 Getting Started
 
 ### Prerequisites

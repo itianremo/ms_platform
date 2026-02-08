@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
+import { ArrowLeft, Save, Shield, User, Activity, Lock, Key, Edit, CheckCircle2, MoreHorizontal, Info, XCircle, FileJson } from 'lucide-react';
+import { formatDistanceToNow, format } from 'date-fns';
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Input } from "../components/ui/input";
 import { Switch } from "../components/ui/switch";
 import { Label } from "../components/ui/label";
-import { ArrowLeft, Save, Shield, User, Activity, Lock, Key, Edit, CheckCircle2, MoreHorizontal, Info, XCircle } from 'lucide-react';
+
+// ... (inside AuditLogViewer)
+// Removed orphaned checks that were outside the component or incorrectly placed
+// The component logic already handles loading and empty states within the return JSX or above
+
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { UserService, UserDto, UserProfile } from '../services/userService';
 import { useToast } from '../context/ToastContext';
@@ -782,10 +787,13 @@ const RolePermissionsDisplay = ({ appId, roleName }: { appId: string, roleName: 
 const AuditLogViewer = ({ userId, userName }: { userId: string, userName?: string }) => {
     const [logs, setLogs] = useState<AuditLog[]>([]);
     const [loading, setLoading] = useState(false);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(25);
+    const [totalCount, setTotalCount] = useState(0);
 
     useEffect(() => {
         loadLogs();
-    }, [userId]);
+    }, [userId, page, pageSize]);
 
     const loadLogs = async () => {
         // Prevent fetch if no userId (e.g. initial render)
@@ -793,39 +801,128 @@ const AuditLogViewer = ({ userId, userName }: { userId: string, userName?: strin
 
         setLoading(true);
         // We use userId param to fetch logs related to this user
-        const data = await AuditService.getLogs(undefined, userId);
-        setLogs(data);
-        setLoading(false);
+        try {
+            const result = await AuditService.getLogs(page, pageSize, undefined, userId);
+            setLogs(result.items);
+            setTotalCount(result.totalCount);
+        } catch (error) {
+            console.error("Failed to load audit logs", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    if (loading) return <div className="p-4 text-center">Loading logs...</div>;
-    if (logs.length === 0) return <div className="p-4 text-center text-muted-foreground">No audit history found.</div>;
+    const totalPages = Math.ceil(totalCount / pageSize);
 
     return (
-        <div className="border rounded-md">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Time</TableHead>
-                        <TableHead>Action</TableHead>
-                        <TableHead>Changes</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {logs.map(log => (
-                        <TableRow key={log.id}>
-                            <TableCell className="whitespace-nowrap text-xs">{new Date(log.timestamp).toLocaleString()}</TableCell>
-                            <TableCell>
-                                <div className="font-medium text-sm">{log.action}</div>
-                                <div className="text-xs text-muted-foreground">{log.entityName}</div>
-                            </TableCell>
-                            <TableCell className="max-w-md truncate text-xs font-mono bg-muted/50 p-1 rounded" title={log.changesJson}>
-                                {log.changesJson?.substring(0, 100)}{log.changesJson?.length > 100 ? '...' : ''}
-                            </TableCell>
+        <div className="space-y-4">
+            <div className="flex justify-between items-center">
+                <div className="text-sm text-muted-foreground">
+                    Showing {logs.length} of {totalCount} entries
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Page Size:</span>
+                    <select
+                        className="h-8 w-16 rounded-md border border-input bg-background px-2 py-1 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={pageSize}
+                        onChange={(e) => {
+                            setPageSize(Number(e.target.value));
+                            setPage(1);
+                        }}
+                    >
+                        <option value={25}>25</option>
+                        <option value={100}>100</option>
+                    </select>
+                </div>
+            </div>
+
+            <div className="border rounded-md">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[180px]">Timestamp</TableHead>
+                            <TableHead>Action</TableHead>
+                            <TableHead>Entity</TableHead>
+                            <TableHead className="text-right">Details</TableHead>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {loading ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center h-24">
+                                    Loading...
+                                </TableCell>
+                            </TableRow>
+                        ) : logs.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">
+                                    No audit logs found for this user.
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            logs.map((log) => (
+                                <TableRow key={log.id} className="group">
+                                    <TableCell className="text-sm text-muted-foreground whitespace-nowrap font-mono">
+                                        {format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss.SSS')}
+                                    </TableCell>
+                                    <TableCell className="font-medium">
+                                        {log.action}
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col">
+                                            <span className="font-medium text-xs">{log.entityName}</span>
+                                            <span className="text-xs text-muted-foreground">{log.entityId}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                                    <FileJson className="h-4 w-4 text-muted-foreground" />
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="max-w-xl">
+                                                <DialogHeader>
+                                                    <DialogTitle>Audit Details</DialogTitle>
+                                                    <DialogDescription>
+                                                        {log.action} on {log.entityName}
+                                                    </DialogDescription>
+                                                </DialogHeader>
+                                                <div className="bg-slate-950 text-slate-50 p-4 rounded-md overflow-x-auto text-xs font-mono max-h-[60vh] overflow-y-auto">
+                                                    <pre>
+                                                        {JSON.stringify(JSON.parse(log.changesJson || "{}"), null, 2)}
+                                                    </pre>
+                                                </div>
+                                            </DialogContent>
+                                        </Dialog>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-end space-x-2 py-4">
+                    <button
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1 || loading}
+                    >
+                        Previous
+                    </button>
+                    <span className="text-sm font-medium">Page {page} of {totalPages}</span>
+                    <button
+                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={page === totalPages || loading}
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

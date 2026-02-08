@@ -1,5 +1,5 @@
 name: shared_ui
-description: Shared UI components and design system.
+description: Reusable UI components for FitIt and Wissler.
 version: 0.0.1
 publish_to: 'none'
 
@@ -9,7 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  google_fonts: ^6.1.0
+  flutter_riverpod: ^2.4.9
+  go_router: ^13.0.1
+  shared_core:
+    path: ../shared_core
 
 dev_dependencies:
   flutter_test:

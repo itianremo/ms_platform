@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { UserService } from '../services/userService';
+import { AppService } from '../services/appService';
 import type { UserProfile } from '../services/userService';
 import { useAuth } from './AuthContext';
 import { useTheme } from '../components/theme-provider';
@@ -31,15 +32,42 @@ export const UserPreferencesProvider = ({ children }: { children: React.ReactNod
 
     // Initial Load
     useEffect(() => {
-        if (user) {
-            loadPreferences();
-        } else {
-            setLoading(false);
-        }
+        loadPreferences();
     }, [user]);
 
+    const loadAppDefaults = async () => {
+        try {
+            const app = await AppService.getAppById(APP_ID);
+
+            if (app.themeJson) {
+                try {
+                    const themeData = JSON.parse(app.themeJson);
+                    setPreferences(prev => ({
+                        ...prev,
+                        ...themeData
+                    }));
+                    if (themeData.theme) {
+                        setTheme(themeData.theme);
+                    }
+                } catch { }
+            }
+        } catch (e) {
+            console.error("Failed to load app defaults", e);
+        }
+    };
+
     const loadPreferences = async () => {
-        if (!user) return;
+        if (!user) {
+            // Reset to defaults first to avoid stale state from previous user
+            setPreferences({
+                theme: 'system',
+                sidebarCollapsed: false
+            });
+            await loadAppDefaults();
+            setLoading(false);
+            return;
+        }
+
         setLoading(true);
         try {
             // Assuming "System App" ID or current app context. 
@@ -87,7 +115,7 @@ export const UserPreferencesProvider = ({ children }: { children: React.ReactNod
         }
 
         try {
-            const SYSTEM_APP_ID = "00000000-0000-0000-0000-000000000001";
+            const SYSTEM_APP_ID = APP_ID;
 
             // Merge with existing customDataJson
             let currentData = {};

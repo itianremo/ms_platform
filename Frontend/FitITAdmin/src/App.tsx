@@ -11,24 +11,29 @@ import Dashboard from './pages/Dashboard';
 
 import ProtectedRoute from './layouts/ProtectedRoute';
 
+import { Toaster } from './components/ui/sonner';
+
 function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/auth/callback" element={<AuthCallbackPage />} />
+    <>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-      <Route path="/" element={
-        <ProtectedRoute>
-          <DashboardLayout />
-        </ProtectedRoute>
-      }>
-        <Route index element={<Dashboard />} />
-        {/* Placeholder for Users Route */}
-        <Route path="users" element={<UsersPage />} />
-        <Route path="moderation" element={<ModerationPage />} />
-        <Route path="settings" element={<PreferencesPage />} />
-      </Route>
-    </Routes >
+        <Route path="/" element={
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Dashboard />} />
+          {/* Placeholder for Users Route */}
+          <Route path="users" element={<UsersPage />} />
+          <Route path="moderation" element={<ModerationPage />} />
+          <Route path="settings" element={<PreferencesPage />} />
+        </Route>
+      </Routes >
+      <Toaster />
+    </>
   );
 }
 

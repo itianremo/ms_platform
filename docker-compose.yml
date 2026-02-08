@@ -176,6 +176,7 @@ services:
       - RabbitMq__Password=guest
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=NotificationsDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
       - SeqServerUrl=http://seq:5341
+      - RedisConnectionString=redis:6379
     depends_on:
       - rabbitmq
       - seq

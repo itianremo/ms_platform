@@ -29,10 +29,10 @@ export default function Dashboard() {
         const fetchData = async () => {
             try {
                 // Fetch independent data in parallel where possible, but handle failures gracefully
-                const [dashboardStats, appStats, auditLogs, notifsResult] = await Promise.allSettled([
+                const [dashboardStats, appStats, auditLogsResult, notifsResult] = await Promise.allSettled([
                     AnalyticsService.getDashboardStats(),
                     AnalyticsService.getAppUserStats(),
-                    AuditService.getLogs(),
+                    AuditService.getLogs(1, 10),
                     user ? NotificationService.getMyNotifications(user.id) : Promise.resolve([])
                 ]);
 
@@ -50,7 +50,8 @@ export default function Dashboard() {
                 const newUsersLast24h = dashboardStats.status === 'fulfilled' ? dashboardStats.value.newUsersLast24h : 0;
 
                 const rawAppStats = appStats.status === 'fulfilled' ? appStats.value : [];
-                const logsData = auditLogs.status === 'fulfilled' ? auditLogs.value : [];
+                // Handle PagedResult from AuditService
+                const logsData = auditLogsResult.status === 'fulfilled' ? auditLogsResult.value.items : [];
                 const notifs = notifsResult.status === 'fulfilled' ? notifsResult.value : [];
 
                 // Map IDs to Names for App Stats
@@ -70,7 +71,7 @@ export default function Dashboard() {
                     appUserStats: mappedAppStats
                 });
 
-                setLogs(logsData.slice(0, 5));
+                setLogs(logsData);
                 setNotifications(notifs.slice(0, 5));
 
             } catch (error) {
@@ -209,12 +210,12 @@ export default function Dashboard() {
                 {/* Recent Activity & Notifications Column */}
                 {/* Recent Activity & Notifications Column */}
                 <div className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col gap-4 h-[350px]">
-                    {/* Recent Activity */}
+                    {/* Recent Audit Logs */}
                     <Card className="flex-1 overflow-hidden flex flex-col">
                         <CardHeader className="py-3">
                             <CardTitle className="text-base flex items-center">
                                 <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
-                                Recent Activity
+                                Recent Audit Logs
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="overflow-y-auto flex-1 p-0 px-6 pb-2">
@@ -227,8 +228,8 @@ export default function Dashboard() {
                                             <div className="w-2 h-2 mt-1.5 rounded-full bg-blue-500 shrink-0" />
                                             <div className="space-y-0.5">
                                                 <p className="text-sm font-medium leading-none">{log.action}</p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {log.entityName} • {new Date(log.timestamp).toLocaleTimeString()}
+                                                <p className="text-xs text-muted-foreground font-mono">
+                                                    {log.entityName} • {new Date(log.timestamp).toISOString().replace('T', ' ').replace('Z', '')}
                                                 </p>
                                             </div>
                                         </div>

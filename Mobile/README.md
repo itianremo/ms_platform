@@ -1,28 +1,29 @@
-# Mobile App
+# Mobile Applications (Flutter)
 
-## Overview
-The React Native mobile application for end-users of the FitIT Platform.
+This directory contains the cross-platform mobile applications for the platform, built using **Flutter**.
 
-## Tech Stack
-- **Framework**: React Native (Expo)
-- **Language**: TypeScript
-- **State Management**: React Query / Zustand
-- **Navigation**: React Navigation
+## Structure
+-   **`apps/`**: Contains the specific application implementations.
+    -   **`fitit/`**: The Fitness Tracking App (Blue Theme).
+    -   **`wissler/`**: The Dating & Social App (Orange/Blue Theme).
+-   **`packages/`**: Shared libraries used by all apps.
+    -   **`api_client`**: Auto-generated or shared API client code.
+    -   **`shared_core`**: Authentication, State Management (Riverpod), and Common Utilities.
+    -   **`shared_ui`**: Reusable UI components and widgets.
 
-## Key Features
-- **User Profile**: View and edit profile.
-- **Workouts**: Track fitness activities.
-- **Social**: Connect with friends and share progress.
-- **Notifications**: Push notifications for updates.
+## Features
+-   **Dynamic Theming**: Apps automatically load theme settings from the backend based on the App ID.
+-   **Unified Auth**: Shared authentication flow using the Identity Microservice.
 
 ## Getting Started
-\`\`\`bash
-# Install dependencies
-npm install
-
-# Run on iOS Simulator
-npm run ios
-
-# Run on Android Emulator
-npm run android
-\`\`\`
+1.  **Prerequisites**: Flutter SDK, Android Studio / Xcode.
+2.  **Run FitIt**:
+    ```bash
+    cd apps/fitit
+    flutter run
+    ```
+3.  **Run Wissler**:
+    ```bash
+    cd apps/wissler
+    flutter run
+    ```

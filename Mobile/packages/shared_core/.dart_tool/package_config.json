@@ -14,6 +14,12 @@
       "languageVersion": "3.9"
     },
     {
+      "name": "api_client",
+      "rootUri": "../../api_client",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "args",
       "rootUri": "file:///C:/Users/ramim/AppData/Local/Pub/Cache/hosted/pub.dev/args-2.7.0",
       "packageUri": "lib/",

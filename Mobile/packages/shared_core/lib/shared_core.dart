@@ -1,4 +1,5 @@
 library shared_core;
 
-export 'src/auth_controller.dart';
-export 'src/networking/api_client.dart';
+export 'repositories/auth_repository.dart';
+export 'providers/auth_provider.dart';
+export 'package:api_client/api_client.dart';

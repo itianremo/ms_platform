@@ -1,37 +1,47 @@
-# FitIT Microservices Platform
+# Unified Microservices Platform (UMP)
 
 ## Overview
-A comprehensive microservices ecosystem for fitness and wellness management, featuring advanced RBAC, subscription handling, and real-time notifications.
+A scalable **App Factory** designed to incubate and manage multiple distinct applications ("Tenants") from a single control plane. UMP currently powers **FitIt** (Fitness) and **Wissler** (Dating), managing **25+ Dockerized containers** to provide shared infrastructure and distinct business logic.
 
 ## Architecture
-- **Gateway**: YARP-based Reverse Proxy with Rate Limiting (Redis).
-- **Auth**: JWT Authentication, Social Login (Google/Microsoft), and RBAC.
-- **Apps**: Application & Subscription Management (Weekly/Monthly/Yearly/Unlimited).
-- **Payments**: Stripe/PayPal Webhook integration.
-- **Notifications**: Real-time updates (SignalR) and Email/SMS dispatch.
-- **Users**: User profile, preferences, and linked accounts.
-- **Search**: Full-text search across the platform.
-- **Audit**: Advanced logging and compliance.
+The platform is built on a **Shared Kernel** of microservices that provide "Day 1" readiness for new apps:
 
-## Infrastructure
-- **Message Bus**: RabbitMQ (MassTransit)
-- **Database**: SQL Server (EF Core)
-- **Caching**: Redis (StackExchange.Redis)
-- **Logging**: Serilog -> Seq
-- **Frontend**: React (Global Admin, FitIT Admin, Wissler Admin)
+-   **Gateway**: YARP-based Reverse Proxy with Rate Limiting (Redis).
+-   **Identity (Auth)**: Centralized JWT Authentication with Configurable Social Logins (Google, Microsoft, Facebook, Apple).
+-   **Payments**: Unified engine supporting multi-tenant Gateways (Stripe, PayPal).
+-   **Communication**: Single Global Pipeline for SMS/SMTP (Twilio/SendGrid) + SignalR for Real-time updates.
+-   **Data**: SQL Server (Relational), MongoDB (Chat), PostGIS (Geo), MinIO (Media), Redis (Cache).
+
+## Multi-Tenant Configuration Strategy
+| Feature | Strategy | Description |
+| :--- | :--- | :--- |
+| **SMS/SMTP** | **Single Global** | Configured once in Global Admin. High-reputation sender shared by all apps. |
+| **Social Auth** | **Multi-Tenant** | Configurable per App. App A can use Google, App B can use Microsoft. |
+| **Payments** | **Multi-Tenant** | Configurable per App. Revenue streams are completely isolated. |
+
+
+## Application Portfolio (Examples)
+1.  **FitIT**: Fitness management with Gym discovery (Geo API) and Workout streaming (Media API).
+2.  **Wissler**: Dating application with "People Nearby" (Geo API) and Real-time Messaging (Chat API).
+
+## Mobile Applications
+The platform includes native mobile experiences for both Tenants, built with **Flutter**:
+-   **FitIT App**: Manages workout plans and tracks progress.
+-   **Wissler App**: Discovery and social interaction.
+Both apps share a common `API Client` and `Authentication Core` while maintaining distinct visual identities through **Dynamic Theming**.
+
+## Dynamic Theme Engine
+The platform enforces consistent branding across Web and Mobile:
+-   **Public/Logout State**: Applications automatically load the **App-Specific Default Theme** configurations (e.g., FitIT Blue, Wissler Orange) from the backend.
+-   **Authenticated State**: Applications adapt to the **User's Personal Preferences** (Dark/Light mode) stored in their profile.
 
 ## Getting Started
-1. **Prerequisites**: Docker Desktop, .NET 8 SDK, Node.js.
-2. **Run Infrastructure**: `docker-compose up -d sqlserver rabbitmq redis seq`
-3. **Run Services**: `docker-compose up -d`
-4. **Access**:
-   - Global Admin: http://localhost:3000
-   - Seq Logs: http://localhost:5341
-   - Health Checks: http://localhost:5000/health-ui
 
-## Recent Updates
-- **User Profiles**: Refactored logic to derive Display Names from email and removed redundant Email storage in Users DB.
-- **Admin UI**: Fixed "Unknown User" display in User Lists by enhancing Auht API projections.
-- **Social Login**: Integrated Google & Microsoft OAuth.
-- **Payments**: Added Stripe Webhook handling for automated subscriptions.
-- **Monitoring**: Added HealthChecks UI and Seq Centralized Logging.
+1.  **Prerequisites**: Docker Desktop, .NET 8 SDK, Node.js.
+2.  **Run Infrastructure**: `docker-compose up -d sqlserver rabbitmq redis seq`
+3.  **Run Services/Apps**: `docker-compose up -d`
+4.  **Access Portals**:
+    -   **Global Admin**: http://localhost:3000 (Manage Tenants & System Configs)
+    -   **FitIT Admin**: http://localhost:3001
+    -   **Wissler Admin**: http://localhost:3002
+    -   **Seq Logs**: http://localhost:5341

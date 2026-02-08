@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { AuthService } from '../services/authService';
 
 const LoginPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -12,27 +13,21 @@ const LoginPage: React.FC = () => {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // Mocking standard login for now or calling actual endpoint
-            const res = await fetch('http://localhost:5002/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-            const data = await res.json();
-            if (res.ok && data.token) {
+            const data = await AuthService.login({ email, password });
+            if (data.token) {
                 login(data.token);
                 navigate('/');
             } else {
                 setError('Invalid credentials');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            setError('Login failed');
+            setError(err.response?.data?.message || 'Login failed');
         }
     };
 
     const handleSocialLogin = (provider: string) => {
-        // Redirect to Backend for OAuth flow
+        // Redirect to Backend for OAuth flow via Gateway
         window.location.href = `http://localhost:7032/api/externalauth/login/${provider}`;
     };
 
