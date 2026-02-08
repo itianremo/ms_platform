@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'models.dart';
 
@@ -7,7 +8,8 @@ class AuthClient {
   final Dio _dio;
   final String baseUrl;
 
-  AuthClient(this._dio, {this.baseUrl = "http://localhost:5001/api/Auth"});
+  AuthClient(this._dio,
+      {this.baseUrl = "http://192.168.100.16:7032/auth/api/Auth"});
 
   Future<AuthResponse> login(LoginRequest request) async {
     final response = await _dio.post(
@@ -72,7 +74,26 @@ class AuthClient {
     return AppConfig.fromJson(response.data);
   }
 
-  Future<UserProfile> getUserProfile(String userId, String appId) async {
+  Future<List<SubscriptionPackage>> getSubscriptionPackages(
+      String appId) async {
+    try {
+      final uri = Uri.parse(baseUrl);
+      final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+
+      final response =
+          await _dio.get('$gatewayUrl/apps/api/Apps/$appId/packages');
+      if (response.statusCode == 200 && response.data != null) {
+        final List<dynamic> data = response.data;
+        return data.map((json) => SubscriptionPackage.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching packages: $e');
+      return [];
+    }
+  }
+
+  Future<UserProfile?> getUserProfile(String userId, String appId) async {
     final uri = Uri.parse(baseUrl);
     final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
 
@@ -80,6 +101,40 @@ class AuthClient {
       '$gatewayUrl/users/api/Users/profile',
       queryParameters: {'userId': userId, 'appId': appId},
     );
-    return UserProfile.fromJson(response.data);
+    var data = response.data;
+    if (data is String) {
+      if (data.isEmpty) {
+        return null;
+      }
+      try {
+        data = jsonDecode(data);
+      } catch (e) {
+        throw FormatException('Failed to decode JSON: $e');
+      }
+    }
+    if (data == null) {
+      return null;
+    }
+    return UserProfile.fromJson(data);
+  }
+
+  Future<void> updateUserProfile(UserProfile profile) async {
+    final uri = Uri.parse(baseUrl);
+    final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+
+    await _dio.put(
+      '$gatewayUrl/users/api/Users/profile',
+      data: {
+        'id': profile.id,
+        'userId': profile.userId,
+        'appId': profile.appId,
+        'displayName': profile.displayName,
+        'bio': profile.bio,
+        'avatarUrl': profile.avatarUrl,
+        'customDataJson': profile.customDataJson,
+        'dateOfBirth': profile.dateOfBirth?.toIso8601String(),
+        'gender': profile.gender,
+      },
+    );
   }
 }

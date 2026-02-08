@@ -15,7 +15,7 @@ public class SubscriptionPackage : Entity
 
     private SubscriptionPackage() { }
 
-    public SubscriptionPackage(Guid appId, string name, string description, decimal price, decimal discount, SubscriptionPeriod period)
+    public SubscriptionPackage(Guid appId, string name, string description, decimal price, decimal discount, SubscriptionPeriod period, string currency = "USD")
     {
         Id = Guid.NewGuid();
         AppId = appId;
@@ -23,7 +23,7 @@ public class SubscriptionPackage : Entity
         Description = description;
         Price = price;
         Discount = discount;
-        Currency = "USD"; // Default for now
+        Currency = currency;
         Period = period;
         IsActive = true;
     }
@@ -34,10 +34,11 @@ public class SubscriptionPackage : Entity
 
 public enum SubscriptionPeriod
 {
-    Weekly = 1,
-    Monthly = 2,
-    Quarterly = 3,
-    SemiAnnually = 6,
-    Yearly = 12,
-    Unlimited = 99
+    Weekly = 7,  // Days
+    BiWeekly = 14, // Days
+    Monthly = 30, // Days (Approx)
+    Quarterly = 90, // Days (Approx)
+    SemiAnnually = 180, // Days (Approx)
+    Yearly = 365, // Days
+    Unlimited = 9999 // Special
 }

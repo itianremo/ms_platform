@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import UsersPage from './pages/UsersPage';
 import PreferencesPage from './pages/PreferencesPage';
+import GeneralConfigPage from './pages/GeneralConfigPage';
 
 import Dashboard from './pages/Dashboard';
 
@@ -30,6 +31,7 @@ function App() {
           <Route path="users" element={<UsersPage />} />
           <Route path="moderation" element={<ModerationPage />} />
           <Route path="settings" element={<PreferencesPage />} />
+          <Route path="configuration" element={<GeneralConfigPage />} />
         </Route>
       </Routes >
       <Toaster />

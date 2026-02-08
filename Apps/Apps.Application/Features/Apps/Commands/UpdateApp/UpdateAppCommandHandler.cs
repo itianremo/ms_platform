@@ -19,6 +19,12 @@ public class UpdateAppCommandHandler : IRequestHandler<UpdateAppCommand, bool>
         if (app == null) return false;
 
         app.UpdateDetails(request.Name, request.Description, request.BaseUrl);
+        
+        if (!string.IsNullOrEmpty(request.ThemeJson))
+        {
+            app.UpdateTheme(request.ThemeJson);
+        }
+
         await _repository.UpdateAsync(app);
         return true;
     }

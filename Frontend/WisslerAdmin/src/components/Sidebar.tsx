@@ -92,8 +92,8 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
                     <div className="py-2">
                         {!collapsed && <h4 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Configuration</h4>}
                         <div className="space-y-1">
-                            {/* Assuming Settings page exists or will exist */}
-                            {/* <SidebarItem to="/settings" icon={Settings} label="Settings" collapsed={collapsed} /> */}
+                            <SidebarItem to="/configuration" icon={Settings} label="App Configuration" collapsed={collapsed} />
+                            <SidebarItem to="/settings" icon={Users} label="My Preferences" collapsed={collapsed} />
                         </div>
                     </div>
                 )}

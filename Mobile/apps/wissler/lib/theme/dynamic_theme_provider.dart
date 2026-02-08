@@ -8,8 +8,12 @@ import 'wissler_theme.dart';
 
 class DynamicThemeNotifier extends StateNotifier<ThemeData> {
   final Ref _ref;
+  Color _currentPrimary = WisslerPalette.coral; // Default cheerful color
+  bool _isDark = false;
 
-  DynamicThemeNotifier(this._ref) : super(WisslerTheme.theme) {
+  DynamicThemeNotifier(this._ref)
+      : super(WisslerTheme.getTheme(
+            primary: WisslerPalette.coral, isDark: false)) {
     loadTheme();
   }
 
@@ -20,7 +24,8 @@ class DynamicThemeNotifier extends StateNotifier<ThemeData> {
       if (authState.status == AuthStatus.authenticated) {
         await _loadAppConfigDefaults();
       } else {
-        await _loadAppConfigDefaults();
+        // Default if validation fails or unauthenticated
+        _updateTheme();
       }
     } catch (e) {
       print('Error loading theme: $e');
@@ -39,19 +44,57 @@ class DynamicThemeNotifier extends StateNotifier<ThemeData> {
     }
   }
 
-  void _applyThemeFromJson(String jsonStr) {
+  void _applyThemeFromJson(String? jsonStr) {
+    if (jsonStr == null || jsonStr.isEmpty) return;
     try {
+      if (!jsonStr.trim().startsWith('{')) {
+        print('Invalid JSON format');
+        return;
+      }
       final Map<String, dynamic> data = json.decode(jsonStr);
+
       final themeMode = data['theme'] as String?;
       if (themeMode == 'dark') {
-        state = WisslerTheme.darkTheme;
+        _isDark = true;
       } else {
-        state = WisslerTheme.theme;
+        _isDark = false;
       }
+
+      final colorValue = data['primaryColor'] as int?;
+      if (colorValue != null) {
+        _currentPrimary = Color(colorValue);
+      }
+
+      _updateTheme();
     } catch (e) {
       print('Error parsing theme json: $e');
+      _updateTheme(); // Fallback
     }
   }
+
+  void toggleDarkMode(bool isDark) {
+    _isDark = isDark;
+    _updateTheme();
+  }
+
+  void setPrimaryColor(Color color) {
+    _currentPrimary = color;
+    _updateTheme();
+  }
+
+  // Deprecated usage support if called directly
+  void setTheme(ThemeData theme) {
+    // Try to infer brightness
+    _isDark = theme.brightness == Brightness.dark;
+    state = theme;
+  }
+
+  void _updateTheme() {
+    state = WisslerTheme.getTheme(primary: _currentPrimary, isDark: _isDark);
+  }
+
+  Color get currentPrimary => _currentPrimary;
+  bool get isDark => _isDark;
 }
 
 final dynamicThemeProvider =

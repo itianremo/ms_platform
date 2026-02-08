@@ -160,6 +160,41 @@ public static class AppsDbInitializer
             }
         }
 
+        // Hardcoded Seeding for Wissler (Dynamic Request)
+        var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        var wisslerPackages = new List<(string Name, decimal Price, SubscriptionPeriod Period)>
+        {
+            ("1 Week", 49, SubscriptionPeriod.Weekly),
+            ("2 Weeks", 89, SubscriptionPeriod.BiWeekly),
+            ("1 Month", 149, SubscriptionPeriod.Monthly),
+            ("3 Months", 399, SubscriptionPeriod.Quarterly),
+            ("6 Months", 649, SubscriptionPeriod.SemiAnnually),
+            ("1 Year", 1000, SubscriptionPeriod.Yearly),
+            ("Unlimited", 1700, SubscriptionPeriod.Unlimited)
+        };
+
+        foreach (var (name, price, period) in wisslerPackages)
+        {
+             var existingPkg = await context.SubscriptionPackages
+                .FirstOrDefaultAsync(p => p.AppId == wisslerAppId && p.Name == name);
+
+            if (existingPkg == null)
+            {
+                var pkg = new SubscriptionPackage(
+                    wisslerAppId, 
+                    name, 
+                    $"Access to premium features for {name}", 
+                    price, 
+                    0, 
+                    period,
+                    "EGP"
+                );
+                await context.SubscriptionPackages.AddAsync(pkg);
+                logger.LogInformation("Seeded Wissler Package: {Name} - {Price} EGP", name, price);
+            }
+        }
+        await context.SaveChangesAsync();
+
         // Ensure VIP Unlimited Package exists for ALL Apps (for Admin Auto-Grant)
         var allApps = await context.Apps.ToListAsync();
         foreach (var app in allApps)

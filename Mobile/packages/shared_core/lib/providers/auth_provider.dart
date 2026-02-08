@@ -7,8 +7,7 @@ import '../repositories/auth_repository.dart';
 // Dio Provider - should be configured with BaseOptions, Interceptors, etc. somewhere globally.
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(BaseOptions(
-    baseUrl:
-        'http://192.168.100.16:5001/api/Auth', // Local IP for device testing
+    baseUrl: 'http://192.168.100.16:7032/auth/api/Auth', // Gateway URL
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -24,7 +23,8 @@ final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
 });
 
 final authClientProvider = Provider<AuthClient>((ref) {
-  return AuthClient(ref.watch(dioProvider));
+  final dio = ref.watch(dioProvider);
+  return AuthClient(dio, baseUrl: dio.options.baseUrl);
 });
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {

@@ -9,7 +9,7 @@ class AppRepository {
     return await _client.getAppConfig(appId);
   }
 
-  Future<UserProfile> getUserProfile(String userId, String appId) async {
+  Future<UserProfile?> getUserProfile(String userId, String appId) async {
     return await _client.getUserProfile(userId, appId);
   }
 }

@@ -47,7 +47,7 @@ export const UserPreferencesProvider = ({ children }: { children: React.ReactNod
                         ...themeData
                     }));
                     if (themeData.theme) {
-                        setTheme(themeData.theme);
+                        setTheme(themeData.theme.toLowerCase() as any);
                     }
                 } catch { }
             }
@@ -89,7 +89,7 @@ export const UserPreferencesProvider = ({ children }: { children: React.ReactNod
 
                     // Apply Theme immediately
                     if (data.theme) {
-                        setTheme(data.theme);
+                        setTheme(data.theme.toLowerCase() as any);
                     }
                 } catch (e) {
                     console.error("Failed to parse preferences", e);
@@ -111,7 +111,7 @@ export const UserPreferencesProvider = ({ children }: { children: React.ReactNod
 
         // Apply Theme Side-effect
         if (newPrefs.theme) {
-            setTheme(newPrefs.theme);
+            setTheme(newPrefs.theme.toLowerCase() as any);
         }
 
         try {

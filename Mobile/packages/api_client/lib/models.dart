@@ -136,6 +136,8 @@ class UserProfile {
   final String? bio;
   final String? avatarUrl;
   final String? customDataJson;
+  final DateTime? dateOfBirth;
+  final String? gender;
 
   UserProfile({
     required this.id,
@@ -145,6 +147,8 @@ class UserProfile {
     this.bio,
     this.avatarUrl,
     this.customDataJson,
+    this.dateOfBirth,
+    this.gender,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -156,6 +160,48 @@ class UserProfile {
       bio: json['bio'] as String?,
       avatarUrl: json['avatarUrl'] as String?,
       customDataJson: json['customDataJson'] as String?,
+      dateOfBirth: json['dateOfBirth'] == null
+          ? null
+          : DateTime.parse(json['dateOfBirth']),
+      gender: json['gender'] as String?,
+    );
+  }
+}
+
+class SubscriptionPackage {
+  final String id;
+  final String appId;
+  final String name;
+  final String description;
+  final double price;
+  final double discount;
+  final String currency;
+  final int period;
+  final bool isActive;
+
+  SubscriptionPackage({
+    required this.id,
+    required this.appId,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.discount,
+    required this.currency,
+    required this.period,
+    required this.isActive,
+  });
+
+  factory SubscriptionPackage.fromJson(Map<String, dynamic> json) {
+    return SubscriptionPackage(
+      id: json['id'] as String,
+      appId: json['appId'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String,
+      price: (json['price'] as num).toDouble(),
+      discount: (json['discount'] as num).toDouble(),
+      currency: json['currency'] as String? ?? 'USD',
+      period: json['period'] as int,
+      isActive: json['isActive'] as bool,
     );
   }
 }

@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_ui/shared_ui.dart';
+
 import 'package:shared_core/providers/auth_provider.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'theme/dynamic_theme_provider.dart';
+import 'screens/splash_screen.dart';
+import 'screens/auth/wissler_login_screen.dart';
+import 'screens/auth/wissler_register_screen.dart';
+import 'screens/auth/wissler_forgot_password_screen.dart';
+import 'screens/home/wissler_home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +34,7 @@ class WisslerApp extends ConsumerWidget {
     final currentTheme = ref.watch(dynamicThemeProvider);
 
     final router = GoRouter(
-      initialLocation: '/',
+      initialLocation: '/splash',
       redirect: (context, state) {
         final isLoggedIn = authState.status == AuthStatus.authenticated;
         final isLoggingIn = state.uri.path == '/login' ||
@@ -46,20 +51,23 @@ class WisslerApp extends ConsumerWidget {
       routes: [
         GoRoute(
           path: '/',
-          builder: (context, state) => const Scaffold(
-              body: Center(child: Text('Wissler Home - Authenticated'))),
+          builder: (context, state) => const WisslerHomeScreen(),
+        ),
+        GoRoute(
+          path: '/splash',
+          builder: (context, state) => const SplashScreen(),
         ),
         GoRoute(
           path: '/login',
-          builder: (context, state) => const LoginScreen(),
+          builder: (context, state) => const WisslerLoginScreen(),
         ),
         GoRoute(
           path: '/register',
-          builder: (context, state) => const RegisterScreen(),
+          builder: (context, state) => const WisslerRegisterScreen(),
         ),
         GoRoute(
           path: '/forgot-password',
-          builder: (context, state) => const ForgotPasswordScreen(),
+          builder: (context, state) => const WisslerForgotPasswordScreen(),
         ),
       ],
     );

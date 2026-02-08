@@ -78,7 +78,7 @@ public class UsersDbInitializer
                     var gender = genders[random.Next(genders.Length)];
                     var dob = DateTime.UtcNow.AddYears(-random.Next(18, 60)).AddDays(-random.Next(0, 365));
 
-                     await SeedProfileAsync(user.Id, appId, displayName, bio, dob, gender);
+                     await SeedProfileAsync(user.Id, appId, displayName, bio, dob, gender, user.Phone);
                 }
             }
         }
@@ -101,7 +101,7 @@ public class UsersDbInitializer
         return name;
     }
 
-    private async Task SeedProfileAsync(Guid userId, Guid appId, string displayName, string bio, DateTime dob, string gender)
+    private async Task SeedProfileAsync(Guid userId, Guid appId, string displayName, string bio, DateTime dob, string gender, string? phone)
     {
         var exists = await _context.UserProfiles.AnyAsync(x => x.UserId == userId && x.AppId == appId);
         if (!exists)
@@ -124,6 +124,18 @@ public class UsersDbInitializer
                  defaults = "{}";
              }
 
+             // Merge Phone into Defaults/CustomData
+             if (!string.IsNullOrEmpty(phone))
+             {
+                 try 
+                 {
+                     var json = System.Text.Json.JsonNode.JsonNode.Parse(defaults)?.AsObject() ?? new System.Text.Json.Nodes.JsonObject();
+                     json["mobile"] = phone;
+                     defaults = json.ToJsonString();
+                 }
+                 catch { /* ignore json parse error, keep defaults as is or manually append */ }
+             }
+
              await _context.Database.ExecuteSqlRawAsync(@"
                 INSERT INTO [UserProfiles] ([Id], [UserId], [AppId], [DisplayName], [Bio], [AvatarUrl], [CustomDataJson], [DateOfBirth], [Gender], [Created])
                 VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9})
@@ -138,6 +150,7 @@ public class UsersDbInitializer
     {
         public Guid Id { get; set; }
         public string Email { get; set; } = string.Empty;
+        public string? Phone { get; set; }
     }
 }
 
