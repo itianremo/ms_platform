@@ -13,8 +13,14 @@ import 'screens/auth/wissler_register_screen.dart';
 import 'screens/auth/wissler_forgot_password_screen.dart';
 import 'screens/home/wissler_home_screen.dart';
 
+import 'package:flutter/services.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   final prefs = await SharedPreferences.getInstance();
 
   runApp(ProviderScope(
@@ -51,7 +57,7 @@ class WisslerApp extends ConsumerWidget {
       routes: [
         GoRoute(
           path: '/',
-          builder: (context, state) => const WisslerHomeScreen(),
+          builder: (context, state) => WisslerHomeScreen(key: wisslerHomeKey),
         ),
         GoRoute(
           path: '/splash',

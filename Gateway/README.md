@@ -1,18 +1,34 @@
 # Gateway Service
 
 ## Overview
-The entry point for all external traffic to the FitIT Platform. Implements the Reverse Proxy pattern using YARP (Yet Another Reverse Proxy) to route requests to appropriate microservices.
+The **Gateway Service** is the central entry point for the entire **Unified Microservices Platform**. It routes all incoming traffic to the appropriate downstream microservices using **YARP (Yet Another Reverse Proxy)**.
 
-## Tech Stack
-- **Framework**: .NET 8 (YARP)
-- **Rate Limiting**: Redis-based distributed rate limiting.
-- **Cors**: Centralized Cross-Origin Resource Sharing policy.
+## 🚀 Key Features
+-   **Centralized Routing**: Maps external requests (e.g., `/auth/*`) to internal services (e.g., `http://auth-service:8080`).
+-   **Authentication Proxy**: Validates JWTs before forwarding requests to protected endpoints.
+-   **Health Checks UI**: Aggregates health status from all downstream services into a single dashboard.
+-   **Rate Limiting**: Protects backend services from abuse.
+-   **CORS Management**: Centralized Cross-Origin Resource Sharing policies.
 
-## Key Features
-- **Routing**: dynamic routing to backend services based on path (`/auth`, `/apps`, `/users`, etc.).
-- **Load Balancing**: Distributes traffic across service instances (if scaled).
-- **Authentication**: Validates JWT tokens at the edge (optional, mostly pass-through).
-- **Rate Limiting**: Protects downstream services from abuse.
+## 🛠️ Configuration
+The routing logic is defined in `appsettings.json` (or `appsettings.Docker.json` for containerized environments).
 
-## Configuration
-Routes and Clusters are defined in `appsettings.json` or loaded dynamically.
+### Main Routes
+| Route | Cluster | Destination |
+| :--- | :--- | :--- |
+| `/auth/*` | `auth-cluster` | Auth Service |
+| `/users/*` | `users-cluster` | Users Service |
+| `/apps/*` | `apps-cluster` | Apps Service |
+| `/notifications/*` | `notifications-cluster` | Notifications Service |
+| `/media/*` | `media-cluster` | Media Service |
+| `/chat/*` | `chat-cluster` | Chat Service |
+| `/payments/*` | `payments-cluster` | Payments Service |
+| `/audit/*` | `audit-cluster` | Audit Service |
+| `/search/*` | `search-cluster` | Search Service |
+| `/geo/*` | `geo-cluster` | Geo Service |
+| `/recommendation/*` | `rec-cluster` | Recommendation Service |
+
+## 📦 Tech Stack
+-   **.NET 8**
+-   **YARP**
+-   **AspNetCore.HealthChecks.UI**

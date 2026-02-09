@@ -76,46 +76,44 @@ class AuthClient {
 
   Future<List<SubscriptionPackage>> getSubscriptionPackages(
       String appId) async {
-    try {
-      final uri = Uri.parse(baseUrl);
-      final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
-
-      final response =
-          await _dio.get('$gatewayUrl/apps/api/Apps/$appId/packages');
-      if (response.statusCode == 200 && response.data != null) {
-        final List<dynamic> data = response.data;
-        return data.map((json) => SubscriptionPackage.fromJson(json)).toList();
-      }
-      return [];
-    } catch (e) {
-      print('Error fetching packages: $e');
-      return [];
-    }
+    // Mock Packages
+    return [
+      SubscriptionPackage(
+          id: '1',
+          appId: appId,
+          name: 'Weekly',
+          description: '7 Days access',
+          price: 299.0,
+          discount: 0,
+          currency: 'EGP',
+          period: 7,
+          isActive: true),
+      SubscriptionPackage(
+          id: '2',
+          appId: appId,
+          name: 'Monthly',
+          description: '30 Days access',
+          price: 899.0,
+          discount: 10,
+          currency: 'EGP',
+          period: 30,
+          isActive: true),
+    ];
   }
 
   Future<UserProfile?> getUserProfile(String userId, String appId) async {
-    final uri = Uri.parse(baseUrl);
-    final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
-
-    final response = await _dio.get(
-      '$gatewayUrl/users/api/Users/profile',
-      queryParameters: {'userId': userId, 'appId': appId},
+    // Mock Profile
+    return UserProfile(
+      id: userId,
+      userId: userId,
+      appId: appId,
+      displayName: 'Mock User',
+      bio: 'This is a mock profile for UI testing.',
+      avatarUrl: 'https://i.pravatar.cc/300',
+      dateOfBirth: DateTime(1995, 5, 20),
+      gender: 'Male',
+      customDataJson: jsonEncode({'coins': 100, 'score': 500}),
     );
-    var data = response.data;
-    if (data is String) {
-      if (data.isEmpty) {
-        return null;
-      }
-      try {
-        data = jsonDecode(data);
-      } catch (e) {
-        throw FormatException('Failed to decode JSON: $e');
-      }
-    }
-    if (data == null) {
-      return null;
-    }
-    return UserProfile.fromJson(data);
   }
 
   Future<void> updateUserProfile(UserProfile profile) async {
@@ -136,5 +134,218 @@ class AuthClient {
         'gender': profile.gender,
       },
     );
+  }
+
+  Future<List<UserProfile>> getProfiles(String appId) async {
+    final uri = Uri.parse(baseUrl);
+    final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+
+    try {
+      final response = await _dio.get(
+        '$gatewayUrl/users/api/Users/profiles',
+        queryParameters: {'appId': appId},
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final List<dynamic> data = response.data;
+        return data.map((json) => UserProfile.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching profiles: $e');
+      return [];
+    }
+  }
+
+  Future<List<Country>> getCountries() async {
+    // Mock Countries for UI verification
+    return [
+      Country(id: '1', name: 'Egypt', code: 'EG', phoneCode: '+20'),
+      Country(id: '2', name: 'USA', code: 'US', phoneCode: '+1'),
+      Country(id: '3', name: 'UAE', code: 'AE', phoneCode: '+971'),
+    ];
+  }
+
+  Future<List<City>> getCities(String countryId) async {
+    final uri = Uri.parse(baseUrl);
+    final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+
+    try {
+      final response =
+          await _dio.get('$gatewayUrl/geo/api/Lookups/cities/$countryId');
+      if (response.statusCode == 200 && response.data != null) {
+        final List<dynamic> data = response.data;
+        return data.map((json) => City.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching cities: $e');
+      return [];
+    }
+  }
+
+  Future<void> deleteAccount(String userId, String password) async {
+    // Assuming a Delete Endpoint that takes password for confirmation
+    // If endpoints are standard REST, DELETE usually doesn't take body in some clients, but Dio supports it.
+    // URL: /users/api/Users/{userId}
+
+    final uri = Uri.parse(baseUrl);
+    final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+
+    await _dio.delete(
+      '$gatewayUrl/users/api/Users/$userId',
+      data: jsonEncode({'password': password}),
+    );
+  }
+
+  Future<void> requestVerification(String userId, String type) async {
+    // Mocking the endpoint call
+    await _dio.post(
+      '$baseUrl/verification/send', // Assuming Auth service handles this
+      data: {'userId': userId, 'type': type},
+    );
+  }
+
+  Future<List<Recommendation>> getRecommendations({
+    String category = 'All',
+    int page = 1,
+    int pageSize = 20,
+    String? country,
+    int? minAge,
+    int? maxAge,
+  }) async {
+    final uri = Uri.parse(baseUrl);
+    final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+
+    try {
+      final response = await _dio.get(
+        '$gatewayUrl/recommendation/api/Recommendations',
+        queryParameters: {
+          'category': category,
+          'page': page,
+          'pageSize': pageSize,
+          if (country != null) 'country': country,
+          if (minAge != null) 'minAge': minAge,
+          if (maxAge != null) 'maxAge': maxAge,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final List<dynamic> data = response.data;
+        return data.map((json) => Recommendation.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching recommendations: $e');
+      return [];
+    }
+  }
+
+  Future<List<Recommendation>> getWhoLikesMe(String userId) async {
+    // Attempt to fetch from backend, or return mock
+    try {
+      final uri = Uri.parse(baseUrl);
+      final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+      final response = await _dio.get(
+          '$gatewayUrl/matching/api/Likes/who-likes-me',
+          queryParameters: {'userId': userId});
+      if (response.statusCode == 200 && response.data != null) {
+        return (response.data as List)
+            .map((e) => Recommendation.fromJson(e))
+            .toList();
+      }
+    } catch (_) {}
+    // Mock Data (Max 20 as requested)
+    return List.generate(
+        20,
+        (i) => Recommendation(
+            userId: 'mock_$i',
+            displayName: 'Admirer $i',
+            age: 20 + i,
+            avatarUrl: 'https://i.pravatar.cc/150?u=$i',
+            city: 'Unknown',
+            country: 'Unknown',
+            matchPercentage: 0.8,
+            isBoosted: false,
+            isNew: true,
+            isOnline: true,
+            isVerified: false));
+  }
+
+  Future<List<Recommendation>> getMyLikes(String userId) async {
+    try {
+      final uri = Uri.parse(baseUrl);
+      final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+      final response = await _dio.get('$gatewayUrl/matching/api/Likes/my-likes',
+          queryParameters: {'userId': userId});
+      if (response.statusCode == 200 && response.data != null) {
+        return (response.data as List)
+            .map((e) => Recommendation.fromJson(e))
+            .toList();
+      }
+    } catch (_) {}
+    // Mock
+    return List.generate(
+        5,
+        (i) => Recommendation(
+            userId: 'liked_$i',
+            displayName: 'Crush $i',
+            age: 22 + i,
+            avatarUrl: 'https://i.pravatar.cc/150?u=${i + 20}',
+            city: 'Cairo',
+            country: 'Egypt',
+            matchPercentage: 0.9,
+            isBoosted: false,
+            isNew: false,
+            isOnline: false,
+            isVerified: true));
+  }
+
+  Future<List<Recommendation>> getMyDislikes(String userId) async {
+    // Mock Dislikes
+    return List.generate(
+        10,
+        (i) => Recommendation(
+            userId: 'disliked_$i',
+            displayName: 'Removed $i',
+            age: 22 + i,
+            avatarUrl: 'https://i.pravatar.cc/150?u=${i + 60}',
+            city: 'Cairo',
+            country: 'Egypt',
+            matchPercentage: 0.1,
+            isBoosted: false,
+            isNew: false,
+            isOnline: false,
+            isVerified: false));
+  }
+
+  Future<List<Recommendation>> getTopPicks(String userId) async {
+    try {
+      final uri = Uri.parse(baseUrl);
+      final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+      final response = await _dio.get(
+          '$gatewayUrl/matching/api/Recommendations/top-picks',
+          queryParameters: {'userId': userId});
+      if (response.statusCode == 200 && response.data != null) {
+        return (response.data as List)
+            .map((e) => Recommendation.fromJson(e))
+            .toList();
+      }
+    } catch (_) {}
+    // Mock
+    return List.generate(
+        5,
+        (i) => Recommendation(
+            userId: 'top_$i',
+            displayName: 'Top Pick $i',
+            age: 25,
+            avatarUrl: 'https://i.pravatar.cc/150?u=${i + 50}',
+            city: 'Paris',
+            country: 'France',
+            matchPercentage: 0.95 + (i * 0.01),
+            isBoosted: true,
+            isNew: false,
+            isOnline: true,
+            isVerified: true));
   }
 }

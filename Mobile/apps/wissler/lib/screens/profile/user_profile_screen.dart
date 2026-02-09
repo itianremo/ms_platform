@@ -1,16 +1,19 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:shared_core/providers/auth_provider.dart';
 import 'package:api_client/api_client.dart';
 import '../../theme/dynamic_theme_provider.dart';
+import '../../theme/dynamic_theme_provider.dart';
+import '../../widgets/custom_toast.dart';
+import '../home/wissler_home_screen.dart';
 
 class UserProfileScreen extends ConsumerStatefulWidget {
-  const UserProfileScreen({super.key});
+// ... (omitted)
+
+  final bool isModal;
+  final VoidCallback? onClose;
+  const UserProfileScreen({super.key, this.isModal = false, this.onClose});
 
   @override
   ConsumerState<UserProfileScreen> createState() => _UserProfileScreenState();
@@ -21,138 +24,78 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   late TabController _tabController;
   UserProfile? _userProfile;
   bool _isLoading = true;
-  String? _errorMessage;
 
-  // Profile Fields
-  final _displayNameController = TextEditingController();
-  final _bioController = TextEditingController();
-  final _mobileController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _countryController = TextEditingController();
+  // Lookups
+  List<Country> _countries = [];
+  List<City> _cities = [];
 
-  // Settings
-  bool _emailNotify = true;
-  bool _smsNotify = true;
-  bool _pushNotify = true;
+  // Gamification
+  int _coins = 0;
+  int _score = 0;
 
-  // Questions
-  final _lookingForController = TextEditingController();
-  final _interestsController = TextEditingController();
-
-  // Image Picker
-  final ImagePicker _picker = ImagePicker();
-  XFile? _imageFile;
-
+  // Packages
   List<SubscriptionPackage> _packages = [];
   bool _isLoadingPackages = false;
-  String? _selectedPackageId;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _loadProfile();
+    _loadLookups();
     _loadPackages();
-  }
-
-  Future<void> _loadPackages() async {
-    setState(() => _isLoadingPackages = true);
-    try {
-      final authClient = ref.read(authClientProvider);
-      // Hardcoded Wissler AppID for now
-      final pkgs = await authClient
-          .getSubscriptionPackages('22222222-2222-2222-2222-222222222222');
-      setState(() {
-        _packages = pkgs.where((p) => p.isActive).toList();
-        // Sort by price
-        _packages.sort((a, b) => a.price.compareTo(b.price));
-      });
-    } catch (e) {
-      print('Error loading packages: $e');
-    } finally {
-      if (mounted) setState(() => _isLoadingPackages = false);
-    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    _displayNameController.dispose();
-    _bioController.dispose();
-    _mobileController.dispose();
-    _emailController.dispose();
-    _cityController.dispose();
-    _countryController.dispose();
-    _lookingForController.dispose();
-    _interestsController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadProfile() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  Future<void> _loadPackages() async {
+    setState(() => _isLoadingPackages = true);
+    try {
+      final client = ref.read(authClientProvider);
+      final pkgs = await client
+          .getSubscriptionPackages('22222222-2222-2222-2222-222222222222');
+      if (mounted)
+        setState(() => _packages = pkgs.where((p) => p.isActive).toList());
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _isLoadingPackages = false);
+    }
+  }
 
+  Future<void> _loadLookups() async {
+    try {
+      final client = ref.read(authClientProvider);
+      final countries = await client.getCountries();
+      if (mounted) setState(() => _countries = countries);
+    } catch (_) {}
+  }
+
+  Future<void> _loadProfile() async {
+    setState(() => _isLoading = true);
     try {
       final repo = ref.read(authRepositoryProvider);
       final token = repo.getAccessToken();
-
       if (token == null) throw Exception('User not logged in');
-
       final payload = _decodeJwt(token);
       final userId = payload['sub'] ?? payload['id'] ?? payload['userId'];
 
-      if (userId == null) throw Exception('Invalid token');
+      final client = ref.read(authClientProvider);
+      final profile = await client.getUserProfile(
+          userId, '22222222-2222-2222-2222-222222222222');
 
-      final authClient = ref.read(authClientProvider);
-      final profile = await authClient.getUserProfile(
-        userId,
-        '22222222-2222-2222-2222-222222222222',
-      );
-
-      if (profile == null) {
-        _userProfile = UserProfile(
-          id: '',
-          userId: userId,
-          appId: '22222222-2222-2222-2222-222222222222',
-          displayName: '',
-          bio: '',
-          avatarUrl: '',
-          customDataJson: null,
-          dateOfBirth: null,
-          gender: null,
-        );
-      } else {
-        _userProfile = profile;
-        _parseCustomData(profile.customDataJson);
+      if (profile != null) {
+        setState(() {
+          _userProfile = profile;
+          _parseCustomData(profile.customDataJson);
+        });
       }
-
-      _displayNameController.text = _userProfile?.displayName ?? '';
-      _bioController.text = _userProfile?.bio ?? '';
-
-      // Populate Email from Token
-      final email = payload['email'] ??
-          payload[
-              'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] ??
-          '';
-      _emailController.text = email;
-
-      // Populate Mobile from Token if not already set by customData
-      if (_mobileController.text.isEmpty) {
-        final phone = payload['phone'] ??
-            payload[
-                'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/mobilephone'] ??
-            '';
-        _mobileController.text = phone;
-      }
-    } catch (e) {
-      _errorMessage = e.toString();
+    } catch (_) {
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -161,722 +104,485 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     try {
       final data = json.decode(jsonStr);
       if (data is Map<String, dynamic>) {
-        if (data.containsKey('mobile')) _mobileController.text = data['mobile'];
-        if (data.containsKey('city')) _cityController.text = data['city'];
-        if (data.containsKey('country'))
-          _countryController.text = data['country'];
-        if (data.containsKey('lookingFor'))
-          _lookingForController.text = data['lookingFor'];
-        if (data.containsKey('interests'))
-          _interestsController.text = data['interests'];
-
-        if (data.containsKey('emailNotify')) _emailNotify = data['emailNotify'];
-        if (data.containsKey('smsNotify')) _smsNotify = data['smsNotify'];
-        if (data.containsKey('pushNotify')) _pushNotify = data['pushNotify'];
-      }
-    } catch (e) {
-      print('Error parsing custom data: $e');
-    }
-  }
-
-  Future<void> _pickImage() async {
-    try {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
         setState(() {
-          _imageFile = image;
+          _coins = data['coins'] ?? 0;
+          _score = data['score'] ?? 0;
         });
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking image: $e')),
-      );
-    }
-  }
-
-  Future<void> _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location services are disabled.')));
-      return;
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permissions are denied')));
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Location permissions are permanently denied.')));
-      return;
-    }
-
-    try {
-      final position = await Geolocator.getCurrentPosition();
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(position.latitude, position.longitude);
-      if (placemarks.isNotEmpty) {
-        final place = placemarks.first;
-        setState(() {
-          _cityController.text = place.locality ?? '';
-          _countryController.text = place.country ?? '';
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error getting location: $e')));
-    }
-  }
-
-  Future<void> _saveProfile() async {
-    if (_userProfile == null) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      final authClient = ref.read(authClientProvider);
-
-      // Merge data into customData
-      Map<String, dynamic> customData = {};
-      if (_userProfile?.customDataJson != null) {
-        try {
-          customData = json.decode(_userProfile!.customDataJson!);
-        } catch (_) {}
-      }
-
-      customData['mobile'] = _mobileController.text;
-      customData['city'] = _cityController.text;
-      customData['country'] = _countryController.text;
-      customData['lookingFor'] = _lookingForController.text;
-      customData['interests'] = _interestsController.text;
-
-      customData['emailNotify'] = _emailNotify;
-      customData['smsNotify'] = _smsNotify;
-      customData['pushNotify'] = _pushNotify;
-
-      // Handle Image Upload (Mock)
-      String? finalAvatarUrl = _userProfile?.avatarUrl;
-      if (_imageFile != null) {
-        print("Simulating upload of ${_imageFile!.path}");
-        // In real app, upload and update finalAvatarUrl
-      }
-
-      final updatedProfile = UserProfile(
-        id: _userProfile!.id,
-        userId: _userProfile!.userId,
-        appId: _userProfile!.appId,
-        displayName: _displayNameController.text,
-        bio: _bioController.text,
-        avatarUrl: finalAvatarUrl,
-        customDataJson: json.encode(customData),
-        dateOfBirth: _userProfile!.dateOfBirth,
-        gender: _userProfile!.gender,
-      );
-
-      await authClient.updateUserProfile(updatedProfile);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile Saved Successfully')),
-        );
-        _userProfile = updatedProfile;
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating profile: $e')),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
-  // ... (Keep existing helpers like _decodeJwt, _decodeBase64, _getUserEmail, _toggleTheme, _changeColor, _saveThemePreferences)
-  // Re-implementing them briefly for completeness in this file rewrite.
-
-  Map<String, dynamic> _decodeJwt(String token) {
-    try {
-      final parts = token.split('.');
-      if (parts.length != 3) throw Exception('Invalid token');
-      final payload = _decodeBase64(parts[1]);
-      final payloadMap = json.decode(payload);
-      if (payloadMap is! Map<String, dynamic>) {
-        throw Exception('Invalid payload');
-      }
-      return payloadMap;
-    } catch (e) {
-      return {};
-    }
-  }
-
-  String _decodeBase64(String str) {
-    String output = str.replaceAll('-', '+').replaceAll('_', '/');
-    switch (output.length % 4) {
-      case 0:
-        break;
-      case 2:
-        output += '==';
-        break;
-      case 3:
-        output += '=';
-        break;
-    }
-    return utf8.decode(base64Url.decode(output));
-  }
-
-  Future<void> _toggleTheme(bool isDark) async {
-    final notifier = ref.read(dynamicThemeProvider.notifier);
-    notifier.toggleDarkMode(isDark);
-    _saveThemePreferences(isDark, notifier.currentPrimary);
-  }
-
-  Future<void> _saveThemePreferences(bool isDark, Color primary) async {
-    if (_userProfile == null) return;
-    // Note: This duplicates logic with _saveProfile but is instant for UI responsiveness
-    Map<String, dynamic> customData = {};
-    if (_userProfile?.customDataJson != null) {
-      try {
-        customData = json.decode(_userProfile!.customDataJson!);
-      } catch (_) {}
-    }
-    customData['theme'] = isDark ? 'dark' : 'light';
-    customData['primaryColor'] = primary.value;
-
-    // Update local state without full reload
-    _userProfile = UserProfile(
-      id: _userProfile!.id,
-      userId: _userProfile!.userId,
-      appId: _userProfile!.appId,
-      displayName: _userProfile!.displayName,
-      bio: _userProfile!.bio,
-      avatarUrl: _userProfile!.avatarUrl,
-      customDataJson: json.encode(customData),
-    );
-
-    final authClient = ref.read(authClientProvider);
-    try {
-      await authClient.updateUserProfile(_userProfile!);
     } catch (_) {}
   }
 
-  void _logout() {
-    ref.read(authProvider.notifier).logout();
+  void _logout() => ref.read(authProvider.notifier).logout();
+
+  Map<String, dynamic> _decodeJwt(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) return {};
+    final payload = parts[1];
+    final normalized = base64Url.normalize(payload);
+    final resp = utf8.decode(base64Url.decode(normalized));
+    return json.decode(resp);
+  }
+
+  String _calculateAge(DateTime? dob) {
+    if (dob == null) return "N/A";
+    final now = DateTime.now();
+    int age = now.year - dob.year;
+    if (now.month < dob.month || (now.month == dob.month && now.day < dob.day))
+      age--;
+    return age.toString();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final primary = theme.primaryColor;
-
-    if (_isLoading && _userProfile == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    // Avatar logic
-    ImageProvider? bgImage;
-    if (_imageFile != null) {
-      bgImage = FileImage(File(_imageFile!.path));
-    } else if (_userProfile?.avatarUrl != null &&
-        _userProfile!.avatarUrl!.isNotEmpty) {
-      bgImage = NetworkImage(_userProfile!.avatarUrl!);
-    }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        bottom: TabBar(
+      body: NestedScrollView(
+        headerSliverBuilder: (context, _) => [
+          SliverAppBar(
+            expandedHeight: 180, // Reduced height for narrower spacing
+            leading: widget.isModal
+                ? IconButton(
+                    icon: Icon(Icons.close, color: Colors.grey[800], size: 30),
+                    onPressed: () {
+                      if (widget.onClose != null) {
+                        widget.onClose!();
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    })
+                : null,
+            automaticallyImplyLeading: false,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [
+                  theme.primaryColor,
+                  isDark ? Colors.black : Colors.white
+                ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
+                padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top +
+                        (widget.isModal ? 40 : 20),
+                    left: 20,
+                    right: 20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Avatar & Info Column
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 35,
+                                backgroundImage: _userProfile?.avatarUrl != null
+                                    ? NetworkImage(_userProfile!.avatarUrl!)
+                                    : null,
+                                child: _userProfile?.avatarUrl == null
+                                    ? const Icon(Icons.person, size: 35)
+                                    : null,
+                              ),
+                              const SizedBox(width: 15),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "${_userProfile?.displayName ?? 'Guest'}, ${_calculateAge(_userProfile?.dateOfBirth)}",
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const Text("Cairo, Egypt",
+                                        style: TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 14)),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              _buildHeaderBtn(context, Icons.edit, () {
+                                if (_userProfile != null) {
+                                  // Open Edit in Home Screen Overlay
+                                  final homeState = wisslerHomeKey.currentState;
+                                  if (homeState != null) {
+                                    homeState.openEditProfile(
+                                        _userProfile!,
+                                        _countries,
+                                        _cities); // Note: Need _cities in State or pass empty
+                                  }
+                                }
+                              }),
+                              const SizedBox(width: 15),
+                              _buildHeaderBtn(context, Icons.visibility, () {
+                                if (_userProfile != null) {
+                                  // Open Preview in Home Screen Overlay
+                                  final homeState = wisslerHomeKey.currentState;
+                                  if (homeState != null) {
+                                    homeState.openPreviewProfile(_userProfile!);
+                                  }
+                                }
+                              }),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    // Gamification Column (Thinner)
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          _buildThinCard(
+                              "Loyalty", "$_score", Icons.star, Colors.indigo),
+                          const SizedBox(height: 5),
+                          _buildThinCard("Coins", "$_coins",
+                              Icons.monetization_on, Colors.amber),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SliverPersistentHeader(
+            delegate: _SliverTabBarDelegate(
+              TabBar(
+                controller: _tabController,
+                indicatorColor: Colors.orange,
+                labelColor: Colors.orange,
+                unselectedLabelColor: Colors.blueGrey,
+                labelStyle: const TextStyle(
+                    fontWeight: FontWeight.normal, fontSize: 12),
+                tabs: const [
+                  Tab(
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                        Icon(Icons.stars, size: 16),
+                        SizedBox(width: 5),
+                        Text("Wissler+")
+                      ])),
+                  Tab(
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                        Icon(Icons.notifications, size: 16),
+                        SizedBox(width: 5),
+                        Text("Alerts")
+                      ])),
+                  Tab(
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                        Icon(Icons.settings, size: 16),
+                        SizedBox(width: 5),
+                        Text("Settings")
+                      ])),
+                ],
+              ),
+            ),
+            pinned: true,
+          ),
+        ],
+        body: TabBarView(
           controller: _tabController,
-          labelColor: primary,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: primary,
-          tabs: const [
-            Tab(icon: Icon(Icons.person_rounded), text: 'Personal'),
-            Tab(icon: Icon(Icons.star_rounded), text: 'Premium'),
-            Tab(icon: Icon(Icons.settings_rounded), text: 'Settings'),
+          children: [
+            _buildWisslerPlusTab(),
+            _buildNotificationsTab(),
+            _buildSettingsTab()
           ],
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: IconButton(
-              onPressed: _saveProfile,
-              style: IconButton.styleFrom(
-                  backgroundColor: primary.withOpacity(0.1)),
-              icon: Icon(Icons.check_rounded, color: primary),
-              tooltip: 'Save',
-            ),
-          )
-        ],
       ),
-      body: TabBarView(
-        controller: _tabController,
+    );
+  }
+
+  Widget _buildHeaderBtn(
+      BuildContext context, IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(right: 15),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.15),
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              spreadRadius: 1,
+            )
+          ],
+        ),
+        child: Icon(icon, color: Colors.white, size: 22),
+      ),
+    );
+  }
+
+  Widget _buildThinCard(
+      String title, String value, IconData icon, Color color) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)]),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // 1. Personal Info Tab
-          ListView(
-            padding: const EdgeInsets.all(24),
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Identity Section
-              Center(
-                child: Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child: CircleAvatar(
-                        radius: 60,
-                        backgroundColor: primary.withOpacity(0.1),
-                        backgroundImage: bgImage,
-                        child: bgImage == null
-                            ? Icon(Icons.person_rounded,
-                                size: 60, color: primary)
-                            : null,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                            color: primary,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                                color:
-                                    Theme.of(context).scaffoldBackgroundColor,
-                                width: 3)),
-                        child: const Icon(Icons.camera_alt_rounded,
-                            color: Colors.white, size: 18),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 32),
-              TextFormField(
-                controller: _displayNameController,
-                decoration: InputDecoration(
-                  labelText: 'Display Name',
-                  prefixIcon: const Icon(Icons.badge_outlined),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: theme.colorScheme.surface,
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _bioController,
-                decoration: InputDecoration(
-                  labelText: 'Bio',
-                  prefixIcon: const Icon(Icons.info_outline_rounded),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: theme.colorScheme.surface,
-                ),
-                maxLines: 3,
-              ),
-
-              const SizedBox(height: 24),
-              const Text('Demographics',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      initialValue: _userProfile?.dateOfBirth != null
-                          ? "${_userProfile!.dateOfBirth!.year}-${_userProfile!.dateOfBirth!.month}-${_userProfile!.dateOfBirth!.day}"
-                          : '',
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: 'Birthdate',
-                        prefixIcon: const Icon(Icons.cake_outlined),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        filled: true,
-                        fillColor: theme.colorScheme.surface.withOpacity(0.5),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextFormField(
-                      initialValue: _userProfile?.gender ?? '',
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: 'Gender',
-                        prefixIcon: const Icon(Icons.transgender),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        filled: true,
-                        fillColor: theme.colorScheme.surface.withOpacity(0.5),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-              const Text('Contact & Verification',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const SizedBox(height: 16),
-              // Mobile
-              TextFormField(
-                controller: _mobileController,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  labelText: 'Mobile Number',
-                  prefixIcon: const Icon(Icons.phone_iphone_rounded),
-                  suffixIcon: Icon(Icons.verified,
-                      color: Colors.green), // Mock Verified
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: theme.colorScheme.surface,
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Email
-              TextFormField(
-                controller: _emailController,
-                readOnly: true,
-                decoration: InputDecoration(
-                  labelText: 'Email Address',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  suffixIcon: Icon(Icons.verified,
-                      color: Colors.green), // Mock Verified
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: theme.colorScheme.surface.withOpacity(0.5),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Location',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  TextButton.icon(
-                    onPressed: _getCurrentLocation,
-                    icon: const Icon(Icons.my_location),
-                    label: const Text('Use GPS'),
-                  )
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _countryController,
-                      decoration: InputDecoration(
-                        labelText: 'Country',
-                        prefixIcon: const Icon(Icons.public),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        filled: true,
-                        fillColor: theme.colorScheme.surface,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _cityController,
-                      decoration: InputDecoration(
-                        labelText: 'City',
-                        prefixIcon: const Icon(Icons.location_city),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        filled: true,
-                        fillColor: theme.colorScheme.surface,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-              const Text('About Me',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _lookingForController,
-                decoration: InputDecoration(
-                  labelText: 'Looking For',
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: 'e.g. A serious relationship, new friends...',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: theme.colorScheme.surface,
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _interestsController,
-                decoration: InputDecoration(
-                  labelText: 'Interests',
-                  prefixIcon: const Icon(Icons.favorite_border),
-                  hintText: 'e.g. Hiking, Photography, Cooking...',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: theme.colorScheme.surface,
-                ),
-              ),
-              const SizedBox(height: 48),
+              Text(value,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(title,
+                  style: const TextStyle(fontSize: 10, color: Colors.grey)),
             ],
-          ),
-
-          // 2. Subscription Tab
-          ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                        colors: [primary, primary.withOpacity(0.7)]),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                          color: primary.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5))
-                    ]),
-                child: const Column(
-                  children: [
-                    Icon(Icons.star_rounded, color: Colors.white, size: 48),
-                    SizedBox(height: 16),
-                    Text('Wissler Premium',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
-                    Text('Unlock unlimited swipes and see who likes you!',
-                        style: TextStyle(color: Colors.white70),
-                        textAlign: TextAlign.center),
-                    SizedBox(height: 24),
-                    Chip(
-                        label: Text('Current Plan: Free',
-                            style: TextStyle(color: Colors.black)),
-                        backgroundColor: Colors.white)
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text('Available Packages',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              const SizedBox(height: 16),
-              if (_isLoadingPackages)
-                const Center(
-                    child: Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: CircularProgressIndicator(),
-                ))
-              else if (_packages.isEmpty)
-                const Center(
-                    child: Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: Text("No packages available.",
-                      style: TextStyle(color: Colors.grey)),
-                ))
-              else
-                ..._packages.map((pkg) {
-                  final isSelected = _selectedPackageId == pkg.id;
-                  final isBestValue =
-                      pkg.name == "1 Month"; // Simple logic for now
-
-                  return GestureDetector(
-                    // Make the whole card tappable
-                    onTap: () {
-                      setState(() {
-                        _selectedPackageId = pkg.id;
-                      });
-                    },
-                    child: _PackageCard(
-                      title: pkg.name,
-                      price: '${pkg.price.toStringAsFixed(0)} ${pkg.currency}',
-                      isSelected: isSelected,
-                      primary: primary,
-                      isBestValue: isBestValue,
-                    ),
-                  );
-                }).toList(),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _selectedPackageId == null
-                    ? null
-                    : () {
-                        // Create Subscription Logic Here
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  'Selected Package: $_selectedPackageId')),
-                        );
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primary,
-                  disabledBackgroundColor: Colors.grey.withOpacity(0.3),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Text('Upgrade Now',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-
-          // 3. Settings Tab
-          ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              const Text('Appearance',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              const SizedBox(height: 16),
-              SwitchListTile(
-                title: const Text('Dark Mode',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                value: isDark,
-                onChanged: (val) => _toggleTheme(val),
-                secondary: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.grey[800]
-                          : Colors.amber.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Icon(
-                      isDark
-                          ? Icons.dark_mode_rounded
-                          : Icons.light_mode_rounded,
-                      color: isDark ? Colors.white : Colors.amber),
-                ),
-              ),
-              const SizedBox(height: 32),
-              const Text('Notifications',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              const SizedBox(height: 16),
-              SwitchListTile(
-                title: const Text('Email Notifications'),
-                subtitle: const Text('Receive updates via email'),
-                secondary: const Icon(Icons.email_outlined),
-                value: _emailNotify,
-                onChanged: (val) {
-                  setState(() => _emailNotify = val);
-                },
-              ),
-              SwitchListTile(
-                title: const Text('SMS Notifications'),
-                subtitle: const Text('Receive updates via SMS'),
-                secondary: const Icon(Icons.sms_outlined),
-                value: _smsNotify,
-                onChanged: (val) {
-                  setState(() => _smsNotify = val);
-                },
-              ),
-              SwitchListTile(
-                title: const Text('Push Notifications'),
-                subtitle: const Text('Receive push messages'),
-                secondary: const Icon(Icons.notifications_active_outlined),
-                value: _pushNotify,
-                onChanged: (val) {
-                  setState(() => _pushNotify = val);
-                },
-              ),
-              const SizedBox(height: 32),
-              const Divider(),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.lock_outline),
-                title: const Text('Privacy Settings'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {},
-              ),
-              const SizedBox(height: 32),
-              Center(
-                child: TextButton.icon(
-                  onPressed: _logout,
-                  icon: const Icon(Icons.logout, color: Colors.red),
-                  label: const Text('Log Out',
-                      style: TextStyle(color: Colors.red)),
-                ),
-              )
-            ],
-          ),
+          )
         ],
       ),
     );
   }
-}
 
-class _PackageCard extends StatelessWidget {
-  final String title;
-  final String price;
-  final bool isSelected;
-  final Color primary;
-  final bool isBestValue;
+  Widget _buildWisslerPlusTab() {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Current Subscription Status (Mock)
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+                colors: [Colors.purple, Colors.deepPurple]),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.diamond, color: Colors.white, size: 40),
+              SizedBox(width: 15),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text("Free Plan",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold)),
+                Text("Upgrade to unlock more!",
+                    style: TextStyle(color: Colors.white70)),
+              ])
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
+        const Text("Premium Packages",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 220,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _packages.length + 1, // +1 for mock if empty
+            itemBuilder: (context, index) {
+              if (_packages.isEmpty && index == 0) {
+                return _buildPackageCard(
+                    "Wissler VIP", "Get everything unlimited!", 19.99);
+              }
+              if (index >= _packages.length) return const SizedBox.shrink();
+              final p = _packages[index];
+              return _buildPackageCard(p.name, p.description, p.price);
+            },
+          ),
+        ),
 
-  const _PackageCard({
-    required this.title,
-    required this.price,
-    required this.isSelected,
-    required this.primary,
-    this.isBestValue = false,
-  });
+        const SizedBox(height: 20),
+        const Text("Get Coins",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildCoinOption("100", "\$1.99"),
+            _buildCoinOption("500", "\$6.99", isBestValue: true),
+            _buildCoinOption("1000", "\$11.99"),
+          ],
+        ),
+        const SizedBox(height: 10),
+        const Text("Use coins to buy Super Likes, Boosts, and more!",
+            style: TextStyle(color: Colors.grey, fontSize: 12)),
+      ],
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildPackageCard(String name, String desc, double price) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      width: 250,
+      margin: const EdgeInsets.only(right: 15),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSelected ? primary : Colors.grey.withOpacity(0.3),
-          width: isSelected ? 2 : 1,
-        ),
+        color: Colors.white,
+        border: Border.all(color: Colors.purple.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 10)],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Icon(
-          isSelected ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: isSelected ? primary : Colors.grey,
-        ),
-        title: Text(title,
-            style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: isSelected ? primary : null)),
-        subtitle: isBestValue
-            ? Text('Best Value',
-                style: TextStyle(
-                    color: primary, fontWeight: FontWeight.bold, fontSize: 12))
-            : null,
-        trailing: Text(price,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(name,
+              style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple)),
+          const SizedBox(height: 5),
+          Text(desc,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.grey)),
+          const Spacer(),
+          Text("\$${price.toStringAsFixed(2)} / mo",
+              style:
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                  onPressed: () {
+                    CustomToast.show(context, "Subscribing to $name...");
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                      foregroundColor: Colors.white),
+                  child: const Text("Select")))
+        ],
       ),
     );
+  }
+
+  Widget _buildCoinOption(String coins, String price,
+      {bool isBestValue = false}) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                      title: const Text("Confirm Purchase"),
+                      content: Text("Buy $coins Coins for $price?"),
+                      actions: [
+                        TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Cancel")),
+                        ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              CustomToast.show(
+                                  context, "Purchased $coins Coins!");
+                            },
+                            child: const Text("Buy")),
+                      ]));
+        },
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 5),
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          decoration: BoxDecoration(
+            color: isBestValue ? Colors.amber[100] : Colors.grey[100],
+            border: isBestValue ? Border.all(color: Colors.amber) : null,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            children: [
+              if (isBestValue)
+                const Text("BEST VALUE",
+                    style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange)),
+              Icon(Icons.monetization_on,
+                  color: isBestValue ? Colors.amber : Colors.grey, size: 30),
+              const SizedBox(height: 5),
+              Text(coins,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 18)),
+              Text(price, style: const TextStyle(color: Colors.grey)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationsTab() {
+    return ListView.separated(
+        padding: const EdgeInsets.all(10),
+        itemCount: 5,
+        separatorBuilder: (_, __) => const Divider(),
+        itemBuilder: (context, index) => ListTile(
+              leading: const CircleAvatar(
+                  backgroundColor: Colors.pink,
+                  child: Icon(Icons.favorite, color: Colors.white, size: 16)),
+              title: Text("New Like! #$index"),
+              subtitle: const Text("Someone liked your profile."),
+              trailing: const Text("2m ago",
+                  style: TextStyle(fontSize: 12, color: Colors.grey)),
+            ));
+  }
+
+  Widget _buildSettingsTab() {
+    return ListView(padding: const EdgeInsets.all(20), children: [
+      SwitchListTile(
+          title: const Text("Dark Mode"),
+          value: ref.watch(dynamicThemeProvider).brightness == Brightness.dark,
+          onChanged: (v) =>
+              ref.read(dynamicThemeProvider.notifier).toggleDarkMode(v)),
+      ListTile(
+          title: const Text("Privacy Policy"),
+          trailing: const Icon(Icons.arrow_forward_ios),
+          onTap: () {}),
+      ListTile(
+          title: const Text("Log Out"),
+          trailing: const Icon(Icons.logout, color: Colors.red),
+          onTap: _logout),
+    ]);
+  }
+}
+
+class _SliverTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabBar _tabBar;
+
+  _SliverTabBarDelegate(this._tabBar);
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverTabBarDelegate oldDelegate) {
+    return false;
   }
 }

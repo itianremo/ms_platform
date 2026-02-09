@@ -8,6 +8,8 @@ public class GeoDbContext : DbContext
     public GeoDbContext(DbContextOptions<GeoDbContext> options) : base(options) { }
 
     public DbSet<GeoLocation> Locations { get; set; }
+    public DbSet<Country> Countries { get; set; }
+    public DbSet<City> Cities { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

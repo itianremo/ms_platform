@@ -1,47 +1,67 @@
-# Unified Microservices Platform (UMP)
+# Unified Microservices Platform (FitIT & Wissler)
 
-## Overview
-A scalable **App Factory** designed to incubate and manage multiple distinct applications ("Tenants") from a single control plane. UMP currently powers **FitIt** (Fitness) and **Wissler** (Dating), managing **25+ Dockerized containers** to provide shared infrastructure and distinct business logic.
+Welcome to the **Unified Microservices Platform**, a robust, scalable backend system powering multiple tenant applications including **FitIT** (Fitness) and **Wissler** (Social/Dating).
 
-## Architecture
-The platform is built on a **Shared Kernel** of microservices that provide "Day 1" readiness for new apps:
+## 🚀 Overview
 
--   **Gateway**: YARP-based Reverse Proxy with Rate Limiting (Redis).
--   **Identity (Auth)**: Centralized JWT Authentication with Configurable Social Logins (Google, Microsoft, Facebook, Apple).
--   **Payments**: Unified engine supporting multi-tenant Gateways (Stripe, PayPal).
--   **Communication**: Single Global Pipeline for SMS/SMTP (Twilio/SendGrid) + SignalR for Real-time updates.
--   **Data**: SQL Server (Relational), MongoDB (Chat), PostGIS (Geo), MinIO (Media), Redis (Cache).
+The platform is designed with a **Microservices Architecture** using **.NET 8**, **Docker**, and an **Event-Driven** approach. It provides a centralized API Gateway, shared identity management, and specialized services for various domain functions.
 
-## Multi-Tenant Configuration Strategy
-| Feature | Strategy | Description |
-| :--- | :--- | :--- |
-| **SMS/SMTP** | **Single Global** | Configured once in Global Admin. High-reputation sender shared by all apps. |
-| **Social Auth** | **Multi-Tenant** | Configurable per App. App A can use Google, App B can use Microsoft. |
-| **Payments** | **Multi-Tenant** | Configurable per App. Revenue streams are completely isolated. |
+### Key Applications
+*   **FitIT**: A comprehensive fitness tracking application helping users achieve their health goals. [Read More](Mobile/apps/fitit/README.md)
+*   **Wissler**: A social and dating application featuring biometric security and advanced profile matching. [Read More](Mobile/apps/wissler/README.md)
 
+## 🏗️ Architecture
 
-## Application Portfolio (Examples)
-1.  **FitIT**: Fitness management with Gym discovery (Geo API) and Workout streaming (Media API).
-2.  **Wissler**: Dating application with "People Nearby" (Geo API) and Real-time Messaging (Chat API).
+The system uses a **YARP API Gateway** as the single entry point, routing traffic to downstream services. Communication between services is handled asynchronously via **RabbitMQ (MassTransit)**.
 
-## Mobile Applications
-The platform includes native mobile experiences for both Tenants, built with **Flutter**:
--   **FitIT App**: Manages workout plans and tracks progress.
--   **Wissler App**: Discovery and social interaction.
-Both apps share a common `API Client` and `Authentication Core` while maintaining distinct visual identities through **Dynamic Theming**.
+ > [!NOTE]
+ > For a detailed architecture diagram and data flow, please refer to the [Architecture Documentation](docs/architecture.md).
 
-## Dynamic Theme Engine
-The platform enforces consistent branding across Web and Mobile:
--   **Public/Logout State**: Applications automatically load the **App-Specific Default Theme** configurations (e.g., FitIT Blue, Wissler Orange) from the backend.
--   **Authenticated State**: Applications adapt to the **User's Personal Preferences** (Dark/Light mode) stored in their profile.
+### Core Services
+| Service | Description |
+| :--- | :--- |
+| **Gateway** | Central API Gateway handling routing, rate limiting, and auth proxying. |
+| **Auth** | Identity provider (JWT), OAuth2, and RBAC management. |
+| **Users** | Manages user profiles, settings, and extended personal data. |
+| **Apps** | Handles tenant application logic, subscriptions, and memberships. |
+| **Notifications** | Centralized notification sender (Email, SMS, Push). |
+| **Media** | Handles file uploads, storage (MinIO/S3), and serving. |
+| **Chat** | Real-time messaging using SignalR. |
+| **Payments** | Integration with Stripe/payment providers. |
+| **Audit** | system-wide audit logging for security and compliance. |
+| **Search** | ElasticSearch/OpenSearch integration for discovery. |
+| **Scheduler** | Background job processing using Hangfire. |
+| **Geo** | Location services, country/city data. |
+| **Recommendation** | AI/ML powered matching and recommendations. |
 
-## Getting Started
+## 🛠️ Getting Started
 
-1.  **Prerequisites**: Docker Desktop, .NET 8 SDK, Node.js.
-2.  **Run Infrastructure**: `docker-compose up -d sqlserver rabbitmq redis seq`
-3.  **Run Services/Apps**: `docker-compose up -d`
-4.  **Access Portals**:
-    -   **Global Admin**: http://localhost:3000 (Manage Tenants & System Configs)
-    -   **FitIT Admin**: http://localhost:3001
-    -   **Wissler Admin**: http://localhost:3002
-    -   **Seq Logs**: http://localhost:5341
+### Prerequisites
+*   **Docker Desktop** (Running)
+*   **.NET 8 SDK**
+*   **Visual Studio 2022** or **VS Code**
+
+### Quick Start
+1.  **Clone the repository**:
+    ```bash
+    git clone <repo-url>
+    ```
+2.  **Run with Docker**:
+    The easiest way to start the entire platform is via Docker Compose.
+    ```bash
+    docker-compose up -d --build
+    ```
+    *This will spin up all services, databases, Redis, and RabbitMQ.*
+
+3.  **Access Services**:
+    *   **Gateway (API)**: `http://localhost:5000`
+    *   **Health Dashboard**: `http://localhost:5000/health-dashboard`
+    *   **Swagger (Auth)**: `http://localhost:5001/swagger` (Direct) or `http://localhost:5000/auth/swagger` (Gateway)
+
+## 📦 Deployment
+
+The platform is containerized and ready for deployment on Kubernetes or any Docker-compatible orchestrator. Configuration is managed via `appsettings.json` and Environment Variables.
+
+## 🤝 Contributing
+
+Please ensure you follow the coding standards and run all tests before submitting a Pull Request.

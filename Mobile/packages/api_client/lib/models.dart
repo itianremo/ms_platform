@@ -104,6 +104,7 @@ class AppConfig {
   final bool isActive;
   final String? themeJson;
   final String? defaultUserProfileJson;
+  final String? privacyPolicy;
 
   AppConfig({
     required this.id,
@@ -113,6 +114,7 @@ class AppConfig {
     required this.isActive,
     this.themeJson,
     this.defaultUserProfileJson,
+    this.privacyPolicy,
   });
 
   factory AppConfig.fromJson(Map<String, dynamic> json) {
@@ -124,6 +126,7 @@ class AppConfig {
       isActive: json['isActive'] as bool,
       themeJson: json['themeJson'] as String?,
       defaultUserProfileJson: json['defaultUserProfileJson'] as String?,
+      privacyPolicy: json['privacyPolicy'] as String?,
     );
   }
 }
@@ -153,9 +156,9 @@ class UserProfile {
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-      id: json['id'] as String,
-      userId: json['userId'] as String,
-      appId: json['appId'] as String,
+      id: json['id'] as String? ?? '',
+      userId: json['userId'] as String? ?? '',
+      appId: json['appId'] as String? ?? '',
       displayName: json['displayName'] as String?,
       bio: json['bio'] as String?,
       avatarUrl: json['avatarUrl'] as String?,
@@ -193,15 +196,102 @@ class SubscriptionPackage {
 
   factory SubscriptionPackage.fromJson(Map<String, dynamic> json) {
     return SubscriptionPackage(
-      id: json['id'] as String,
-      appId: json['appId'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      price: (json['price'] as num).toDouble(),
-      discount: (json['discount'] as num).toDouble(),
+      id: json['id'] as String? ?? '',
+      appId: json['appId'] as String? ?? '',
+      name: json['name'] as String? ?? 'Unknown',
+      description: json['description'] as String? ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      discount: (json['discount'] as num?)?.toDouble() ?? 0.0,
       currency: json['currency'] as String? ?? 'USD',
-      period: json['period'] as int,
-      isActive: json['isActive'] as bool,
+      period: json['period'] as int? ?? 0,
+      isActive: json['isActive'] as bool? ?? false,
+    );
+  }
+}
+
+class Country {
+  final String id;
+  final String name;
+  final String code;
+  final String phoneCode;
+
+  Country({
+    required this.id,
+    required this.name,
+    required this.code,
+    required this.phoneCode,
+  });
+
+  factory Country.fromJson(Map<String, dynamic> json) {
+    return Country(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      code: json['code'] as String? ?? '', // Handle missing fields gracefully
+      phoneCode: json['phoneCode'] as String? ?? '',
+    );
+  }
+}
+
+class City {
+  final String id;
+  final String name;
+  final String countryId;
+
+  City({
+    required this.id,
+    required this.name,
+    required this.countryId,
+  });
+
+  factory City.fromJson(Map<String, dynamic> json) {
+    return City(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      countryId: json['countryId'] as String? ?? '',
+    );
+  }
+}
+
+class Recommendation {
+  final String userId;
+  final String displayName;
+  final int age;
+  final String avatarUrl;
+  final String city;
+  final String country;
+  final double matchPercentage;
+  final bool isBoosted;
+  final bool isNew;
+  final bool isOnline;
+  final bool isVerified;
+
+  Recommendation({
+    required this.userId,
+    required this.displayName,
+    required this.age,
+    required this.avatarUrl,
+    required this.city,
+    required this.country,
+    required this.matchPercentage,
+    required this.isBoosted,
+    required this.isNew,
+    required this.isOnline,
+    required this.isVerified,
+  });
+
+  factory Recommendation.fromJson(Map<String, dynamic> json) {
+    return Recommendation(
+      userId: json['userId'] as String? ?? '',
+      displayName: json['displayName'] as String? ?? 'User',
+      age: json['age'] as int? ?? 18,
+      avatarUrl: json['avatarUrl'] as String? ?? '',
+      city: json['city'] as String? ?? '',
+      country: json['country'] as String? ?? '',
+      matchPercentage: (json['matchPercentage'] as num?)?.toDouble() ?? 0.0,
+      isBoosted: json['isBoosted'] as bool? ?? false,
+      isNew: json['isNew'] as bool? ?? false,
+      isOnline: json['isOnline'] as bool? ?? false,
+      isVerified: json['isVerified'] as bool? ?? false,
     );
   }
 }

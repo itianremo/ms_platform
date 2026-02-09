@@ -176,5 +176,41 @@
         "IsEmailVerified": true,
         "IsPhoneVerified": true,
         "OtpBlockedUntil": null
+    },
+    {
+        "Id": "00000000-0000-0000-0000-000000000010",
+        "Email": "visitor_egypt@wissler.com",
+        "Password": "Password123!",
+        "Phone": "+201000000010",
+        "Roles": [],
+        "IsSealed": false,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Id": "00000000-0000-0000-0000-000000000011",
+        "Email": "visitor_germany@wissler.com",
+        "Password": "Password123!",
+        "Phone": "+491510000011",
+        "Roles": [],
+        "IsSealed": false,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
+    },
+    {
+        "Id": "00000000-0000-0000-0000-000000000012",
+        "Email": "visitor_usa@wissler.com",
+        "Password": "Password123!",
+        "Phone": "+15550000012",
+        "Roles": [],
+        "IsSealed": false,
+        "Status": 4,
+        "IsEmailVerified": true,
+        "IsPhoneVerified": true,
+        "OtpBlockedUntil": null
     }
 ]

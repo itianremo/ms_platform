@@ -12,6 +12,7 @@ public class AppConfig : Entity
     public string ThemeJson { get; private set; } = "{}";
     public string DefaultUserProfileJson { get; private set; } = "{}";
     public string ExternalAuthProvidersJson { get; private set; } = "{}";
+    public string PrivacyPolicy { get; private set; } = "";
     
     public bool IsActive { get; private set; }
     public VerificationType VerificationType { get; private set; }
@@ -57,6 +58,11 @@ public class AppConfig : Entity
     public void UpdateExternalAuthProviders(string json)
     {
         ExternalAuthProvidersJson = json;
+    }
+
+    public void UpdatePrivacyPolicy(string policy)
+    {
+        PrivacyPolicy = policy;
     }
 
     public void UpdateDetails(string name, string description, string baseUrl)

@@ -4,7 +4,7 @@ class WisslerPalette {
   static const coral = Color(0xFFFF6B6B);
   static const teal = Color(0xFF11998E);
   static const purple = Color(0xFF9D4EDD);
-  static const orange = Color(0xFFFF9F1C);
+  static const orange = Color(0xFFF97316); // Updated to Wissler Orange
   static const pink = Color(0xFFFF0080);
 }
 

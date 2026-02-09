@@ -1,18 +1,19 @@
 # Audit Service
 
 ## Overview
-Responsible for comprehensive system-wide logging and audit trails. Tracks critical user actions and data changes for compliance and security.
+The **Audit Service** provides centralized logging for security, compliance, and system activity. It tracks "Who did What, When, and Where" across the entire platform.
 
-## Tech Stack
-- **Framework**: .NET 8 (ASP.NET Core Web API)
-- **Database**: SQL Server (EF Core)
-- **Messaging**: RabbitMQ (MassTransit) - Listens for `AuditLogCreated` events.
+## 🚀 Key Features
+-   **Centralized Logging**: Aggregates audit logs from all microservices.
+-   **Interceptors**: Uses EF Core Interceptors in other services to automatically capture data changes (Create/Update/Delete).
+-   **Security**: Immutable log storage for compliance.
+-   **Searchable**: Logs are indexed for quick retrieval by Admins.
 
-## Key Features
-- **Centralized Logging**: Aggregates logs from all microservices via message bus.
-- **Change Tracking**: Records entity changes (OldValue vs NewValue).
-- **Search**: Provides API for querying logs by User, App, or Timeframe.
-- **Compliance**: Immutable ledger of critical actions.
+## 📡 Event Architecture
+### Consumes
+-   `AuditLogCreatedEvent`: The primary event consumed from all services containing the change details (JSON diffs).
 
-## API Documentation
-Swagger UI: http://localhost:5004/swagger (via Gateway: http://localhost:5000/audit/swagger)
+## 🛠️ Tech Stack
+-   **.NET 8** (Web API)
+-   **SQL Server** (Log Storage)
+-   **MassTransit** (RabbitMQ)

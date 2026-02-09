@@ -1,18 +1,20 @@
 # Scheduler Service
 
 ## Overview
-Background job orchestrator for recurring tasks and delayed operations.
+The **Scheduler Service** manages background jobs and recurring tasks for the platform.
 
-## Tech Stack
-- **Framework**: .NET 8 (Worker Service / ASP.NET Core)
-- **Engine**: Quartz.NET / Hangfire
-- **Messaging**: RabbitMQ (MassTransit)
+## 🚀 Key Features
+-   **Recurring Jobs**: Daily/Weekly tasks (e.g., Subscription Renewals, Data Cleanup).
+-   **Delayed Jobs**: One-off tasks scheduled for the future (e.g., "Remind me in 1 hour").
+-   **Reliability**: Retries failed jobs automatically.
+-   **Dashboard**: UI for monitoring job status and history.
 
-## Key Features
-- **Cron Jobs**: Execute recurring tasks (e.g., Daily Subscription Checks, Email Summaries).
-- **Delayed Jobs**: Schedule one-time tasks for the future.
-- **Reliability**: Retries and error handling for background jobs.
-- **Integration**: Triggers commands via RabbitMQ to other services.
+## Key Jobs
+-   `SubscriptionRenewalJob`: Checks for expiring subscriptions and triggers renewal logic.
+-   `DataRetentionJob`: Cleans up old logs or temporary files.
 
-## Configuration
-Define jobs in `appsettings.json` or via code registration.
+## 🛠️ Tech Stack
+-   **.NET 8** (Web API)
+-   **Hangfire** (Job Processing)
+-   **SQL Server** (Job Storage)
+-   **MassTransit** (RabbitMQ) - Used to publish events from jobs.

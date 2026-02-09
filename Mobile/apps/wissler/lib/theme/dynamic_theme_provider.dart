@@ -8,12 +8,12 @@ import 'wissler_theme.dart';
 
 class DynamicThemeNotifier extends StateNotifier<ThemeData> {
   final Ref _ref;
-  Color _currentPrimary = WisslerPalette.coral; // Default cheerful color
+  Color _currentPrimary = WisslerPalette.orange; // Default: Wissler Orange
   bool _isDark = false;
 
   DynamicThemeNotifier(this._ref)
       : super(WisslerTheme.getTheme(
-            primary: WisslerPalette.coral, isDark: false)) {
+            primary: WisslerPalette.orange, isDark: false)) {
     loadTheme();
   }
 

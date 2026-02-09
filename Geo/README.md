@@ -1,18 +1,14 @@
 # Geo Service
 
 ## Overview
-Provides location-based services, geocoding, and distance calculations for the FitIT Platform.
+The **Geo Service** provides location-based utilities and data to other services and clients.
 
-## Tech Stack
-- **Framework**: .NET 8 (ASP.NET Core Web API)
-- **Database**: SQL Server (Spatial Types) or Redis (Geo)
-- **External API**: Google Maps API / Mapbox (if applicable)
+## 🚀 Key Features
+-   **Location Data**: API for Countries, Cities, and Regions.
+-   **Proximity Calculation**: Utilities for distance between coordinates.
+-   **IP Geolocation**: Resolving user location from IP Address.
 
-## Key Features
-- **Geocoding**: Convert addresses to coordinates.
-- **Reverse Geocoding**: Convert coordinates to addresses.
-- **Search**: Find Gyms/Trainers within a radius.
-- **Validation**: Verify address headers.
-
-## API Documentation
-Swagger UI: http://localhost:5008/swagger (via Gateway: http://localhost:5000/geo/swagger)
+## 🛠️ Tech Stack
+-   **.NET 8** (Web API)
+-   **SQL Server** (Spatial Data)
+-   **Redis** (Caching frequent lookups)

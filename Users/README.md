@@ -1,18 +1,24 @@
 # Users Service
 
 ## Overview
-Manages user profiles, preferences, and personal information. Acts as the source of truth for user details beyond authentication credentials.
+The **Users Service** manages the extended user profile, preferences, and personal information. While `Auth Service` handles credentials, `Users Service` handles the "Person" behind the account.
 
-## Tech Stack
-- **Framework**: .NET 8 (ASP.NET Core Web API)
-- **Database**: SQL Server (EF Core)
-- **Messaging**: RabbitMQ (MassTransit)
+## 🚀 Key Features
+-   **Profile Management**: Display Name, Avatar, Bio, Date of Birth, Gender.
+-   **App Preferences**: Stores JSON-based settings per app (e.g., Theme: Dark, Sidebar: Collapsed).
+-   **Fast Lookups**: Optimized for retrieving user details for UI display.
+-   **Search Sync**: Pushes profile updates to the `Search Service` for discoverability.
 
-## Key Features
-- **Profiles**: Manages display names, avatars, and bio.
-- **Preferences**: Stores user settings (Theme, Sidebar state) per application via `customDataJson`.
-- **Integration**: Consumes `UserRegistered` events to create profiles automatically.
-- **Search**: Syncs user data to the Search service for discovery.
+## 📡 Event Architecture
+### Consumes
+-   `UserRegisteredEvent`: Automatically creates a base profile for the new user.
+-   `UserContactUpdatedEvent`: Updates contact details if mirrored in profile.
 
-## API Documentation
-Swagger UI: http://localhost:5002/swagger (via Gateway: http://localhost:5000/users/swagger)
+### Publishes
+-   `UserProfileCreatedEvent`: Notifies Search service to index the new profile.
+-   `UserProfileUpdatedEvent`: Notifies Search service to update the index.
+
+## 🛠️ Tech Stack
+-   **.NET 8** (Web API)
+-   **SQL Server** (Profile Data)
+-   **MassTransit** (RabbitMQ)

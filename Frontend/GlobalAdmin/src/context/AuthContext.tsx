@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const login = async (identifier: string, password: string) => {
         try {
-            // Pass System App ID (Global Admin)
+            // Pass System App ID (UMP)
             const appId = "00000000-0000-0000-0000-000000000001";
             const data = await AuthService.login({ email: identifier, password, appId });
 

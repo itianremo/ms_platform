@@ -53,6 +53,10 @@ namespace Apps.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("PrivacyPolicy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("RequiresAdminApproval")
                         .HasColumnType("bit");
 

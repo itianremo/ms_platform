@@ -199,6 +199,44 @@ public static class AppsDbInitializer
         var allApps = await context.Apps.ToListAsync();
         foreach (var app in allApps)
         {
+            // Seed Privacy Policy for Wissler
+            if (app.Id == Guid.Parse("22222222-2222-2222-2222-222222222222"))
+            {
+                var policy = @"# Privacy Policy for Wissler
+
+**Effective Date:** October 2023
+
+## 1. Introduction
+Welcome to Wissler. We respect your privacy and are committed to protecting your personal data. This privacy policy will inform you as to how we look after your personal data when you visit our application and tell you about your privacy rights and how the law protects you, particularly in compliance with the Egyptian Personal Data Protection Law No. 151 of 2020.
+
+## 2. Important Information and Who We Are
+Wissler is the controller and responsible for your personal data.
+
+## 3. The Data We Collect About You
+We may collect, use, store and transfer different kinds of personal data about you which we have grouped together follows:
+- **Identity Data:** includes first name, last name, username or similar identifier, marital status, title, date of birth and gender.
+- **Contact Data:** includes email address and telephone numbers.
+- **Location Data:** includes your current location for matching purposes.
+
+## 4. How We Use Your Personal Data
+We will only use your personal data when the law allows us to. Most commonly, we will use your personal data in the following circumstances:
+- Where we need to perform the contract we are about to enter into or have entered into with you.
+- Where it is necessary for our legitimate interests (or those of a third party) and your interests and fundamental rights do not override those interests.
+- Where we need to comply with a legal or regulatory obligation.
+
+## 5. Data Security
+We have put in place appropriate security measures to prevent your personal data from being accidentally lost, used or accessed in an unauthorized way, altered or disclosed.
+
+## 6. Your Legal Rights
+Under certain circumstances, you have rights under data protection laws in relation to your personal data, including the right to access, correct, erase, restrict, transfer, or object to processing of your personal data.";
+                
+                if (string.IsNullOrEmpty(app.PrivacyPolicy) || app.PrivacyPolicy.Length < 10)
+                {
+                    app.UpdatePrivacyPolicy(policy);
+                    logger.LogInformation("Seeded Privacy Policy for Wissler App");
+                }
+            }
+
             var vipPackage = await context.SubscriptionPackages
                 .FirstOrDefaultAsync(p => p.AppId == app.Id && p.Name == "VIP Unlimited");
             

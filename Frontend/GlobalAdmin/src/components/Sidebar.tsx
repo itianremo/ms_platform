@@ -79,7 +79,7 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
                 {!collapsed && (
                     <Link to="/" className="flex items-center gap-2 font-bold text-xl text-primary decoration-transparent">
                         <img src="/logo.png" alt="Logo" className="h-10 w-10 object-cover" />
-                        <span className="text-foreground">Global Dashboard</span>
+                        <span className="text-foreground">UMP</span>
                     </Link>
                 )}
                 <button

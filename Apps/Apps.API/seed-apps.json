@@ -1,8 +1,8 @@
 [
     {
         "Id": "00000000-0000-0000-0000-000000000001",
-        "Name": "Global Admin Dashboard",
-        "Description": "Admin Dashboard",
+        "Name": "UMP",
+        "Description": "Unified Microservices Platform Dashboard",
         "BaseUrl": "http://localhost:3000/",
         "ThemeJson": "corporate",
         "DefaultUserProfileJson": "{\"theme\": \"system\", \"notifications\": {\"email\": true}}",

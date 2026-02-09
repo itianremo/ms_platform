@@ -128,7 +128,7 @@ const PaymentConfigPage = () => {
             setApps(data);
             if (data.length > 0) {
                 // Default to Global Dashboard or first app
-                const defaultApp = data.find(a => a.name === 'Global Dashboard') || data.find(a => a.name.includes('Global')) || data[0];
+                const defaultApp = data.find(a => a.name === 'UMP') || data.find(a => a.name === 'Global Dashboard') || data.find(a => a.name.includes('Global')) || data[0];
                 setSelectedAppId(defaultApp.name);
             }
         } catch (error) {

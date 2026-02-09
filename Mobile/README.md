@@ -14,6 +14,7 @@ This directory contains the cross-platform mobile applications for the platform,
 ## Features
 -   **Dynamic Theming**: Apps automatically load theme settings from the backend based on the App ID.
 -   **Unified Auth**: Shared authentication flow using the Identity Microservice.
+-   **Profile Management**: Dynamic profile fields, Verification status, and Privacy Policy integration.
 
 ## Getting Started
 1.  **Prerequisites**: Flutter SDK, Android Studio / Xcode.

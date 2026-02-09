@@ -135,7 +135,7 @@ const UserDetailsPage = () => {
     const [allApps, setAllApps] = useState<AppConfig[]>([]);
     const [selectedSubscriptionAppId, setSelectedSubscriptionAppId] = useState<string>("");
 
-    // Default to System App ("Global Admin Dashboard") or just Global Context
+    // Default to System App ("UMP") or just Global Context
     const SYSTEM_APP_ID = "00000000-0000-0000-0000-000000000001";
     const [selectedProfileAppId, setSelectedProfileAppId] = useState<string>(SYSTEM_APP_ID);
 
