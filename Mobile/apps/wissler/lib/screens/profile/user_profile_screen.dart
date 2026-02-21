@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_core/providers/auth_provider.dart';
 import 'package:api_client/api_client.dart';
 import '../../theme/dynamic_theme_provider.dart';
-import '../../theme/dynamic_theme_provider.dart';
+
 import '../../widgets/custom_toast.dart';
-import '../home/wissler_home_screen.dart';
+import '../wissler/wissler_home_screen.dart';
 
 class UserProfileScreen extends ConsumerStatefulWidget {
 // ... (omitted)
@@ -16,10 +16,10 @@ class UserProfileScreen extends ConsumerStatefulWidget {
   const UserProfileScreen({super.key, this.isModal = false, this.onClose});
 
   @override
-  ConsumerState<UserProfileScreen> createState() => _UserProfileScreenState();
+  ConsumerState<UserProfileScreen> createState() => UserProfileScreenState();
 }
 
-class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
+class UserProfileScreenState extends ConsumerState<UserProfileScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   UserProfile? _userProfile;
@@ -27,7 +27,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
 
   // Lookups
   List<Country> _countries = [];
-  List<City> _cities = [];
+  final List<City> _cities = [];
 
   // Gamification
   int _coins = 0;
@@ -46,6 +46,14 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     _loadPackages();
   }
 
+  Future<void> refresh() async {
+    await Future.wait([
+      _loadProfile(),
+      _loadLookups(),
+      _loadPackages(),
+    ]);
+  }
+
   @override
   void dispose() {
     _tabController.dispose();
@@ -58,8 +66,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       final client = ref.read(authClientProvider);
       final pkgs = await client
           .getSubscriptionPackages('22222222-2222-2222-2222-222222222222');
-      if (mounted)
+      if (mounted) {
         setState(() => _packages = pkgs.where((p) => p.isActive).toList());
+      }
     } catch (_) {
     } finally {
       if (mounted) setState(() => _isLoadingPackages = false);
@@ -99,14 +108,35 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     }
   }
 
+  // Custom Data Fields
+  Map<String, dynamic> _attributes = {};
+  List<Map<String, dynamic>> _photos = [];
+
   void _parseCustomData(String? jsonStr) {
     if (jsonStr == null) return;
     try {
       final data = json.decode(jsonStr);
       if (data is Map<String, dynamic>) {
         setState(() {
+          _attributes = data;
           _coins = data['coins'] ?? 0;
           _score = data['score'] ?? 0;
+
+          if (data['photos'] != null) {
+            // Profile owner sees ALL photos, regardless of status
+            _photos = (data['photos'] as List).map((p) {
+              if (p is String) {
+                return {
+                  'url': p,
+                  'isVerified': false,
+                  'isApproved':
+                      true, // Mocking approved if it's just a string url
+                  'isActive': true
+                };
+              }
+              return p as Map<String, dynamic>;
+            }).toList();
+          }
         });
       }
     } catch (_) {}
@@ -127,8 +157,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     if (dob == null) return "N/A";
     final now = DateTime.now();
     int age = now.year - dob.year;
-    if (now.month < dob.month || (now.month == dob.month && now.day < dob.day))
+    if (now.month < dob.month ||
+        (now.month == dob.month && now.day < dob.day)) {
       age--;
+    }
     return age.toString();
   }
 
@@ -137,11 +169,14 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final genderText = _userProfile?.gender ?? "Not specified";
+    final interestedIn = _attributes['interestedIn'];
+
     return Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (context, _) => [
           SliverAppBar(
-            expandedHeight: 180, // Reduced height for narrower spacing
+            expandedHeight: 220, // Slightly expanded to fit more details
             leading: widget.isModal
                 ? IconButton(
                     icon: Icon(Icons.close, color: Colors.grey[800], size: 30),
@@ -167,92 +202,207 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                         (widget.isModal ? 40 : 20),
                     left: 20,
                     right: 20),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
                   children: [
-                    // Avatar & Info Column
-                    Expanded(
-                      flex: 3,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Avatar & Info Column
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              CircleAvatar(
-                                radius: 35,
-                                backgroundImage: _userProfile?.avatarUrl != null
-                                    ? NetworkImage(_userProfile!.avatarUrl!)
-                                    : null,
-                                child: _userProfile?.avatarUrl == null
-                                    ? const Icon(Icons.person, size: 35)
-                                    : null,
-                              ),
-                              const SizedBox(width: 15),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "${_userProfile?.displayName ?? 'Guest'}, ${_calculateAge(_userProfile?.dateOfBirth)}",
-                                      style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18),
-                                      overflow: TextOverflow.ellipsis,
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 35,
+                                    backgroundImage: _userProfile?.avatarUrl !=
+                                            null
+                                        ? NetworkImage(_userProfile!.avatarUrl!)
+                                        : null,
+                                    child: _userProfile?.avatarUrl == null
+                                        ? const Icon(Icons.person, size: 35)
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 15),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "${_userProfile?.displayName ?? 'Guest'}, ${_calculateAge(_userProfile?.dateOfBirth)}",
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        Text(
+                                            "${_attributes['cityId'] ?? 'Cairo'}, ${_attributes['countryId'] ?? 'Egypt'}",
+                                            style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 14)),
+                                      ],
                                     ),
-                                    const Text("Cairo, Egypt",
-                                        style: TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: 14)),
-                                  ],
-                                ),
+                                  )
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  _buildHeaderBtn(context, Icons.edit, () {
+                                    if (_userProfile != null) {
+                                      // Open Edit in Home Screen Overlay
+                                      final homeState =
+                                          wisslerHomeKey.currentState;
+                                      if (homeState != null) {
+                                        homeState.openEditProfile(
+                                            _userProfile!,
+                                            _countries,
+                                            _cities); // Note: Need _cities in State or pass empty
+                                      }
+                                    }
+                                  }),
+                                  const SizedBox(width: 15),
+                                  _buildHeaderBtn(context, Icons.visibility,
+                                      () {
+                                    if (_userProfile != null) {
+                                      // Open Preview in Home Screen Overlay
+                                      final homeState =
+                                          wisslerHomeKey.currentState;
+                                      if (homeState != null) {
+                                        homeState
+                                            .openPreviewProfile(_userProfile!);
+                                      }
+                                    }
+                                  }),
+                                ],
                               )
                             ],
                           ),
-                          const SizedBox(height: 10),
-                          Row(
+                        ),
+                        // Gamification Column (Thinner)
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              _buildHeaderBtn(context, Icons.edit, () {
-                                if (_userProfile != null) {
-                                  // Open Edit in Home Screen Overlay
-                                  final homeState = wisslerHomeKey.currentState;
-                                  if (homeState != null) {
-                                    homeState.openEditProfile(
-                                        _userProfile!,
-                                        _countries,
-                                        _cities); // Note: Need _cities in State or pass empty
-                                  }
-                                }
-                              }),
-                              const SizedBox(width: 15),
-                              _buildHeaderBtn(context, Icons.visibility, () {
-                                if (_userProfile != null) {
-                                  // Open Preview in Home Screen Overlay
-                                  final homeState = wisslerHomeKey.currentState;
-                                  if (homeState != null) {
-                                    homeState.openPreviewProfile(_userProfile!);
-                                  }
-                                }
-                              }),
+                              _buildThinCard("Loyalty", "$_score", Icons.star,
+                                  Colors.indigo),
+                              const SizedBox(height: 5),
+                              _buildThinCard("Coins", "$_coins",
+                                  Icons.monetization_on, Colors.amber),
                             ],
-                          )
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    // Foundational Demographics Row symmetrically mimicking details view
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildMiniChip(Icons.person, genderText),
+                          const SizedBox(width: 8),
+                          if (interestedIn != null)
+                            _buildMiniChip(
+                                Icons.favorite_border, "Int: $interestedIn"),
+                          const SizedBox(width: 8),
+                          _buildMiniChip(
+                              Icons.height,
+                              _attributes['height'] != null
+                                  ? "${_attributes['height']} cm"
+                                  : "No height"),
                         ],
                       ),
                     ),
-                    // Gamification Column (Thinner)
-                    Expanded(
-                      flex: 2,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          _buildThinCard(
-                              "Loyalty", "$_score", Icons.star, Colors.indigo),
-                          const SizedBox(height: 5),
-                          _buildThinCard("Coins", "$_coins",
-                              Icons.monetization_on, Colors.amber),
-                        ],
+                    const SizedBox(height: 15),
+                    // Photo Gallery Preview (Show all, including unapproved/inactive)
+                    if (_photos.isNotEmpty)
+                      SizedBox(
+                        height: 70,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount:
+                              _photos.length + 1, // +1 for "Add Photo" mock
+                          itemBuilder: (context, index) {
+                            if (index == _photos.length) {
+                              return GestureDetector(
+                                onTap: () =>
+                                    CustomToast.show(context, "Add Photo Flow"),
+                                child: Container(
+                                  width: 55,
+                                  margin: const EdgeInsets.only(right: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        color: Colors.white.withOpacity(0.5)),
+                                  ),
+                                  child: const Icon(Icons.add_a_photo,
+                                      color: Colors.white),
+                                ),
+                              );
+                            }
+                            final p = _photos[index];
+                            final isVerified = p['isVerified'] == true;
+                            final isApproved = p['isApproved'] == true;
+                            final isActive = p['isActive'] == true;
+
+                            return Container(
+                              width: 55,
+                              margin: const EdgeInsets.only(right: 10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                image: DecorationImage(
+                                    image: NetworkImage(p['url']),
+                                    fit: BoxFit.cover),
+                                border: Border.all(
+                                    color: isApproved
+                                        ? (isActive
+                                            ? Colors.green
+                                            : Colors.grey)
+                                        : Colors.red,
+                                    width: 2),
+                              ),
+                              child: Stack(
+                                children: [
+                                  if (!isApproved)
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.5),
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
+                                      child: const Center(
+                                          child: Icon(Icons.pending,
+                                              color: Colors.white, size: 20)),
+                                    ),
+                                  if (isVerified)
+                                    const Positioned(
+                                      bottom: 2,
+                                      right: 2,
+                                      child: Icon(Icons.verified,
+                                          color: Colors.orange, size: 14),
+                                    ),
+                                  if (!isActive && isApproved)
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.6),
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
+                                      child: const Center(
+                                          child: Icon(Icons.visibility_off,
+                                              color: Colors.black54, size: 20)),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    )
                   ],
                 ),
               ),
@@ -333,6 +483,29 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     );
   }
 
+  Widget _buildMiniChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.white.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(label,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildThinCard(
       String title, String value, IconData icon, Color color) {
     return Container(
@@ -341,7 +514,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)]),
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)]),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

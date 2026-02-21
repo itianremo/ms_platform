@@ -6,6 +6,7 @@ using Users.Application.Features.Users.EventConsumers;
 using Users.Domain.Repositories;
 using Users.Infrastructure.Persistence;
 using Users.Infrastructure.Repositories;
+using Users.Infrastructure.Persistence.Repositories;
 using Shared.Infrastructure.Caching;
 using Shared.Kernel.Interfaces;
 
@@ -19,6 +20,8 @@ public static class DependencyInjection
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+        services.AddScoped<IReportReasonRepository, ReportReasonRepository>();
+        services.AddScoped<IUserReportRepository, UserReportRepository>();
         services.AddHttpContextAccessor();
         services.AddScoped<Shared.Kernel.Interfaces.ICurrentUserService, Shared.Infrastructure.Services.CurrentUserService>();
         services.AddScoped<Users.Application.Common.Interfaces.IMaintenanceService, Users.Infrastructure.Services.MaintenanceService>();

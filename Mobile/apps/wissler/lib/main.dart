@@ -11,7 +11,7 @@ import 'screens/splash_screen.dart';
 import 'screens/auth/wissler_login_screen.dart';
 import 'screens/auth/wissler_register_screen.dart';
 import 'screens/auth/wissler_forgot_password_screen.dart';
-import 'screens/home/wissler_home_screen.dart';
+import 'screens/wissler/wissler_home_screen.dart';
 
 import 'package:flutter/services.dart';
 

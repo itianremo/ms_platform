@@ -11,6 +11,8 @@ public class UsersDbContext : DbContext
     }
 
     public DbSet<UserProfile> UserProfiles { get; set; }
+    public DbSet<ReportReason> ReportReasons { get; set; }
+    public DbSet<UserReport> UserReports { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

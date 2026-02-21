@@ -8,6 +8,7 @@ public class RecommendationDto
     public string AvatarUrl { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string Country { get; set; } = string.Empty;
+    public List<string> Images { get; set; } = new();
     
     // Discovery Features
     public double MatchPercentage { get; set; } // 0-100

@@ -10,6 +10,8 @@ COPY ["Chat/Chat.Application/Chat.Application.csproj", "Chat/Chat.Application/"]
 COPY ["Chat/Chat.Domain/Chat.Domain.csproj", "Chat/Chat.Domain/"]
 COPY ["Chat/Chat.Infrastructure/Chat.Infrastructure.csproj", "Chat/Chat.Infrastructure/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
+COPY ["Shared/Shared.Messaging/Shared.Messaging.csproj", "Shared/Shared.Messaging/"]
+COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
 RUN dotnet restore "Chat/Chat.API/Chat.API.csproj"
 COPY . .
 WORKDIR "/src/Chat/Chat.API"

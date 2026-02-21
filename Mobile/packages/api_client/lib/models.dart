@@ -264,6 +264,7 @@ class Recommendation {
   final bool isNew;
   final bool isOnline;
   final bool isVerified;
+  final List<String> images;
 
   Recommendation({
     required this.userId,
@@ -277,6 +278,7 @@ class Recommendation {
     required this.isNew,
     required this.isOnline,
     required this.isVerified,
+    this.images = const [],
   });
 
   factory Recommendation.fromJson(Map<String, dynamic> json) {
@@ -292,6 +294,10 @@ class Recommendation {
       isNew: json['isNew'] as bool? ?? false,
       isOnline: json['isOnline'] as bool? ?? false,
       isVerified: json['isVerified'] as bool? ?? false,
+      images: (json['images'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
     );
   }
 }

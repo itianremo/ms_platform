@@ -61,11 +61,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     _birthDate = p.dateOfBirth;
     _gender = p.gender;
-
-    // Safety check for mobile controller if not in custom data
-    if (!(_mobileController is TextEditingController)) {
-      _mobileController = TextEditingController();
-    }
   }
 
   void _parseCustomData(String? jsonStr) {
@@ -150,9 +145,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         }
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -295,7 +291,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               Row(children: [
                 Expanded(
                     child: DropdownButtonFormField<String>(
-                        value: _gender,
+                        initialValue: _gender,
                         items: ['Male', 'Female', 'Prefer not to answer']
                             .map((g) =>
                                 DropdownMenuItem(value: g, child: Text(g)))
@@ -307,7 +303,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 const SizedBox(width: 10),
                 Expanded(
                     child: DropdownButtonFormField<String>(
-                        value: _selectedCountryId,
+                        initialValue: _selectedCountryId,
                         items: widget.countries
                             .map((c) => DropdownMenuItem(
                                 value: c.id, child: Text(c.name)))

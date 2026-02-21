@@ -102,18 +102,18 @@ class AuthClient {
   }
 
   Future<UserProfile?> getUserProfile(String userId, String appId) async {
-    // Mock Profile
-    return UserProfile(
-      id: userId,
-      userId: userId,
-      appId: appId,
-      displayName: 'Mock User',
-      bio: 'This is a mock profile for UI testing.',
-      avatarUrl: 'https://i.pravatar.cc/300',
-      dateOfBirth: DateTime(1995, 5, 20),
-      gender: 'Male',
-      customDataJson: jsonEncode({'coins': 100, 'score': 500}),
-    );
+    try {
+      final uri = Uri.parse(baseUrl);
+      final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+      final response = await _dio.get(
+        '$gatewayUrl/users/api/Users/profile',
+        queryParameters: {'userId': userId, 'appId': appId},
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        return UserProfile.fromJson(response.data);
+      }
+    } catch (_) {}
+    return null;
   }
 
   Future<void> updateUserProfile(UserProfile profile) async {
@@ -206,28 +206,106 @@ class AuthClient {
     );
   }
 
+  Future<List<String>> getReportReasons() async {
+    try {
+      final uri = Uri.parse(baseUrl);
+      final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+      final response =
+          await _dio.get('$gatewayUrl/users/api/Users/ReportReasons');
+      if (response.statusCode == 200 && response.data != null) {
+        return List<String>.from(response.data);
+      }
+    } catch (e) {
+      print('Error fetching report reasons: $e');
+    }
+    // Fallback if endpoint fails
+    return [
+      'Nothing',
+      'Fake Profile',
+      'Inappropriate Content',
+      'Spam',
+      'Harassment',
+      'Other'
+    ];
+  }
+
+  Future<bool> reportUser(String reporterId, String reportedId, String reason,
+      [String? comment]) async {
+    try {
+      final uri = Uri.parse(baseUrl);
+      final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+      final data = <String, dynamic>{
+        'reporterId': reporterId,
+        'reportedId': reportedId,
+        'reason': reason,
+      };
+      if (comment != null) {
+        data['comment'] = comment;
+      }
+      final response = await _dio.post(
+        '$gatewayUrl/users/api/Users/Report',
+        data: data,
+      );
+      return response.statusCode == 200 ||
+          response.statusCode == 201 ||
+          response.statusCode == 204;
+    } catch (e) {
+      print('Error reporting user: $e');
+      return false;
+    }
+  }
+
+  Future<Map<String, String>?> getExistingReportReason(
+      String reporterId, String reportedId) async {
+    try {
+      final uri = Uri.parse(baseUrl);
+      final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+      final response = await _dio.get(
+        '$gatewayUrl/users/api/Users/Report',
+        queryParameters: {
+          'reporterId': reporterId,
+          'reportedId': reportedId,
+        },
+      );
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data;
+        return {
+          'reason': data['reason']?.toString() ?? '',
+          'comment': data['comment']?.toString() ?? '',
+        };
+      }
+    } catch (e) {
+      print('Error fetching existing report: $e');
+    }
+    return null;
+  }
+
   Future<List<Recommendation>> getRecommendations({
     String category = 'All',
     int page = 1,
     int pageSize = 20,
-    String? country,
-    int? minAge,
-    int? maxAge,
+    Map<String, dynamic>? filters,
   }) async {
     final uri = Uri.parse(baseUrl);
     final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
 
     try {
+      final queryParams = <String, dynamic>{
+        'category': category,
+        'page': page,
+        'pageSize': pageSize,
+      };
+
+      if (filters != null) {
+        // Add all filter keys. Dio handles basic types well.
+        filters.forEach((key, value) {
+          queryParams[key] = value;
+        });
+      }
+
       final response = await _dio.get(
         '$gatewayUrl/recommendation/api/Recommendations',
-        queryParameters: {
-          'category': category,
-          'page': page,
-          'pageSize': pageSize,
-          if (country != null) 'country': country,
-          if (minAge != null) 'minAge': minAge,
-          if (maxAge != null) 'maxAge': maxAge,
-        },
+        queryParameters: queryParams,
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -242,7 +320,6 @@ class AuthClient {
   }
 
   Future<List<Recommendation>> getWhoLikesMe(String userId) async {
-    // Attempt to fetch from backend, or return mock
     try {
       final uri = Uri.parse(baseUrl);
       final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
@@ -255,21 +332,7 @@ class AuthClient {
             .toList();
       }
     } catch (_) {}
-    // Mock Data (Max 20 as requested)
-    return List.generate(
-        20,
-        (i) => Recommendation(
-            userId: 'mock_$i',
-            displayName: 'Admirer $i',
-            age: 20 + i,
-            avatarUrl: 'https://i.pravatar.cc/150?u=$i',
-            city: 'Unknown',
-            country: 'Unknown',
-            matchPercentage: 0.8,
-            isBoosted: false,
-            isNew: true,
-            isOnline: true,
-            isVerified: false));
+    return [];
   }
 
   Future<List<Recommendation>> getMyLikes(String userId) async {
@@ -284,39 +347,12 @@ class AuthClient {
             .toList();
       }
     } catch (_) {}
-    // Mock
-    return List.generate(
-        5,
-        (i) => Recommendation(
-            userId: 'liked_$i',
-            displayName: 'Crush $i',
-            age: 22 + i,
-            avatarUrl: 'https://i.pravatar.cc/150?u=${i + 20}',
-            city: 'Cairo',
-            country: 'Egypt',
-            matchPercentage: 0.9,
-            isBoosted: false,
-            isNew: false,
-            isOnline: false,
-            isVerified: true));
+    return [];
   }
 
   Future<List<Recommendation>> getMyDislikes(String userId) async {
-    // Mock Dislikes
-    return List.generate(
-        10,
-        (i) => Recommendation(
-            userId: 'disliked_$i',
-            displayName: 'Removed $i',
-            age: 22 + i,
-            avatarUrl: 'https://i.pravatar.cc/150?u=${i + 60}',
-            city: 'Cairo',
-            country: 'Egypt',
-            matchPercentage: 0.1,
-            isBoosted: false,
-            isNew: false,
-            isOnline: false,
-            isVerified: false));
+    // Currently no dedicated backend endpoint for dislikes, so we just return empty
+    return [];
   }
 
   Future<List<Recommendation>> getTopPicks(String userId) async {
@@ -332,20 +368,41 @@ class AuthClient {
             .toList();
       }
     } catch (_) {}
-    // Mock
-    return List.generate(
-        5,
-        (i) => Recommendation(
-            userId: 'top_$i',
-            displayName: 'Top Pick $i',
-            age: 25,
-            avatarUrl: 'https://i.pravatar.cc/150?u=${i + 50}',
-            city: 'Paris',
-            country: 'France',
-            matchPercentage: 0.95 + (i * 0.01),
-            isBoosted: true,
-            isNew: false,
-            isOnline: true,
-            isVerified: true));
+    return [];
+  }
+
+  Future<Map<String, dynamic>> swipe(
+      String userId, String targetId, String action) async {
+    final uri = Uri.parse(baseUrl);
+    final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+
+    try {
+      final response = await _dio.post(
+        '$gatewayUrl/recommendation/api/Recommendation/swipe',
+        data: {'userId': userId, 'targetId': targetId, 'action': action},
+      );
+      return response.data;
+    } catch (e) {
+      if (e is DioException && e.response?.statusCode == 400) {
+        // Return error message if limit reached
+        return {'error': e.response?.data};
+      }
+      return {'error': 'Swipe failed'};
+    }
+  }
+
+  Future<Map<String, dynamic>> getSwipeStats(String userId) async {
+    final uri = Uri.parse(baseUrl);
+    final gatewayUrl = '${uri.scheme}://${uri.host}:${uri.port}';
+
+    try {
+      final response = await _dio.get(
+        '$gatewayUrl/recommendation/api/Recommendation/stats',
+        queryParameters: {'userId': userId},
+      );
+      return response.data;
+    } catch (_) {
+      return {'remainingLikes': 25}; // Fallback
+    }
   }
 }

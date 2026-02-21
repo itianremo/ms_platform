@@ -11,6 +11,7 @@ COPY ["Media/Media.Infrastructure/Media.Infrastructure.csproj", "Media/Media.Inf
 COPY ["Media/Media.Domain/Media.Domain.csproj", "Media/Media.Domain/"]
 COPY ["Shared/Shared.Kernel/Shared.Kernel.csproj", "Shared/Shared.Kernel/"]
 COPY ["Shared/Shared.Infrastructure/Shared.Infrastructure.csproj", "Shared/Shared.Infrastructure/"]
+COPY ["Shared/Shared.Messaging/Shared.Messaging.csproj", "Shared/Shared.Messaging/"]
 RUN dotnet restore "Media/Media.API/Media.API.csproj"
 COPY . .
 WORKDIR "/src/Media/Media.API"

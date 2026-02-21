@@ -20,6 +20,16 @@ class MenuBackgroundPainter extends CustomPainter {
 
     canvas.drawShadow(path, Colors.black, 5, true);
     canvas.drawPath(path, paint);
+
+    // 1px Top Border
+    Paint borderPaint = Paint()
+      ..color = Colors.orange
+      ..strokeWidth =
+          2.0 // Slightly thicker as requested (implied by "orange color of the theme")
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawLine(const Offset(0, 20), Offset(size.width, 20), borderPaint);
   }
 
   @override

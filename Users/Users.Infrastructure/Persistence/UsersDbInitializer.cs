@@ -32,81 +32,23 @@ namespace Users.Infrastructure.Persistence
                 }
 
                 var seedDataPath = Path.Combine(AppContext.BaseDirectory, "seed-users.json");
-                if (!File.Exists(seedDataPath))
+                if (File.Exists(seedDataPath))
                 {
-                    _logger.LogWarning("Seed users file not found at {Path}", seedDataPath);
-                    return;
+                    var json = await File.ReadAllTextAsync(seedDataPath);
+                    var seedUsers = JsonSerializer.Deserialize<List<SeedUserDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                    if (seedUsers != null)
+                    {
+                         await SeedBasicUsersAsync(seedUsers);
+                    }
                 }
 
-                var json = await File.ReadAllTextAsync(seedDataPath);
-                var seedUsers = JsonSerializer.Deserialize<List<SeedUserDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                // --- NEW: Seed Report Reasons ---
+                await SeedReportReasonsAsync();
 
-                if (seedUsers == null) return;
-
-                var random = new Random();
-                var genders = new[] { "Male", "Female", "Non-Binary", "Prefer Not to Say" };
-                
-                // Mock Photos for Seeding
-                var mockPhotos = new[] 
-                {
-                    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=60",
-                    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&auto=format&fit=crop&q=60",
-                    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60",
-                    "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&auto=format&fit=crop&q=60",
-                    "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&auto=format&fit=crop&q=60",
-                    "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=500&auto=format&fit=crop&q=60",
-                    "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&auto=format&fit=crop&q=60",
-                    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=60",
-                    "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=500&auto=format&fit=crop&q=60",
-                    "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=500&auto=format&fit=crop&q=60"
-                };
-
-                foreach (var user in seedUsers)
-                {
-                    var targetApps = new List<Guid>();
-                    var email = user.Email.ToLower();
-
-                    // 1. Global / System
-                    if (email.Contains("@globaldashboard.com") || email.Contains("@global.com"))
-                    {
-                        targetApps.Add(Guid.Parse("00000000-0000-0000-0000-000000000001")); 
-                    }
-
-                    // 2. FitIT
-                    if (email.Contains("@fitit.com") || email.Contains("@global.com"))
-                    {
-                         targetApps.Add(Guid.Parse("11111111-1111-1111-1111-111111111111"));
-                    }
-
-                    // 3. Wissler
-                    if (email.Contains("@wissler.com") || email.Contains("@global.com"))
-                    {
-                         targetApps.Add(Guid.Parse("22222222-2222-2222-2222-222222222222"));
-                    }
-
-                    var globalAppId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-                    if (!targetApps.Contains(globalAppId))
-                    {
-                        targetApps.Add(globalAppId);
-                    }
-
-                    foreach (var appId in targetApps)
-                    {
-                        var displayName = DeriveDisplayName(user.Email);
-                        var bio = $"Automated profile for {user.Email}";
-                        var gender = genders[random.Next(genders.Length)];
-                        var dob = DateTime.UtcNow.AddYears(-random.Next(18, 60)).AddDays(-random.Next(0, 365));
-                        
-                        // Assign random photos for Wissler users
-                        List<string>? userPhotos = null;
-                        if (appId == Guid.Parse("22222222-2222-2222-2222-222222222222"))
-                        {
-                            userPhotos = mockPhotos.OrderBy(x => random.Next()).Take(random.Next(3, 6)).ToList();
-                        }
-
-                         await SeedProfileAsync(user.Id, appId, displayName, bio, dob, gender, user.Phone, userPhotos);
-                    }
-                }
+                // --- NEW: Seed 20 Specific "Visitor" Users for Wissler ---
+                await SeedWisslerVisitorsAsync();
+                // ----------------------------------------------------------
             }
             catch (Exception ex)
             {
@@ -114,73 +56,231 @@ namespace Users.Infrastructure.Persistence
             }
         }
 
+        private async Task SeedBasicUsersAsync(List<SeedUserDto> seedUsers)
+        {
+            var random = new Random();
+            var genders = new[] { "Male", "Female", "Non-Binary", "Prefer Not to Say" };
+            var interestedIns = new[] { "Male", "Female", "All" };
+            var mockPhotos = GetMockPhotos();
+            var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+
+            foreach (var user in seedUsers)
+            {
+                var targetApps = new List<Guid>();
+                var email = user.Email.ToLower();
+
+                if (email.Contains("@globaldashboard.com") || email.Contains("@global.com")) targetApps.Add(Guid.Parse("00000000-0000-0000-0000-000000000001"));
+                if (email.Contains("@fitit.com") || email.Contains("@global.com")) targetApps.Add(Guid.Parse("11111111-1111-1111-1111-111111111111"));
+                if (email.Contains("@wissler.com") || email.Contains("@global.com")) targetApps.Add(wisslerAppId);
+
+                var globalAppId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+                if (!targetApps.Contains(globalAppId)) targetApps.Add(globalAppId);
+
+                foreach (var appId in targetApps)
+                {
+                     // Skip if already exists
+                     if (await _context.UserProfiles.AnyAsync(x => x.UserId == user.Id && x.AppId == appId)) continue;
+
+                    var displayName = DeriveDisplayName(user.Email);
+                    var gender = genders[random.Next(genders.Length)];
+                    var dob = DateTime.UtcNow.AddYears(-random.Next(25, 45)).AddDays(-random.Next(0, 365));
+                    
+                    var customData = new JsonObject();
+                    if (!string.IsNullOrEmpty(user.Phone)) customData["mobile"] = user.Phone;
+                    
+                    if (appId == wisslerAppId && email == "admin@globaldashboard.com")
+                    {
+                        // Specific rich profile for Admin in Wissler
+                        var photoUrls = mockPhotos.OrderBy(x => random.Next()).Take(4).ToList();
+                        var photoObjects = new JsonArray();
+                        foreach (var url in photoUrls)
+                        {
+                            photoObjects.Add(new JsonObject
+                            {
+                                ["url"] = url,
+                                ["isApproved"] = true,
+                                ["isVerified"] = true,
+                                ["isActive"] = true
+                            });
+                        }
+                        
+                        customData["cityId"] = "Admin City";
+                        customData["countryId"] = "Admin Country";
+                        customData["height"] = 185;
+                        customData["job"] = "System Administrator";
+                        customData["education"] = "Masters";
+                        customData["interestedIn"] = "All";
+                        customData["emailVerified"] = true;
+                        customData["phoneVerified"] = true;
+                        customData["photos"] = photoObjects;
+                        customData["interests"] = new JsonArray("Tech", "Management", "Coffee");
+                        
+                        var adminBio = "I am the platform administrator testing the Wissler application features.";
+                        await SeedProfileRawAsync(user.Id, appId, displayName, adminBio, photoUrls.First(), customData.ToJsonString(), dob, gender);
+                    }
+                    else
+                    {
+                        // Standard basic fallback behavior
+                        var simplePhotos = mockPhotos.OrderBy(x => random.Next()).Take(3).ToList();
+                        var photoArray = new JsonArray();
+                        foreach(var p in simplePhotos) photoArray.Add(p);
+                        customData["Images"] = photoArray;
+                        var bio = $"Automated profile for {user.Email}";
+                        
+                        await SeedProfileRawAsync(user.Id, appId, displayName, bio, simplePhotos.First(), customData.ToJsonString(), dob, gender);
+                    }
+                }
+            }
+        }
+
+        private async Task SeedReportReasonsAsync()
+        {
+            var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+
+            if (!await _context.ReportReasons.AnyAsync(r => r.AppId == wisslerAppId))
+            {
+                var reasons = new List<ReportReason>
+                {
+                    new ReportReason { AppId = wisslerAppId, ReasonText = "Nothing", IsActive = true, CreatedAt = DateTime.UtcNow },
+                    new ReportReason { AppId = wisslerAppId, ReasonText = "Inappropriate Content", IsActive = true, CreatedAt = DateTime.UtcNow },
+                    new ReportReason { AppId = wisslerAppId, ReasonText = "Spam or Scam", IsActive = true, CreatedAt = DateTime.UtcNow },
+                    new ReportReason { AppId = wisslerAppId, ReasonText = "Fake Profile", IsActive = true, CreatedAt = DateTime.UtcNow },
+                    new ReportReason { AppId = wisslerAppId, ReasonText = "Harassment or Hostile Behavior", IsActive = true, CreatedAt = DateTime.UtcNow },
+                    new ReportReason { AppId = wisslerAppId, ReasonText = "Underage User", IsActive = true, CreatedAt = DateTime.UtcNow },
+                    new ReportReason { AppId = wisslerAppId, ReasonText = "Other", IsActive = true, CreatedAt = DateTime.UtcNow }
+                };
+
+                await _context.ReportReasons.AddRangeAsync(reasons);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Seeded standard report reasons for Wissler.");
+            }
+        }
+
+        private async Task SeedWisslerVisitorsAsync()
+        {
+            var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            
+            _logger.LogInformation("Seeding 20 Realistic Visitor Users for Wissler...");
+
+            var random = new Random();
+            var genders = new[] { "Male", "Female" };
+            var jobs = new[] { "Software Engineer", "Designer", "Chef", "Doctor", "Teacher", "Artist", "Writer", "Student", "Architect", "Musician" };
+            var educations = new[] { "High School", "Bachelors", "Masters", "PhD" };
+            var drinkSmoking = new[] { "Never", "Socially", "Often" };
+            var eyeColors = new[] { "Blue", "Brown", "Green", "Hazel" };
+            var hairColors = new[] { "Blonde", "Brown", "Black", "Red", "Grey" };
+            var interestedIns = new[] { "Male", "Female", "All" };
+
+            var mockPhotos = GetMockPhotos();
+
+            for (int i = 1; i <= 20; i++)
+            {
+                var email = $"vis{i}@wissler.com";
+                
+                // Determine if user exists based on Auth/Seed process
+                // If Auth seeds them, we should find User ID. If not, we generate one (though this might cause login issues if Auth doesn't know them).
+                // For safety in this context, we check if the profile exists by display name or email equivalent.
+                var existingProfile = await _context.UserProfiles.FirstOrDefaultAsync(u => u.AppId == wisslerAppId && u.DisplayName == $"Visitor {i}");
+                
+                if (existingProfile != null) continue; // Skip if already there
+
+                var userId = Guid.NewGuid(); // Note: Without Auth sync, these users won't be able to login, but they will show in the feed!
+                
+                // If we want them to tie to Auth, we rely on the main seed JSON, but user specifically asked to seed 20 users specifically here.
+                
+                var gender = genders[random.Next(genders.Length)];
+                var displayName = $"Visitor {i}";
+                var age = random.Next(21, 40);
+                var dob = DateTime.UtcNow.AddYears(-age).AddDays(-random.Next(1, 365));
+                var job = jobs[random.Next(jobs.Length)];
+                var edu = educations[random.Next(educations.Length)];
+                var interestedIn = interestedIns[random.Next(interestedIns.Length)];
+                
+                // Verification Logic (Mix)
+                bool emailVerified = random.NextDouble() > 0.2; // 80% verified
+                bool phoneVerified = random.NextDouble() > 0.4; // 60% verified
+                
+                // Photo Objects
+                var photoUrls = mockPhotos.OrderBy(x => random.Next()).Take(random.Next(3, 7)).ToList();
+                var photoObjects = new JsonArray();
+                
+                foreach (var url in photoUrls)
+                {
+                    // Varied statuses for photos
+                    bool isApproved = random.NextDouble() > 0.1; // 90% approved
+                    bool isVerified = isApproved && random.NextDouble() > 0.3; // 70% of approved are verified
+                    bool isActive = random.NextDouble() > 0.1; // 90% active
+
+                    photoObjects.Add(new JsonObject
+                    {
+                        ["url"] = url,
+                        ["isApproved"] = isApproved, 
+                        ["isVerified"] = isVerified,
+                        ["isActive"] = isActive
+                    });
+                }
+                
+                // Construct Custom Data
+                var customData = new JsonObject
+                {
+                    ["cityId"] = "Berlin",
+                    ["countryId"] = "Germany",
+                    ["height"] = random.Next(160, 200),
+                    ["weight"] = random.Next(50, 100),
+                    ["job"] = job,
+                    ["education"] = edu,
+                    ["drinking"] = drinkSmoking[random.Next(drinkSmoking.Length)],
+                    ["smoking"] = drinkSmoking[random.Next(drinkSmoking.Length)],
+                    ["eyeColor"] = eyeColors[random.Next(eyeColors.Length)],
+                    ["hairColor"] = hairColors[random.Next(hairColors.Length)],
+                    ["emailVerified"] = emailVerified,
+                    ["phoneVerified"] = phoneVerified,
+                    ["interestedIn"] = interestedIn,
+                    ["photos"] = photoObjects,
+                    ["interests"] = new JsonArray("Travel", "Music", "Food"),
+                    ["languages"] = new JsonArray("English", "German")
+                };
+
+                var bio = $"Hi, I'm {displayName}. I work as a {job}. Checking out Wissler!";
+                
+                await SeedProfileRawAsync(userId, wisslerAppId, displayName, bio, photoUrls.First(), customData.ToJsonString(), dob, gender);
+            }
+        }
+
+        private async Task SeedProfileRawAsync(Guid userId, Guid appId, string displayName, string bio, string avatarUrl, string customDataJson, DateTime dob, string gender)
+        {
+             // Direct SQL Insert to bypass EF complexities for seeding
+             await _context.Database.ExecuteSqlRawAsync(@"
+                INSERT INTO [UserProfiles] ([Id], [UserId], [AppId], [DisplayName], [Bio], [AvatarUrl], [CustomDataJson], [DateOfBirth], [Gender], [Created])
+                VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9})
+            ", 
+            Guid.NewGuid(), userId, appId, displayName, bio, avatarUrl, customDataJson, dob, gender, DateTime.UtcNow);
+            
+            _logger.LogInformation("Seeded User: {Name}", displayName);
+        }
+
         private string DeriveDisplayName(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) return "User";
             var parts = email.Split('@');
-            if (parts.Length > 0)
-            {
-                var name = parts[0];
-                if (name.Contains('.'))
-                {
-                   var subParts = name.Split('.');
-                   return string.Join(" ", subParts.Select(p => char.ToUpper(p[0]) + p.Substring(1)));
-                }
-                return char.ToUpper(name[0]) + name.Substring(1);
-            }
-            return "User";
+            return char.ToUpper(parts[0][0]) + parts[0].Substring(1);
         }
 
-        private async Task SeedProfileAsync(Guid userId, Guid appId, string displayName, string bio, DateTime dob, string gender, string? phone, List<string>? photos = null)
+        private string[] GetMockPhotos()
         {
-            var exists = await _context.UserProfiles.AnyAsync(x => x.UserId == userId && x.AppId == appId);
-            if (!exists)
+            return new[] 
             {
-                 var defaults = "{}";
-                 try 
-                 {
-                     if (appId != Guid.Empty) 
-                     {
-                         var sql = "SELECT DefaultUserProfileJson FROM [AppsDb].[dbo].[Apps] WHERE Id = {0}";
-                         var result = await _context.Database.SqlQueryRaw<string>(sql, appId).ToListAsync();
-                         defaults = result.FirstOrDefault() ?? "{}";
-                     }
-                 }
-                 catch
-                 {
-                     defaults = "{}";
-                 }
-
-                 // Merge Phone and Photos into Defaults/CustomData
-                 try 
-                 {
-                     var jsonNode = JsonNode.Parse(defaults);
-                     var jsonObject = jsonNode?.AsObject() ?? new JsonObject();
-                     
-                     if (!string.IsNullOrEmpty(phone))
-                     {
-                         jsonObject["mobile"] = phone;
-                     }
-                     
-                     if (photos != null && photos.Any())
-                     {
-                         var photoArray = new JsonArray();
-                         foreach(var p in photos) photoArray.Add(p);
-                         jsonObject["photos"] = photoArray;
-                     }
-
-                     defaults = jsonObject.ToJsonString();
-                 }
-                 catch { /* ignore json parse error */ }
-
-                 await _context.Database.ExecuteSqlRawAsync(@"
-                    INSERT INTO [UserProfiles] ([Id], [UserId], [AppId], [DisplayName], [Bio], [AvatarUrl], [CustomDataJson], [DateOfBirth], [Gender], [Created])
-                    VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9})
-                ", 
-                Guid.NewGuid(), userId, appId, displayName, bio, photos?.FirstOrDefault(), defaults, dob, gender, DateTime.UtcNow);
-                
-                _logger.LogInformation("Seeded UserProfile: {DisplayName} ({UserId}) for App {AppId}", displayName, userId, appId);
-            }
+                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=500&auto=format&fit=crop&q=60"
+            };
         }
 
         private class SeedUserDto
