@@ -54,12 +54,16 @@ public static class EmailTemplates
             .Replace("{Year}", DateTime.Now.Year.ToString());
     }
 
-    public static string GetWelcomeEmail(string name)
+    public static string GetWelcomeEmail(string name, string? initialPassword = null)
     {
+        var passwordSection = !string.IsNullOrWhiteSpace(initialPassword) 
+            ? $"<p>Your account has been created by an administrator. You can log in using the following password:</p><div class='otp-code' style='font-size: 24px;'>{initialPassword}</div><p>Please change this password immediately after your first login.</p>"
+            : "<p>Your account has been successfully created. You can now log in and explore our services.</p>";
+
         var body = $@"
             <p>Hi {name},</p>
             <p>Welcome to MS Platform! We're excited to have you on board.</p>
-            <p>Your account has been successfully created. You can now log in and explore our services.</p>
+            {passwordSection}
             <a href='#' class='button'>Go to Dashboard</a>";
 
         return BaseTemplate

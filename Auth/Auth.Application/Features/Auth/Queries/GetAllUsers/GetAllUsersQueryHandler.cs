@@ -17,6 +17,11 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<Us
     {
         var users = await _repository.ListWithRolesAsync();
         
+        if (request.AppId.HasValue)
+        {
+            users = users.Where(u => u.Memberships.Any(m => m.AppId == request.AppId.Value)).ToList();
+        }
+
         return users.Select(u => {
             var (firstName, lastName) = DeriveNameFromEmail(u.Email);
             return new UserDto(

@@ -9,14 +9,16 @@ public class UserRegisteredEvent : IDomainEvent
     public string Email { get; set; }
     public string DisplayName { get; set; }
     public string Phone { get; set; }
+    public string? InitialPassword { get; set; }
     public DateTime OccurredOn { get; set; } = DateTime.UtcNow;
 
-    public UserRegisteredEvent(Guid userId, Guid appId, string email, string phone, string displayName)
+    public UserRegisteredEvent(Guid userId, Guid appId, string email, string phone, string displayName, string? initialPassword = null)
     {
         UserId = userId;
         AppId = appId;
         Email = email;
         Phone = phone;
         DisplayName = displayName;
+        InitialPassword = initialPassword;
     }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, Settings, Heart, ChevronLeft, ChevronRight, Utensils, LogOut } from 'lucide-react';
+import { NavLink, Link } from 'react-router-dom';
+import { LayoutDashboard, Users, Settings, Heart, ChevronLeft, ChevronRight, LogOut, Image, ShieldAlert, Package, FileText } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 import { TENANT_CONFIG } from '../config/tenant';
@@ -26,14 +26,23 @@ const SidebarItem = ({ to, icon: Icon, label, collapsed, end, onClick }: Sidebar
             end={end}
             onClick={onClick}
             className={({ isActive }) => cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
-                isActive ? "bg-muted text-primary" : "text-muted-foreground",
-                collapsed && "justify-center"
+                "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all hover:bg-secondary/50",
+                isActive
+                    ? "bg-primary/10 text-primary hover:bg-primary/15"
+                    : "text-muted-foreground hover:text-foreground",
+                collapsed && "justify-center px-2"
             )}
             title={collapsed ? label : undefined}
         >
-            <Icon className="h-4 w-4" />
-            {!collapsed && <span>{label}</span>}
+            {({ isActive }) => (
+                <>
+                    <Icon size={20} className={cn("shrink-0", isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
+                    {!collapsed && <span>{label}</span>}
+                    {isActive && !collapsed && (
+                        <div className="absolute left-0 h-6 w-1 rounded-r-full bg-primary" />
+                    )}
+                </>
+            )}
         </NavLink>
     );
 };
@@ -50,80 +59,65 @@ export const Sidebar = ({ collapsed, setCollapsed }: SidebarProps) => {
     const canManageUsers = isSuperAdmin || hasRole('ManageUsers');
 
     return (
-        <aside className={cn(
-            "flex h-screen flex-col border-r bg-card transition-all duration-300",
-            collapsed ? "w-[70px]" : "w-[240px]"
-        )}>
-            {/* Logo / Brand */}
-            <div className="flex h-16 items-center border-b px-4">
-                <div className="flex items-center gap-2 font-bold text-xl text-primary">
-                    <Utensils className="h-6 w-6" />
-                    {!collapsed && <span>{TENANT_CONFIG.appName}</span>}
-                </div>
+        <aside
+            className={cn(
+                "fixed left-0 top-0 z-40 flex h-full flex-col border-r border-border bg-card transition-all duration-300",
+                collapsed ? "w-[80px]" : "w-[260px]"
+            )}
+        >
+            {/* Header / Logo */}
+            <div className={cn(
+                "flex h-16 items-center border-b border-border px-4",
+                collapsed ? "justify-center" : "justify-between"
+            )}>
+                {!collapsed && (
+                    <Link to="/" className="flex items-center gap-2 font-bold text-xl text-primary decoration-transparent">
+                        <img src="/logo.png" alt="Logo" className="h-6 w-6 object-contain" />
+                        <span className="text-foreground">{TENANT_CONFIG.appName} Admin</span>
+                    </Link>
+                )}
+                <button
+                    onClick={() => setCollapsed(!collapsed)}
+                    className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                >
+                    {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+                </button>
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 space-y-2 overflow-y-auto p-4">
+            <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
                 {/* Overview */}
-                <div className="py-2">
-                    {!collapsed && <h4 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Overview</h4>}
-                    <div className="space-y-1">
-                        <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" collapsed={collapsed} end />
-                    </div>
+                <div className="space-y-1">
+                    {!collapsed && <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">Overview</div>}
+                    <SidebarItem to="/" icon={LayoutDashboard} label="Dashboard" collapsed={collapsed} end />
                 </div>
 
                 {/* Management */}
                 {(canManageUsers || isSuperAdmin) && (
-                    <div className="py-2">
-                        {!collapsed && <h4 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Management</h4>}
-                        <div className="space-y-1">
-                            {canManageUsers && (
+                    <div className="space-y-1">
+                        {!collapsed && <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">Management</div>}
+                        {canManageUsers && (
+                            <>
                                 <SidebarItem to="/users" icon={Users} label="Profiles" collapsed={collapsed} />
-                            )}
-                            {isSuperAdmin && (
-                                <SidebarItem to="/matches" icon={Heart} label="Matches" collapsed={collapsed} />
-                            )}
-                        </div>
+                                <SidebarItem to="/packages" icon={Package} label="Packages" collapsed={collapsed} />
+                                <SidebarItem to="/media" icon={Image} label="Media" collapsed={collapsed} />
+                            </>
+                        )}
+                        {isSuperAdmin && (
+                            <SidebarItem to="/matches" icon={Heart} label="Matches" collapsed={collapsed} />
+                        )}
                     </div>
                 )}
 
                 {/* Configuration */}
                 {isSuperAdmin && (
-                    <div className="py-2">
-                        {!collapsed && <h4 className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Configuration</h4>}
-                        <div className="space-y-1">
-                            <SidebarItem to="/configuration" icon={Settings} label="App Configuration" collapsed={collapsed} />
-                            <SidebarItem to="/settings" icon={Users} label="My Preferences" collapsed={collapsed} />
-                        </div>
+                    <div className="space-y-1 mt-auto">
+                        {!collapsed && <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">Configuration</div>}
+                        <SidebarItem to="/audit-logs" icon={FileText} label="Audit Logs" collapsed={collapsed} />
+                        <SidebarItem to="/configuration" icon={Settings} label="App Configuration" collapsed={collapsed} />
                     </div>
                 )}
             </nav>
-
-            {/* Footer / Toggle */}
-            <div className="border-t p-4">
-                <button
-                    onClick={() => setCollapsed(!collapsed)}
-                    className={cn(
-                        "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground hover:bg-muted hover:text-primary transition-all",
-                        collapsed && "justify-center"
-                    )}
-                >
-                    {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-                    {!collapsed && <span>Collapse</span>}
-                </button>
-
-                <button
-                    onClick={logout}
-                    className={cn(
-                        "mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-destructive hover:bg-destructive/10 transition-all",
-                        collapsed && "justify-center"
-                    )}
-                    title={collapsed ? "Sign out" : undefined}
-                >
-                    <LogOut className="h-4 w-4" />
-                    {!collapsed && <span>Sign out</span>}
-                </button>
-            </div>
         </aside>
     );
 };

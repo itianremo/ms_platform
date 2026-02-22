@@ -46,7 +46,7 @@ namespace Users.Infrastructure.Persistence
                 // --- NEW: Seed Report Reasons ---
                 await SeedReportReasonsAsync();
 
-                // --- NEW: Seed 20 Specific "Visitor" Users for Wissler ---
+                // --- NEW: Seed 5 Specific "Visitor" Users for Wissler (Requested minimum) ---
                 await SeedWisslerVisitorsAsync();
                 // ----------------------------------------------------------
             }
@@ -114,6 +114,8 @@ namespace Users.Infrastructure.Persistence
                         customData["phoneVerified"] = true;
                         customData["photos"] = photoObjects;
                         customData["interests"] = new JsonArray("Tech", "Management", "Coffee");
+                        customData["settings"] = new JsonObject { ["pushNotifications"] = true, ["privacy"] = "public" };
+                        customData["filters"] = new JsonObject { ["maxDistance"] = 50, ["ageRange"] = new JsonArray(18, 50) };
                         
                         var adminBio = "I am the platform administrator testing the Wissler application features.";
                         await SeedProfileRawAsync(user.Id, appId, displayName, adminBio, photoUrls.First(), customData.ToJsonString(), dob, gender);
@@ -160,11 +162,11 @@ namespace Users.Infrastructure.Persistence
         {
             var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
             
-            _logger.LogInformation("Seeding 20 Realistic Visitor Users for Wissler...");
+            _logger.LogInformation("Seeding 5 Realistic Visitor Users for Wissler...");
 
             var random = new Random();
             var genders = new[] { "Male", "Female" };
-            var jobs = new[] { "Software Engineer", "Designer", "Chef", "Doctor", "Teacher", "Artist", "Writer", "Student", "Architect", "Musician" };
+            var jobs = new[] { "Software Engineer", "Designer", "Chef", "Doctor", "Teacher", "Writer", "Musician" };
             var educations = new[] { "High School", "Bachelors", "Masters", "PhD" };
             var drinkSmoking = new[] { "Never", "Socially", "Often" };
             var eyeColors = new[] { "Blue", "Brown", "Green", "Hazel" };
@@ -173,20 +175,15 @@ namespace Users.Infrastructure.Persistence
 
             var mockPhotos = GetMockPhotos();
 
-            for (int i = 1; i <= 20; i++)
+            // Just 5 users as requested
+            for (int i = 1; i <= 5; i++)
             {
                 var email = $"vis{i}@wissler.com";
                 
-                // Determine if user exists based on Auth/Seed process
-                // If Auth seeds them, we should find User ID. If not, we generate one (though this might cause login issues if Auth doesn't know them).
-                // For safety in this context, we check if the profile exists by display name or email equivalent.
                 var existingProfile = await _context.UserProfiles.FirstOrDefaultAsync(u => u.AppId == wisslerAppId && u.DisplayName == $"Visitor {i}");
-                
-                if (existingProfile != null) continue; // Skip if already there
+                if (existingProfile != null) continue;
 
-                var userId = Guid.NewGuid(); // Note: Without Auth sync, these users won't be able to login, but they will show in the feed!
-                
-                // If we want them to tie to Auth, we rely on the main seed JSON, but user specifically asked to seed 20 users specifically here.
+                var userId = Guid.NewGuid();
                 
                 var gender = genders[random.Next(genders.Length)];
                 var displayName = $"Visitor {i}";
@@ -196,45 +193,31 @@ namespace Users.Infrastructure.Persistence
                 var edu = educations[random.Next(educations.Length)];
                 var interestedIn = interestedIns[random.Next(interestedIns.Length)];
                 
-                // Verification Logic (Mix)
-                bool emailVerified = random.NextDouble() > 0.2; // 80% verified
-                bool phoneVerified = random.NextDouble() > 0.4; // 60% verified
-                
-                // Photo Objects
-                var photoUrls = mockPhotos.OrderBy(x => random.Next()).Take(random.Next(3, 7)).ToList();
+                var photoUrls = mockPhotos.OrderBy(x => random.Next()).Take(3).ToList();
                 var photoObjects = new JsonArray();
                 
                 foreach (var url in photoUrls)
                 {
-                    // Varied statuses for photos
-                    bool isApproved = random.NextDouble() > 0.1; // 90% approved
-                    bool isVerified = isApproved && random.NextDouble() > 0.3; // 70% of approved are verified
-                    bool isActive = random.NextDouble() > 0.1; // 90% active
-
                     photoObjects.Add(new JsonObject
                     {
                         ["url"] = url,
-                        ["isApproved"] = isApproved, 
-                        ["isVerified"] = isVerified,
-                        ["isActive"] = isActive
+                        ["isApproved"] = true, 
+                        ["isVerified"] = true,
+                        ["isActive"] = true
                     });
                 }
                 
-                // Construct Custom Data
                 var customData = new JsonObject
                 {
                     ["cityId"] = "Berlin",
                     ["countryId"] = "Germany",
                     ["height"] = random.Next(160, 200),
-                    ["weight"] = random.Next(50, 100),
                     ["job"] = job,
                     ["education"] = edu,
                     ["drinking"] = drinkSmoking[random.Next(drinkSmoking.Length)],
                     ["smoking"] = drinkSmoking[random.Next(drinkSmoking.Length)],
                     ["eyeColor"] = eyeColors[random.Next(eyeColors.Length)],
                     ["hairColor"] = hairColors[random.Next(hairColors.Length)],
-                    ["emailVerified"] = emailVerified,
-                    ["phoneVerified"] = phoneVerified,
                     ["interestedIn"] = interestedIn,
                     ["photos"] = photoObjects,
                     ["interests"] = new JsonArray("Travel", "Music", "Food"),

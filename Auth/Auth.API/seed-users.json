@@ -1,7 +1,7 @@
 [
     {
         "Id": "cabbfc49-4488-47d1-9379-33dd46049139",
-        "Email": "admin@globaldashboard.com",
+        "Email": "admin@ump.com",
         "Password": "Password123!",
         "Phone": "+1234567890",
         "Roles": [
@@ -15,7 +15,7 @@
     },
     {
         "Id": "d0e9a1b2-3c4d-5e6f-7a8b-9c0d1e2f3a4b",
-        "Email": "manager@globaldashboard.com",
+        "Email": "manager@ump.com",
         "Password": "Password123!",
         "Phone": "+1987654321",
         "Roles": [
@@ -29,7 +29,7 @@
     },
     {
         "Id": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-        "Email": "active@globaldashboard.com",
+        "Email": "active@ump.com",
         "Password": "Password123!",
         "Phone": "+1122334455",
         "Roles": [
@@ -43,7 +43,7 @@
     },
     {
         "Id": "f1e2d3c4-b5a6-9780-1234-567890abcdef",
-        "Email": "inactive@globaldashboard.com",
+        "Email": "inactive@ump.com",
         "Password": "Password123!",
         "Phone": "+1554433221",
         "Roles": [
@@ -57,7 +57,7 @@
     },
     {
         "Id": "b1a29384-7564-cde3-1234-567890abcdef",
-        "Email": "banned@globaldashboard.com",
+        "Email": "banned@ump.com",
         "Password": "Password123!",
         "Phone": "+1998877665",
         "Roles": [
@@ -167,7 +167,7 @@
     },
     {
         "Id": "99999999-9999-9999-9999-999999999999",
-        "Email": "visitor3@global.com",
+        "Email": "visitor3@Wissler.com",
         "Password": "Password123!",
         "Phone": "+9999999999",
         "Roles": [],

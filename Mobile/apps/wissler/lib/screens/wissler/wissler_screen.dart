@@ -199,6 +199,10 @@ class SwipeScreenState extends ConsumerState<SwipeScreen>
         Position? position;
         if (await Geolocator.isLocationServiceEnabled()) {
           LocationPermission perm = await Geolocator.checkPermission();
+          if (perm == LocationPermission.denied) {
+            perm = await Geolocator.requestPermission();
+          }
+
           if (perm == LocationPermission.whileInUse ||
               perm == LocationPermission.always) {
             position = await Geolocator.getCurrentPosition(
@@ -670,11 +674,11 @@ class _DiscoverCardState extends State<_DiscoverCard> {
 
           // 3.5 Verified Badge
           if (widget.profile.isVerified)
-            Positioned(
+            const Positioned(
               top: 20,
               right: 20,
               child: SafeArea(
-                child: const Icon(Icons.verified,
+                child: Icon(Icons.verified,
                     color: Colors.orange,
                     size: 28,
                     shadows: [Shadow(color: Colors.black54, blurRadius: 5)]),

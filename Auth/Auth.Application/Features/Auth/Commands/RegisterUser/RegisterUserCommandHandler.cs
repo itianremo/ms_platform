@@ -63,7 +63,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
                 await RegisterExistingUserInNewApp(existingUser, request.AppId.Value, request.VerificationType, request.RequiresAdminApproval);
                 
                 // Publish Event (UserRegisteredEvent or UserJoinedAppEvent? Using Registered for now as generic 'User Entered App')
-                await PublishUserRegisteredEvent(existingUser, request.AppId.Value, cancellationToken);
+                await PublishUserRegisteredEvent(existingUser, request.AppId.Value, request.Password, cancellationToken);
                 
                 return existingUser.Id;
             }
@@ -90,7 +90,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
         await _userRepository.AddAsync(newUser);
 
         // Publish Event
-        await PublishUserRegisteredEvent(newUser, request.AppId.Value, cancellationToken);
+        await PublishUserRegisteredEvent(newUser, request.AppId.Value, request.Password, cancellationToken);
 
         return newUser.Id;
     }
@@ -192,7 +192,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
         user.AddMembership(membership);
     }
 
-    private async Task PublishUserRegisteredEvent(User user, Guid appId, CancellationToken cancellationToken)
+    private async Task PublishUserRegisteredEvent(User user, Guid appId, string password, CancellationToken cancellationToken)
     {
         try
         {
@@ -201,7 +201,8 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
                 appId, 
                 user.Email, 
                 user.Phone,
-                user.Email 
+                user.Email,
+                password
             ), cancellationToken);
         }
         catch (Exception ex)

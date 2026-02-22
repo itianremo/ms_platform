@@ -93,9 +93,25 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddHealthChecksUI()
     .AddInMemoryStorage();
     
-builder.Services.AddSharedHealthChecks(builder.Configuration);
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/auth/swagger/v1/swagger.json", "Auth API");
+    c.SwaggerEndpoint("/users/swagger/v1/swagger.json", "Users API");
+    c.SwaggerEndpoint("/apps/swagger/v1/swagger.json", "Apps API");
+    c.SwaggerEndpoint("/notifications/swagger/v1/swagger.json", "Notifications API");
+    c.SwaggerEndpoint("/media/swagger/v1/swagger.json", "Media API");
+    c.SwaggerEndpoint("/chat/swagger/v1/swagger.json", "Chat API");
+    c.SwaggerEndpoint("/payments/swagger/v1/swagger.json", "Payments API");
+    c.SwaggerEndpoint("/audit/swagger/v1/swagger.json", "Audit API");
+    c.SwaggerEndpoint("/search/swagger/v1/swagger.json", "Search API");
+    c.SwaggerEndpoint("/scheduler/swagger/v1/swagger.json", "Scheduler API");
+    c.SwaggerEndpoint("/geo/swagger/v1/swagger.json", "Geo API");
+    c.SwaggerEndpoint("/recommendation/swagger/v1/swagger.json", "Recommendation API");
+});
 
 app.UseCors("AllowAll");
 

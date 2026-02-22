@@ -34,6 +34,13 @@ import {
     DialogTrigger,
     DialogFooter,
 } from "../components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "../components/ui/select";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 
@@ -130,15 +137,19 @@ const UsersPage = () => {
 
     // Create User State
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState({ email: '', password: '', firstName: '', lastName: '', phone: '' });
+    const [formData, setFormData] = useState({ email: '', password: '', firstName: '', lastName: '', phone: '', appId: '' });
 
     const handleSubmit = async () => {
+        if (!formData.appId) {
+            showToast("Please select an application to register the user under.", "error");
+            return;
+        }
         setLoading(true);
         try {
             await UserService.createUser(formData);
             showToast("User created successfully", "success");
             setOpen(false);
-            setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '' });
+            setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '', appId: '' });
             fetchData();
         } catch (error) {
             showToast("Failed to create user", "error");
@@ -229,6 +240,19 @@ const UsersPage = () => {
                                 <div className="grid gap-2">
                                     <Label>Phone (Optional)</Label>
                                     <Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="+1234567890" />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>Select Application (Tenant)</Label>
+                                    <Select value={formData.appId} onValueChange={(val) => setFormData({ ...formData, appId: val })}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Assign user to..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {apps.map(app => (
+                                                <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                             <DialogFooter>

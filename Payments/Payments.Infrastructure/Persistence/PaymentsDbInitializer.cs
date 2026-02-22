@@ -35,6 +35,13 @@ public class PaymentsDbInitializer
             // Provide a way to clean them up so they don't appear as duplicates
             await _context.Database.ExecuteSqlRawAsync("DELETE FROM AppPaymentProviders WHERE AppId = 'system-global'");
 
+            try 
+            {
+                // Safely add CreatedAt to Transactions if it was created before we added this property
+                await _context.Database.ExecuteSqlRawAsync("IF COL_LENGTH('Transactions', 'CreatedAt') IS NULL BEGIN ALTER TABLE Transactions ADD CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE() END");
+            } 
+            catch { /* Ignore if not SQL Server or fails */ }
+
             /* 
              * Obsolete Seeding - Removed to prevent duplicates
              * Now we rely on Dynamic App Configuration via the Frontend/API
@@ -90,4 +97,5 @@ public class PaymentsDbInitializer
             // Don't throw, allow app to start so fallback works
         }
     }
+
 }

@@ -18,10 +18,10 @@ public class AnalyticsController : ControllerBase
     }
 
     [HttpGet("dashboard")]
-    public async Task<IActionResult> GetDashboardStats()
+    public async Task<IActionResult> GetDashboardStats([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
         // Aggregate high-level stats
-        var query = new GetDashboardStatsQuery();
+        var query = new GetDashboardStatsQuery(null, startDate, endDate);
         var result = await _mediator.Send(query);
         return Ok(result);
     }

@@ -34,7 +34,10 @@ const LoginPage: React.FC = () => {
     return (
         <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f3f4f6' }}>
             <div style={{ padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', width: '100%', maxWidth: '400px' }}>
-                <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: 'bold' }}>Sign In to Wissler</h2>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                    <img src="/logo.png" alt="Wissler Logo" style={{ height: '48px', objectFit: 'contain' }} />
+                </div>
+                <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: 'bold' }}>Sign In to Wissler Admin</h2>
 
                 {error && <div style={{ marginBottom: '1rem', padding: '0.5rem', backgroundColor: '#fee2e2', color: '#b91c1c', borderRadius: '4px' }}>{error}</div>}
 
@@ -56,27 +59,10 @@ const LoginPage: React.FC = () => {
                     <button type="submit" style={{ padding: '0.75rem', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
                         Sign In
                     </button>
+                    <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+                        <a href="#" style={{ color: '#2563eb', textDecoration: 'none', fontSize: '0.875rem' }} onClick={(e) => { e.preventDefault(); alert('Forgot password flow to be implemented'); }}>Forgot Password?</a>
+                    </div>
                 </form>
-
-                <div style={{ margin: '1.5rem 0', textAlign: 'center', position: 'relative' }}>
-                    <hr style={{ border: 'none', borderTop: '1px solid #e5e7eb' }} />
-                    <span style={{ position: 'absolute', top: '-10px', left: '50%', transform: 'translateX(-50%)', backgroundColor: 'white', padding: '0 0.5rem', color: '#6b7280', fontSize: '0.875rem' }}>Or continue with</span>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <button
-                        onClick={() => handleSocialLogin('Google')}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '4px', backgroundColor: 'white', cursor: 'pointer', gap: '0.5rem' }}
-                    >
-                        <span style={{ fontWeight: '600' }}>Google</span>
-                    </button>
-                    <button
-                        onClick={() => handleSocialLogin('Facebook')}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.75rem', border: '1px solid #d1d5db', borderRadius: '4px', backgroundColor: '#1877f2', color: 'white', cursor: 'pointer', gap: '0.5rem' }}
-                    >
-                        <span style={{ fontWeight: '600' }}>Facebook</span>
-                    </button>
-                </div>
             </div>
         </div>
     );

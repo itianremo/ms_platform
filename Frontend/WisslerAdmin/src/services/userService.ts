@@ -31,10 +31,10 @@ export interface UserProfile {
 }
 
 export const UserService = {
-    // Auth API - Get All Users
+    // Auth API - Get All Users (Filtered by Wissler app)
     getAllUsers: async (): Promise<UserDto[]> => {
         try {
-            const response = await api.get('/auth/api/Auth/users');
+            const response = await api.get(`/auth/api/Auth/users?appId=${APP_ID}`);
             return response.data;
         } catch (error) {
             console.error("Failed to fetch users", error);

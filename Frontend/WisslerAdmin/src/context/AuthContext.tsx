@@ -31,10 +31,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }).join(''));
 
                 const decoded = JSON.parse(jsonPayload);
+                const roleClaim = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || decoded.role || [];
+                const roles = Array.isArray(roleClaim) ? roleClaim : [roleClaim];
+
                 setUser({
                     id: decoded.sub || decoded.nameid,
                     email: decoded.email,
-                    roles: decoded.role ? (Array.isArray(decoded.role) ? decoded.role : [decoded.role]) : []
+                    roles: roles
                 });
             } catch (e) {
                 console.error("Failed to decode token", e);

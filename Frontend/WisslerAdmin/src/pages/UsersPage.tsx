@@ -38,14 +38,17 @@ import {
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { useNavigate } from 'react-router-dom';
+import { APP_ID } from '../config';
 
 const UsersPage = () => {
     const [users, setUsers] = useState<UserDto[]>([]);
     const [apps, setApps] = useState<AppConfig[]>([]);
     const [loading, setLoading] = useState(true);
     const { showToast } = useToast();
-    const [filter, setFilter] = useState<'all' | 'pending'>('all');
+    const [filter, setFilter] = useState<'all' | 'pending' | 'admins'>('all');
     const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+    const navigate = useNavigate();
 
     // Create User State
     const [open, setOpen] = useState(false);
@@ -136,7 +139,7 @@ const UsersPage = () => {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            await UserService.createUser(formData);
+            await UserService.createUser({ ...formData, appId: APP_ID });
             showToast("User created successfully", "success");
             setOpen(false);
             setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '' });
@@ -149,8 +152,13 @@ const UsersPage = () => {
     };
 
     const filteredUsers = users.filter(user => {
-        if (filter === 'pending') return user.status === 3; // PendingAdminApproval
+        if (filter === 'pending') return user.status === 3 || !user.isActive; // PendingAdminApproval or inactive
+        if (filter === 'admins') return user.roles && user.roles.some(r => r.includes('Admin') || r.includes('Super'));
         return true;
+    }).sort((a, b) => {
+        const dateA = a.lastLoginUtc ? new Date(a.lastLoginUtc).getTime() : 0;
+        const dateB = b.lastLoginUtc ? new Date(b.lastLoginUtc).getTime() : 0;
+        return dateB - dateA; // Most recent first
     });
 
     return (
@@ -172,6 +180,12 @@ const UsersPage = () => {
                         onClick={() => setFilter('pending')}
                     >
                         Pending Support
+                    </Button>
+                    <Button
+                        variant={filter === 'admins' ? "default" : "outline"}
+                        onClick={() => setFilter('admins')}
+                    >
+                        Admins
                     </Button>
 
                     {/* Bulk Actions */}
@@ -227,6 +241,10 @@ const UsersPage = () => {
                                         <Input value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} />
                                     </div>
                                 </div>
+                                <div className="grid gap-2">
+                                    <Label>Phone (Optional)</Label>
+                                    <Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="+1234567890" />
+                                </div>
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
@@ -241,7 +259,7 @@ const UsersPage = () => {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>{filter === 'pending' ? 'Pending Approvals' : 'All Users'}</CardTitle>
+                    <CardTitle>{filter === 'pending' ? 'Pending Approvals' : filter === 'admins' ? 'Admin Profiles' : 'All Users'}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -288,7 +306,9 @@ const UsersPage = () => {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <span className="text-xs text-muted-foreground">Unknown</span>
+                                        <span className="text-xs text-muted-foreground mt-1 block">
+                                            Unknown
+                                        </span>
                                     </TableCell>
                                     <TableCell>
                                         {(() => {
@@ -323,8 +343,8 @@ const UsersPage = () => {
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
-                                                <DropdownMenuItem>
-                                                    <Edit className="mr-2 h-4 w-4" /> Edit
+                                                <DropdownMenuItem onClick={() => navigate(`/users/${user.id}`)}>
+                                                    <Edit className="mr-2 h-4 w-4" /> Edit Details
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem className="text-destructive">

@@ -9,7 +9,7 @@ using Users.Domain.Repositories;
 
 namespace Users.Application.Features.Users.Queries.GetDashboardStats;
 
-public record GetDashboardStatsQuery : IRequest<DashboardStatsDto>;
+public record GetDashboardStatsQuery(Guid? AppId = null, DateTime? StartDate = null, DateTime? EndDate = null) : IRequest<DashboardStatsDto>;
 
 public class GetDashboardStatsQueryHandler : IRequestHandler<GetDashboardStatsQuery, DashboardStatsDto>
 {
@@ -23,10 +23,28 @@ public class GetDashboardStatsQueryHandler : IRequestHandler<GetDashboardStatsQu
     public async Task<DashboardStatsDto> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
     {
         // Fetch all profiles (Not efficient for large scale, but fine for MVP)
-        var profiles = await _profileRepository.ListAsync();
+        var profilesList = await _profileRepository.ListAsync();
+        IEnumerable<Domain.Entities.UserProfile> profiles = profilesList;
+        
+        if (request.AppId.HasValue)
+        {
+            profiles = profiles.Where(p => p.AppId == request.AppId.Value);
+        }
+
+        if (request.StartDate.HasValue)
+        {
+            profiles = profiles.Where(p => p.Created >= request.StartDate.Value);
+        }
+
+        if (request.EndDate.HasValue)
+        {
+            profiles = profiles.Where(p => p.Created <= request.EndDate.Value);
+        }
 
         var totalUsers = profiles.Select(p => p.UserId).Distinct().Count();
-        var activeUsers = totalUsers; // Currently, we count all unique users as active. TODO: Filter by Login/Status
+        
+        var today = DateTime.UtcNow.Date;
+        var activeUsers = profiles.Where(p => p.LastActiveAt >= today).Select(p => p.UserId).Distinct().Count();
         
         // New Users Last 24h
         var oneDayAgo = DateTime.UtcNow.AddHours(-24);
@@ -39,6 +57,34 @@ public class GetDashboardStatsQueryHandler : IRequestHandler<GetDashboardStatsQu
             .Select(g => new AppUserCountDto(g.Key.ToString(), g.Count()))
             .ToList();
 
-        return new DashboardStatsDto(totalUsers, activeUsers, newUsers, usersPerApp);
+        // Calculate Demographics from CustomDataJson
+        var demographics = new Dictionary<string, int>();
+        foreach (var p in profiles)
+        {
+            if (!string.IsNullOrWhiteSpace(p.CustomDataJson) && p.CustomDataJson != "{}")
+            {
+                try
+                {
+                    using var doc = System.Text.Json.JsonDocument.Parse(p.CustomDataJson);
+                    if (doc.RootElement.TryGetProperty("countryId", out var countryProp))
+                    {
+                        var country = countryProp.GetString();
+                        if (!string.IsNullOrWhiteSpace(country))
+                        {
+                            if (demographics.ContainsKey(country)) demographics[country]++;
+                            else demographics[country] = 1;
+                        }
+                    }
+                }
+                catch { } // Ignore parse errors for individual records
+            }
+        }
+
+        var demogList = demographics.Select(kv => new DemographicCountDto(kv.Key, kv.Value)).OrderByDescending(x => x.Count).ToList();
+        
+        // TODO: Query real matches when Match repository is integrated
+        int totalMatches = 0;
+
+        return new DashboardStatsDto(totalUsers, activeUsers, newUsers, usersPerApp, totalMatches, demogList);
     }
 }

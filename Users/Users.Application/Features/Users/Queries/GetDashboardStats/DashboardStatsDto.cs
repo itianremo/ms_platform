@@ -4,9 +4,13 @@ namespace Users.Application.Features.Users.Queries.GetDashboardStats;
 
 public record AppUserCountDto(string AppName, int Count);
 
+public record DemographicCountDto(string Region, int Count);
+
 public record DashboardStatsDto(
     int TotalUsers, 
     int ActiveUsers, 
     int NewUsersLast24h,
-    List<AppUserCountDto> UsersPerApp
+    List<AppUserCountDto> UsersPerApp,
+    int TotalMatches,
+    List<DemographicCountDto> Demographics
 );

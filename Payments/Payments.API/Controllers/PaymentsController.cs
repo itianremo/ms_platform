@@ -41,5 +41,22 @@ namespace Payments.API.Controllers
             }
             return Ok(result);
         }
+
+        [HttpGet("analytics")]
+        public async Task<IActionResult> GetAnalytics([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+        {
+            var query = new Payments.Application.Features.Payments.Queries.GetRevenueAnalytics.GetRevenueAnalyticsQuery(startDate, endDate);
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+
+        [HttpGet("plans")]
+        public async Task<IActionResult> GetPlans()
+        {
+            // Simple query to retrieve active plans. Since we don't have GetPlansQuery yet, we can create one or just use DbContext directly if we're feeling lazy. But let's assume we need to write GetPlansQuery next.
+            var query = new Payments.Application.Features.Payments.Queries.GetPlans.GetPlansQuery();
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
     }
 }

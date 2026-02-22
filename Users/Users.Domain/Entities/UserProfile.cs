@@ -20,8 +20,11 @@ public class UserProfile : Entity
     public DateTime? DateOfBirth { get; private set; }
     public string? Gender { get; private set; }
     public DateTime Created { get; private set; } = DateTime.UtcNow;
+    public DateTime? LastActiveAt { get; set; } // Settable for activity tracking
 
-    private UserProfile() { }
+    private UserProfile() { 
+        DisplayName = "";
+    }
 
     public UserProfile(Guid userId, Guid appId, string displayName, string? customDataJson = "{}")
     {

@@ -3,6 +3,7 @@ import { X, CheckCheck, BellOff } from 'lucide-react';
 import type { Notification } from '../types/notification';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '../lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface NotificationDrawerProps {
     isOpen: boolean;
@@ -15,6 +16,8 @@ interface NotificationDrawerProps {
 export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
     isOpen, onClose, notifications, onMarkAllRead, onMarkRead
 }) => {
+    const navigate = useNavigate();
+
     return (
         <>
             {/* Backdrop */}
@@ -67,7 +70,10 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                                     key={n.id}
                                     onClick={() => {
                                         if (!n.isRead) onMarkRead(n.id);
-                                        // Optional: onClose() if clicking should close drawer
+                                        if (n.link) {
+                                            navigate(n.link);
+                                            onClose();
+                                        }
                                     }}
                                     className={cn(
                                         "relative group cursor-pointer rounded-lg border p-4 transition-all hover:bg-accent/50",

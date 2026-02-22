@@ -40,9 +40,9 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("dashboard/stats")]
-    public async Task<IActionResult> GetDashboardStats()
+    public async Task<IActionResult> GetDashboardStats([FromQuery] Guid? appId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {
-        var query = new Users.Application.Features.Users.Queries.GetDashboardStats.GetDashboardStatsQuery();
+        var query = new Users.Application.Features.Users.Queries.GetDashboardStats.GetDashboardStatsQuery(appId, startDate, endDate);
         var result = await _mediator.Send(query);
         return Ok(result);
     }

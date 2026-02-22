@@ -13,5 +13,6 @@ namespace Payments.Domain.Entities
         public string ProviderTransactionId { get; set; }
         public string PaymentGateway { get; set; } // "Stripe", "PayTabs"
         public string GatewayResponse { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

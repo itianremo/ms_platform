@@ -246,9 +246,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("users")]
-    public async Task<IActionResult> GetAllUsers()
+    public async Task<IActionResult> GetAllUsers([FromQuery] Guid? appId)
     {
-        var result = await _mediator.Send(new Auth.Application.Features.Auth.Queries.GetAllUsers.GetAllUsersQuery());
+        var result = await _mediator.Send(new Auth.Application.Features.Auth.Queries.GetAllUsers.GetAllUsersQuery(appId));
         return Ok(result);
     }
 

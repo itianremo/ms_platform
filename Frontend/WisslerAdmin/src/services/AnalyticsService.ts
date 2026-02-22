@@ -1,17 +1,28 @@
 import api from './api';
+import { APP_ID } from '../config';
 
 export interface DashboardStats {
     totalUsers: number;
     activeUsers: number;
     newUsersLast24h: number;
     usersPerApp: { appName: string; count: number }[];
+    totalMatches: number;
+    demographics: { region: string; count: number }[];
+}
+
+export interface RevenueStats {
+    currentMonthRevenue: number;
+    chartData: { date: string; amount: number }[];
 }
 
 export const AnalyticsService = {
-    getDashboardStats: async (): Promise<DashboardStats> => {
+    getDashboardStats: async (startDate?: string, endDate?: string): Promise<DashboardStats> => {
         try {
             // Gateway Proxy: /users -> Users.API
-            const response = await api.get('/users/api/Users/dashboard/stats');
+            let url = `/users/api/Users/dashboard/stats?appId=${APP_ID}`;
+            if (startDate) url += `&startDate=${startDate}`;
+            if (endDate) url += `&endDate=${endDate}`;
+            const response = await api.get(url);
             return response.data;
         } catch (error) {
             console.error("Failed to fetch dashboard stats", error);
@@ -20,7 +31,9 @@ export const AnalyticsService = {
                 totalUsers: 0,
                 activeUsers: 0,
                 newUsersLast24h: 0,
-                usersPerApp: []
+                usersPerApp: [],
+                totalMatches: 0,
+                demographics: []
             };
         }
     },
@@ -33,6 +46,28 @@ export const AnalyticsService = {
         } catch (error) {
             console.error("Failed to fetch app user stats", error);
             return [];
+        }
+    },
+
+    getRevenueStats: async (startDate?: string, endDate?: string): Promise<RevenueStats> => {
+        try {
+            let url = `/payments/api/Payments/analytics`;
+            const params = new URLSearchParams();
+            if (startDate) params.append('startDate', startDate);
+            if (endDate) params.append('endDate', endDate);
+
+            if (params.toString()) {
+                url += `?${params.toString()}`;
+            }
+
+            const response = await api.get(url);
+            return response.data;
+        } catch (error) {
+            console.error("Failed to fetch revenue stats", error);
+            return {
+                currentMonthRevenue: 0,
+                chartData: []
+            };
         }
     }
 };

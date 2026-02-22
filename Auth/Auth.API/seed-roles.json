@@ -29,6 +29,21 @@
         "IsSealed": false
     },
     {
+        "Name": "ManageConfigs",
+        "Permissions": [
+            "EditApps",
+            "AssignApps"
+        ],
+        "IsSealed": false
+    },
+    {
+        "Name": "ManageMedia",
+        "Permissions": [
+            "EditUsers"
+        ],
+        "IsSealed": false
+    },
+    {
         "Name": "Visitor",
         "Permissions": [
             "FreeSubscription"

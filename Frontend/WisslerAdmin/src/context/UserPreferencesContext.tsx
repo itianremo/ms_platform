@@ -90,10 +90,15 @@ export const UserPreferencesProvider = ({ children }: { children: React.ReactNod
                     // Apply Theme immediately
                     if (data.theme) {
                         setTheme(data.theme.toLowerCase() as any);
+                    } else {
+                        await loadAppDefaults();
                     }
                 } catch (e) {
                     console.error("Failed to parse preferences", e);
+                    await loadAppDefaults();
                 }
+            } else {
+                await loadAppDefaults();
             }
         } catch (error) {
             console.error("Failed to load preferences", error);

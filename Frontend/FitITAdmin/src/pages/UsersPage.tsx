@@ -38,6 +38,7 @@ import {
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { APP_ID } from '../config';
 
 const UsersPage = () => {
     const [users, setUsers] = useState<UserDto[]>([]);
@@ -136,7 +137,7 @@ const UsersPage = () => {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            await UserService.createUser(formData);
+            await UserService.createUser({ ...formData, appId: APP_ID });
             showToast("User created successfully", "success");
             setOpen(false);
             setFormData({ email: '', password: '', firstName: '', lastName: '', phone: '' });
@@ -226,6 +227,10 @@ const UsersPage = () => {
                                         <Label>Last Name</Label>
                                         <Input value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} />
                                     </div>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label>Phone (Optional)</Label>
+                                    <Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="+1234567890" />
                                 </div>
                             </div>
                             <DialogFooter>

@@ -42,7 +42,6 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Docker"))
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
 
     using (var scope = app.Services.CreateScope())
     {

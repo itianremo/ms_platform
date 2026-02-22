@@ -1,0 +1,196 @@
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\components\Sidebar.tsx
+   3:88   error  'LogOut' is defined but never used           @typescript-eslint/no-unused-vars
+   3:103  error  'ShieldAlert' is defined but never used      @typescript-eslint/no-unused-vars
+  51:19   error  'logout' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\components\theme-provider.tsx
+  66:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\components\ui\badge.tsx
+  36:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\components\ui\button.tsx
+  56:18  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\components\ui\calendar.tsx
+  55:33  error  'props' is defined but never used  @typescript-eslint/no-unused-vars
+  56:34  error  'props' is defined but never used  @typescript-eslint/no-unused-vars
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\components\ui\input.tsx
+  5:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\context\AuthContext.tsx
+  37:17  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\context\AuthContext.tsx:37:17
+  35 |                 const roles = Array.isArray(roleClaim) ? roleClaim : [roleClaim];
+  36 |
+> 37 |                 setUser({
+     |                 ^^^^^^^ Avoid calling setState() directly within an effect
+  38 |                     id: decoded.sub || decoded.nameid,
+  39 |                     email: decoded.email,
+  40 |                     roles: roles  react-hooks/set-state-in-effect
+  62:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     react-refresh/only-export-components
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\context\ToastContext.tsx
+  5:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\context\UserPreferencesContext.tsx
+    2:65  error    'useCallback' is defined but never used                                                                                         @typescript-eslint/no-unused-vars
+   36:8   warning  React Hook useEffect has a missing dependency: 'loadPreferences'. Either include it or remove the dependency array              react-hooks/exhaustive-deps
+   50:67  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+   52:25  error    Empty block statement                                                                                                           no-empty
+   92:62  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  114:54  error    Unexpected any. Specify a different type                                                                                        @typescript-eslint/no-explicit-any
+  124:21  error    Empty block statement                                                                                                           no-empty
+  155:14  error    Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\layouts\DashboardLayout.tsx
+   2:24  error    'useLocation' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  11:41  error    'Utensils' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  19:20  error    'setTheme' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  28:9   error    Error: Cannot access variable before it is declared
+
+`fetchNotifications` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\layouts\DashboardLayout.tsx:28:9
+  26 |
+  27 |     useEffect(() => {
+> 28 |         fetchNotifications();
+     |         ^^^^^^^^^^^^^^^^^^ `fetchNotifications` accessed before it is declared
+  29 |         fetchUserProfile();
+  30 |         const interval = setInterval(fetchNotifications, 60000);
+  31 |         return () => clearInterval(interval);
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\layouts\DashboardLayout.tsx:34:5
+  32 |     }, []);
+  33 |
+> 34 |     const fetchNotifications = async () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 35 |         try {
+     | ^^^^^^^^^^^^^
+> 36 |             if (user?.id) {
+     …
+     | ^^^^^^^^^^^^^
+> 47 |         }
+     | ^^^^^^^^^^^^^
+> 48 |     };
+     | ^^^^^^^ `fetchNotifications` is declared here
+  49 |
+  50 |     const fetchUserProfile = async () => {
+  51 |         if (!user?.id) return;                                                                                                                                                                                                   react-hooks/immutability
+  29:9   error    Error: Cannot access variable before it is declared
+
+`fetchUserProfile` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\layouts\DashboardLayout.tsx:29:9
+  27 |     useEffect(() => {
+  28 |         fetchNotifications();
+> 29 |         fetchUserProfile();
+     |         ^^^^^^^^^^^^^^^^ `fetchUserProfile` accessed before it is declared
+  30 |         const interval = setInterval(fetchNotifications, 60000);
+  31 |         return () => clearInterval(interval);
+  32 |     }, []);
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\layouts\DashboardLayout.tsx:50:5
+  48 |     };
+  49 |
+> 50 |     const fetchUserProfile = async () => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 51 |         if (!user?.id) return;
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 52 |         try {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 53 |             await UserService.getProfile(user.id, APP_ID);
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 54 |         } catch (err) { }
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 55 |     };
+     | ^^^^^^^ `fetchUserProfile` is declared here
+  56 |
+  57 |     const handleSetCollapsed = (val: boolean) => {
+  58 |         updatePreferences({ sidebarCollapsed: val });  react-hooks/immutability
+  32:8   warning  React Hook useEffect has missing dependencies: 'fetchNotifications' and 'fetchUserProfile'. Either include them or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        react-hooks/exhaustive-deps
+  38:61  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-explicit-any
+  54:18  error    'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  54:23  error    Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 no-empty
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\pages\Dashboard.tsx
+   2:27   error  'CreditCard' is defined but never used      @typescript-eslint/no-unused-vars
+   2:70   error  'Server' is defined but never used          @typescript-eslint/no-unused-vars
+   2:78   error  'Database' is defined but never used        @typescript-eslint/no-unused-vars
+   2:88   error  'HardDrive' is defined but never used       @typescript-eslint/no-unused-vars
+   2:119  error  'MessageSquare' is defined but never used   @typescript-eslint/no-unused-vars
+   3:10   error  'Link' is defined but never used            @typescript-eslint/no-unused-vars
+   5:10   error  'Button' is defined but never used          @typescript-eslint/no-unused-vars
+   6:10   error  'cn' is defined but never used              @typescript-eslint/no-unused-vars
+  12:10   error  'Avatar' is defined but never used          @typescript-eslint/no-unused-vars
+  12:18   error  'AvatarFallback' is defined but never used  @typescript-eslint/no-unused-vars
+  12:34   error  'AvatarImage' is defined but never used     @typescript-eslint/no-unused-vars
+  42:31   error  Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\pages\GeneralConfigPage.tsx
+   2:16  error    'Layout' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+  15:13  error    'user' is assigned a value but never used                                                                      @typescript-eslint/no-unused-vars
+  29:8   warning  React Hook useEffect has a missing dependency: 'loadConfig'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  42:51  error    Unexpected any. Specify a different type                                                                       @typescript-eslint/no-explicit-any
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\pages\LoginPage.tsx
+  23:23  error  Unexpected any. Specify a different type                @typescript-eslint/no-explicit-any
+  29:11  error  'handleSocialLogin' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\pages\MediaPage.tsx
+   72:8   warning  React Hook useEffect has a missing dependency: 'showToast'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  100:18  error    'error' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+  118:71  error    Unexpected any. Specify a different type                                                                      @typescript-eslint/no-explicit-any
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\pages\ReportsPage.tsx
+   4:10  error  'Input' is defined but never used                @typescript-eslint/no-unused-vars
+   6:10  error  'Search' is defined but never used               @typescript-eslint/no-unused-vars
+   6:55  error  'Users' is defined but never used                @typescript-eslint/no-unused-vars
+  29:19  error  'setUsers' is assigned a value but never used    @typescript-eslint/no-unused-vars
+  30:12  error  'page' is assigned a value but never used        @typescript-eslint/no-unused-vars
+  30:18  error  'setPage' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  37:13  error  'valA' is never reassigned. Use 'const' instead  prefer-const
+  37:19  error  Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+  38:13  error  'valB' is never reassigned. Use 'const' instead  prefer-const
+  38:19  error  Unexpected any. Specify a different type         @typescript-eslint/no-explicit-any
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\pages\UserDetailsPage.tsx
+   3:66  error  'ImageIcon' is defined but never used     @typescript-eslint/no-unused-vars
+  41:50  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  67:34  error  'e' is defined but never used             @typescript-eslint/no-unused-vars
+  92:18  error  'error' is defined but never used         @typescript-eslint/no-unused-vars
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\pages\UsersPage.tsx
+   11:52  error    'CardDescription' is defined but never used                                                                   @typescript-eslint/no-unused-vars
+   12:54  error    'UserIcon' is defined but never used                                                                          @typescript-eslint/no-unused-vars
+   58:8   warning  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  123:22  error    'err' is defined but never used                                                                               @typescript-eslint/no-unused-vars
+  146:18  error    'error' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\services\api.ts
+  25:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  27:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\services\appService.ts
+  78:74  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\services\authService.ts
+  10:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+D:\Worx\_MyProjz\ms_platform\Frontend\WisslerAdmin\src\services\userService.ts
+  61:18  error  'error' is defined but never used         @typescript-eslint/no-unused-vars
+  65:22  error  'e' is defined but never used             @typescript-eslint/no-unused-vars
+  85:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 76 problems (71 errors, 5 warnings)
+  2 errors and 0 warnings potentially fixable with the `--fix` option.
+

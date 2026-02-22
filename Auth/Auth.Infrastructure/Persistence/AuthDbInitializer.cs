@@ -288,7 +288,7 @@ public class AuthDbInitializer
                  await AssignRoleToUser(user, globalAppId, "User", context);
             }
             // Assign Multi-App Visitor
-            else if (seedUser.Email == "visitor3@global.com")
+            else if (seedUser.Email == "visitor3@abc.com")
             {
                  var fitItAppId = Guid.Parse("11111111-1111-1111-1111-111111111111");
                  var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
