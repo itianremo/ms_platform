@@ -93,8 +93,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddHealthChecksUI()
     .AddInMemoryStorage();
     
-builder.Services.AddSwaggerGen();
-
+builder.Services.AddSharedHealthChecks(builder.Configuration);
 var app = builder.Build();
 
 app.UseSwaggerUI(c =>

@@ -8,6 +8,7 @@ using global::Auth.Domain.Services;
 using MassTransit;
 using Shared.Messaging.Events;
 using global::Auth.Domain.Exceptions;
+using System.Net.Http.Json;
 
 namespace Auth.Application.Features.Auth.Commands.LoginUser;
 
@@ -18,19 +19,29 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, AuthRes
     private readonly ITokenService _tokenService;
     private readonly ILogger<LoginUserCommandHandler> _logger;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IHttpClientFactory _httpClientFactory;
 
     public LoginUserCommandHandler(
         IUserRepository userRepository, 
         IPasswordHasher passwordHasher,
         ITokenService tokenService,
         ILogger<LoginUserCommandHandler> logger,
-        IPublishEndpoint publishEndpoint)
+        IPublishEndpoint publishEndpoint,
+        IHttpClientFactory httpClientFactory)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
         _logger = logger;
         _publishEndpoint = publishEndpoint;
+        _httpClientFactory = httpClientFactory;
+    }
+
+    public class LocalAuthProfileDto
+    {
+        public Guid RoleId { get; set; }
+        public int Status { get; set; }
+        public DateTime? SubscriptionExpiry { get; set; }
     }
 
     public async Task<AuthResponse> Handle(LoginUserCommand request, CancellationToken cancellationToken)
@@ -85,11 +96,73 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, AuthRes
 
         user.RecordLogin(request.AppId);
 
-        // 3. Policy Check
-        var requirements = await _userRepository.GetMemberAppRequirementsAsync(user.Id);
-        var policy = new UserLoginPolicy();
+        // 3. Fetch App Profile (Role, Status, Subscription) from Users.API
+        Role? appRole = null;
+        Role? superAdminRole = null;
+        bool suppressRoles = false;
+        var appRequirements = new List<AppRequirement>();
+
+        var client = _httpClientFactory.CreateClient();
+        client.BaseAddress = new Uri("http://ms_users:8080/"); // Internal container DNS
         
-        var policyResult = policy.Evaluate(user, request.AppId, requirements);
+        if (request.AppId.HasValue)
+        {
+            var appReq = await _userRepository.GetAppVerificationConfigAsync(request.AppId.Value);
+            
+            try
+            {
+                var response = await client.GetAsync($"api/Internal/auth-profile?userId={user.Id}&appId={request.AppId.Value}", cancellationToken);
+                if (response.IsSuccessStatusCode)
+                {
+                    var profile = await response.Content.ReadFromJsonAsync<LocalAuthProfileDto>(cancellationToken: cancellationToken);
+                    if (profile != null)
+                    {
+                        if (appReq != null)
+                        {
+                            appReq.MembershipStatus = profile.Status;
+                            appRequirements.Add(appReq);
+                        }
+
+                        appRole = await _userRepository.GetRoleByIdAsync(profile.RoleId);
+
+                        if (profile.SubscriptionExpiry.HasValue && profile.SubscriptionExpiry.Value < DateTime.UtcNow)
+                        {
+                            suppressRoles = true;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to fetch Users.API AuthProfile for User {UserId} in App {AppId}", user.Id, request.AppId.Value);
+            }
+
+            // Check if SuperAdmin in Global App
+            var globalAppId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            if (request.AppId.Value != globalAppId)
+            {
+                try
+                {
+                     var globalResponse = await client.GetAsync($"api/Internal/auth-profile?userId={user.Id}&appId={globalAppId}", cancellationToken);
+                     if (globalResponse.IsSuccessStatusCode)
+                     {
+                         var globalProfile = await globalResponse.Content.ReadFromJsonAsync<LocalAuthProfileDto>(cancellationToken: cancellationToken);
+                         if (globalProfile != null && globalProfile.Status == 0) // Active
+                         {
+                             var globalRole = await _userRepository.GetRoleByIdAsync(globalProfile.RoleId);
+                             if (globalRole?.Name == "SuperAdmin") superAdminRole = globalRole;
+                         }
+                     }
+                }
+                catch { }
+            }
+        }
+
+        // 3.5. Policy Check
+        var policy = new UserLoginPolicy();
+        var policyResult = policy.Evaluate(user, request.AppId, appRequirements);
+        
+        if (policyResult.SuppressRoles) suppressRoles = true;
 
         // 4. Session Limit Check (1 per App)
         if (request.AppId.HasValue)
@@ -126,7 +199,9 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, AuthRes
             userWithRoles ?? user, 
             request.AppId, 
             session.Id, 
-            suppressRoles: policyResult.SuppressRoles 
+            suppressRoles: suppressRoles,
+            appRole: appRole,
+            superAdminRole: superAdminRole
         );
 
         // Persist

@@ -1,5 +1,5 @@
 using Shared.Infrastructure.Extensions;
-using Shared.Infrastructure.Middlewares;
+using Auth.API.Middlewares;
 using Microsoft.AspNetCore.RateLimiting;
 using Auth.Infrastructure.Persistence;
 using System.Threading.RateLimiting;
@@ -29,8 +29,9 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddSharedHealthChecks(builder.Configuration);
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddScoped<Auth.API.Filters.SessionValidationFilter>();
-builder.Services.AddTransient<GlobalExceptionHandler>();
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -64,10 +65,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-}
+app.UseSwagger();
 
 // app.UseHttpsRedirection(); // Disabled for Docker/Gateway environment
 app.UseCors("AllowFrontend");

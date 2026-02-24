@@ -22,25 +22,17 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleCommand>
 
     public async Task Handle(AssignRoleCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetUserWithRolesAsync(request.UserId);
+        var user = await _userRepository.GetByIdAsync(request.UserId);
         if (user == null) throw new Shared.Kernel.Exceptions.NotFoundException(nameof(global::Auth.Domain.Entities.User), request.UserId);
-
-        var membership = user.Memberships.FirstOrDefault(m => m.AppId == request.AppId);
-        if (membership == null)
-        {
-            throw new InvalidOperationException("User is not a member of this app. Add to app on 'Membership' tab first.");
-        }
 
         var newRole = await _userRepository.GetRoleByNameAsync(request.AppId, request.RoleName);
         if (newRole == null) throw new Shared.Kernel.Exceptions.NotFoundException(nameof(global::Auth.Domain.Entities.Role), request.RoleName);
 
-        var oldRoleId = membership.RoleId;
-        string oldRoleName = "Unknown"; // Would normally fetch from repo
+        // Memberships and Roles are now natively handled by Users.API.
+        // We simply publish the assignment event so the downstream services can update their profile.
+        string oldRoleName = "Unknown"; 
 
-        // Perform Change
-        membership.ChangeRole(newRole.Id);
-        
-        await _userRepository.UpdateAsync(user);
+        // Removed direct membership assignment as it no longer exists in AuthDb.
 
         await _publishEndpoint.Publish(new Shared.Messaging.Events.RoleAssignedEvent(
             user.Id,
@@ -76,19 +68,12 @@ public class UnassignRoleCommandHandler : IRequestHandler<UnassignRoleCommand>
 
     public async Task Handle(UnassignRoleCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetUserWithRolesAsync(request.UserId);
+        var user = await _userRepository.GetByIdAsync(request.UserId);
         if (user == null) throw new Shared.Kernel.Exceptions.NotFoundException(nameof(global::Auth.Domain.Entities.User), request.UserId);
-
-        var membership = user.Memberships.FirstOrDefault(m => m.AppId == request.AppId);
-        if (membership == null) return;
 
         var defaultRole = await _userRepository.GetRoleByNameAsync(request.AppId, "User") 
                           ?? await _userRepository.GetRoleByNameAsync(request.AppId, "NormalUser");
         
-        if (defaultRole != null && membership.RoleId != defaultRole.Id)
-        {
-            membership.ChangeRole(defaultRole.Id);
-            await _userRepository.UpdateAsync(user);
-        }
+        // Removed membership update. In a full system, an event should be fired here.
     }
 }

@@ -59,7 +59,7 @@ public class UserRegisteredConsumer : IConsumer<UserRegisteredEvent>
                 displayName = await GenerateUniqueDisplayNameAsync();
             }
 
-            var profile = new UserProfile(message.UserId, message.AppId, displayName, defaultSettings);
+            var profile = new UserProfile(message.UserId, message.AppId, displayName, defaultSettings, message.RoleId);
             await _repository.AddAsync(profile);
         }
     }

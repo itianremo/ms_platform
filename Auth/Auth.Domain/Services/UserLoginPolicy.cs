@@ -1,7 +1,7 @@
 using Auth.Domain.Entities;
 using Auth.Domain.Repositories;
 using Shared.Kernel; // For VerificationType if needed
-// using Exceptions = Auth.Domain.Exceptions;
+using Auth.Domain.Enums;
 
 namespace Auth.Domain.Services;
 
@@ -91,18 +91,8 @@ public class UserLoginPolicy
         }
 
         // 4. Subscription Expiry Check
+        // Handled via external profile API fetch inside the CommandHandler now.
         bool suppressRoles = false;
-        if (appId.HasValue)
-        {
-            var membership = user.Memberships.FirstOrDefault(m => m.AppId == appId.Value);
-            if (membership != null && membership.SubscriptionExpiry.HasValue)
-            {
-                if (membership.SubscriptionExpiry.Value < DateTime.UtcNow)
-                {
-                    suppressRoles = true;
-                }
-            }
-        }
 
         return new LoginResult(suppressRoles);
     }

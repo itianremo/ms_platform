@@ -39,6 +39,14 @@ public class UsersController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("profile-ids")]
+    public async Task<IActionResult> GetProfileIds()
+    {
+        var query = new Users.Application.Features.Users.Queries.GetProfileIds.GetProfileIdsQuery();
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
+
     [HttpGet("dashboard/stats")]
     public async Task<IActionResult> GetDashboardStats([FromQuery] Guid? appId, [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
     {

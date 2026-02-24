@@ -17,9 +17,14 @@ public class MaintenanceController : ControllerBase
         _configuration = configuration;
     }
 
-    [HttpDelete("reset/{appId}")]
-    public async Task<IActionResult> ResetAppData(Guid appId)
+    [HttpDelete("reset")]
+    public async Task<IActionResult> ResetAppData()
     {
+        var headerValue = Request.Headers["App-Id"].FirstOrDefault();
+        if (string.IsNullOrEmpty(headerValue) || !Guid.TryParse(headerValue, out var appId))
+        {
+            return BadRequest("App-Id header is missing or invalid");
+        }
         var secret = Request.Headers["X-Maintenance-Secret"].ToString();
         var expectedSecret = _configuration["Maintenance:Secret"];
 

@@ -14,10 +14,5 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.PasswordHash).IsRequired();
         
         builder.HasIndex(u => u.Email).IsUnique();
-        
-        builder.HasMany(u => u.Memberships)
-               .WithOne()
-               .HasForeignKey(m => m.UserId)
-               .OnDelete(DeleteBehavior.Cascade);
     }
 }

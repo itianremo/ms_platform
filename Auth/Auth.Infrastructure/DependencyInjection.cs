@@ -31,7 +31,7 @@ public static class DependencyInjection
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IMaintenanceService, MaintenanceService>();
         services.AddScoped<Shared.Kernel.IRepository<Auth.Domain.Entities.UserOtp>, Auth.Infrastructure.Repositories.UserOtpRepository>();
-        services.AddScoped<Shared.Kernel.IRepository<Auth.Domain.Entities.UserAppMembership>, Auth.Infrastructure.Repositories.Repository<Auth.Domain.Entities.UserAppMembership>>();
+
         services.AddScoped<Shared.Kernel.IRepository<Auth.Domain.Entities.Role>, Auth.Infrastructure.Repositories.Repository<Auth.Domain.Entities.Role>>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -106,6 +106,18 @@ public static class DependencyInjection
                 options.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"]!;
             });
         }
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("DashboardRead", policy =>
+                policy.RequireAssertion(context =>
+                    context.User.HasClaim(c => 
+                        c.Type.Equals("permission", StringComparison.OrdinalIgnoreCase) && 
+                        (c.Value == "AccessAll" || c.Value == "DashboardRead")
+                    )
+                )
+            );
+        });
 
         return services;
     }

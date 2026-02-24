@@ -13,7 +13,6 @@ public class AuthDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
     public DbSet<Permission> Permissions { get; set; }
-    public DbSet<UserAppMembership> UserAppMemberships { get; set; }
     public DbSet<UserLogin> UserLogins { get; set; }
     public DbSet<UserOtp> UserOtps { get; set; }
     public DbSet<UserSession> UserSessions { get; set; }

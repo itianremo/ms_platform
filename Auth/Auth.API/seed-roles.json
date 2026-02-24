@@ -49,5 +49,12 @@
             "FreeSubscription"
         ],
         "IsSealed": false
+    },
+    {
+        "Name": "ManageDashboards",
+        "Permissions": [
+            "DashboardRead"
+        ],
+        "IsSealed": false
     }
 ]

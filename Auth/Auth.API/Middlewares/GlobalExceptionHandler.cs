@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using global::Auth.Domain.Exceptions;
 
 namespace Auth.API.Middlewares;
@@ -67,6 +68,8 @@ public class GlobalExceptionHandler
                 break;
 
             case KeyNotFoundException:
+            case global::Auth.Domain.Exceptions.NotFoundException:
+            case Shared.Kernel.Exceptions.NotFoundException:
                 response.StatusCode = (int)HttpStatusCode.NotFound;
                 errorResponse.Error = "NotFound";
                 break;
@@ -91,6 +94,10 @@ public class ErrorResponse
 {
     public string? Error { get; set; }
     public string? Message { get; set; }
+    
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Status { get; set; } // For Verification Status
+    
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Phone { get; set; } // For Verification Phone
 }

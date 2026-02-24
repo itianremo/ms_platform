@@ -32,7 +32,6 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByEmailOrPhoneAsync(string emailOrPhone)
     {
         return await _context.Users
-            .Include(u => u.Memberships)
             .Include(u => u.Sessions)
             .FirstOrDefaultAsync(u => u.Email == emailOrPhone || u.Phone == emailOrPhone);
     }
@@ -47,17 +46,12 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetUserWithRolesAsync(Guid userId)
     {
         return await _context.Users
-            .Include(u => u.Memberships)
-            .ThenInclude(m => m.Role)
-            .ThenInclude(r => r.Permissions)
             .FirstOrDefaultAsync(u => u.Id == userId);
     }
 
     public async Task<List<User>> ListWithRolesAsync()
     {
         return await _context.Users
-            .Include(u => u.Memberships)
-            .ThenInclude(m => m.Role)
             .Include(u => u.Logins)
             .ToListAsync();
     }
@@ -94,16 +88,9 @@ public class UserRepository : IUserRepository
     {
         try 
         {
-            // Cross-Database Query
-            var sql = @"
-                SELECT m.AppId, CAST(a.VerificationType AS int) AS VerificationType, a.RequiresAdminApproval, CAST(m.Status AS int) AS MembershipStatus
-                FROM [AppsDb].[dbo].[Apps] a
-                JOIN [AuthDb].[dbo].[UserAppMemberships] m ON a.Id = m.AppId
-                WHERE m.UserId = {0}";
-
-            return await _context.Database
-                .SqlQueryRaw<AppRequirement>(sql, userId)
-                .ToListAsync();
+            // Cross-Database Query - Memberships moved to Users.API, returning empty list for now.
+            // Handlers will rely on GetAppVerificationConfigAsync instead.
+            return new List<AppRequirement>();
         }
         catch (Exception ex)
         {
@@ -213,9 +200,6 @@ public class UserRepository : IUserRepository
     {
         return await _context.UserSessions
             .Include(s => s.User) // Include User for token generation
-            .ThenInclude(u => u.Memberships)
-            .ThenInclude(m => m.Role)
-            .ThenInclude(r => r.Permissions)
             .Include(s => s.User.Sessions) // Include Sessions for cleanup
             .FirstOrDefaultAsync(s => s.RefreshToken == refreshToken);
     }

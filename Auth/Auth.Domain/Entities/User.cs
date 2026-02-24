@@ -25,8 +25,6 @@ public class User : Entity
     public GlobalUserStatus Status { get; private set; }
     public DateTime? OtpBlockedUntil { get; private set; }
 
-    private readonly List<UserAppMembership> _memberships = new();
-    public IReadOnlyCollection<UserAppMembership> Memberships => _memberships.AsReadOnly();
 
     private readonly List<UserLogin> _logins = new();
     public IReadOnlyCollection<UserLogin> Logins => _logins.AsReadOnly();
@@ -112,12 +110,6 @@ public class User : Entity
         IsPhoneVerified = verified;
     }
 
-    public void AddMembership(UserAppMembership membership)
-    {
-        // Validation logic can go here (e.g. check duplicate app)
-        _memberships.Add(membership);
-    }
-
     public void AddLogin(UserLogin login)
     {
         if (!_logins.Any(l => l.LoginProvider == login.LoginProvider && l.ProviderKey == login.ProviderKey))
@@ -157,11 +149,11 @@ public class User : Entity
         }
     }
 
-
     public void MarkAsSealed()
     {
         IsSealed = true;
     }
+
     public void UpdatePassword(string newPasswordHash)
     {
         PasswordHash = newPasswordHash;
@@ -172,34 +164,11 @@ public class User : Entity
         OtpBlockedUntil = until;
     }
 
-    public void UpdateMembershipStatus(Guid appId, AppUserStatus status)
-    {
-        var membership = _memberships.FirstOrDefault(m => m.AppId == appId);
-        if (membership != null)
-        {
-            membership.SetStatus(status);
-        }
-    }
-
-    public void RemoveMembership(Guid appId)
-    {
-        var membership = _memberships.FirstOrDefault(m => m.AppId == appId);
-        if (membership != null)
-        {
-            _memberships.Remove(membership);
-        }
-    }
-
     public void RecordLogin(Guid? appId = null)
     {
         LastLoginUtc = DateTime.UtcNow;
         LastLoginAppId = appId;
         ResetAccessFailedCount(); // Successful login resets the counter
-        if (appId.HasValue)
-        {
-            var membership = _memberships.FirstOrDefault(m => m.AppId == appId.Value);
-            membership?.RecordLogin();
-        }
     }
 
     // Brute Force Protection

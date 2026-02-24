@@ -49,6 +49,9 @@ namespace Users.Infrastructure.Persistence
                 // --- NEW: Seed 5 Specific "Visitor" Users for Wissler (Requested minimum) ---
                 await SeedWisslerVisitorsAsync();
                 // ----------------------------------------------------------
+
+                // --- NEW: Sync Default RoleIds from AuthDb ---
+                await SyncRoleIdsFromAuthDbAsync();
             }
             catch (Exception ex)
             {
@@ -155,6 +158,37 @@ namespace Users.Infrastructure.Persistence
                 await _context.ReportReasons.AddRangeAsync(reasons);
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Seeded standard report reasons for Wissler.");
+            }
+        }
+
+        private async Task SyncRoleIdsFromAuthDbAsync()
+        {
+            try
+            {
+                _logger.LogInformation("Synchronizing empty RoleIds in UserProfiles from AuthDb...");
+                
+                var sql = @"
+                    UPDATE up
+                    SET RoleId = r.Id
+                    FROM [UsersDb].[dbo].[UserProfiles] up
+                    INNER JOIN [AuthDb].[dbo].[Roles] r ON up.AppId = r.AppId
+                    WHERE up.RoleId = '00000000-0000-0000-0000-000000000000'
+                    AND r.Name = CASE 
+                        WHEN up.DisplayName LIKE '%Admin%' THEN 'SuperAdmin'
+                        WHEN up.DisplayName LIKE '%Manager%' THEN 'ManageUsers'
+                        ELSE 'Visitor' 
+                    END
+                ";
+                
+                var rowsAffected = await _context.Database.ExecuteSqlRawAsync(sql);
+                if (rowsAffected > 0)
+                {
+                    _logger.LogInformation("Successfully synchronized {Count} RoleIds for UserProfiles.", rowsAffected);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to synchronize RoleIds from AuthDb. Ensure AuthDb is initialized.");
             }
         }
 

@@ -26,5 +26,8 @@ public interface IUserRepository : IRepository<User>
     Task<User?> GetUserWithLoginsAsync(Guid userId);
 }
 
-public record AppRequirement(Guid AppId, VerificationType VerificationType, bool RequiresAdminApproval, int MembershipStatus);
+public record AppRequirement(Guid AppId, VerificationType VerificationType, bool RequiresAdminApproval)
+{
+    public int MembershipStatus { get; set; }
+}
 public record UserSessionDto(Guid Id, Guid? AppId, string? AppName, string? IpAddress, string? UserAgent, string? DeviceInfo, bool IsCurrent, bool IsRevoked, DateTime CreatedAt, DateTime ExpiresAt);

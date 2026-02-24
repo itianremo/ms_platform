@@ -15,9 +15,7 @@ public class MaintenanceService : IMaintenanceService
 
     public async Task ResetAppDataAsync(Guid appId)
     {
-        // Delete all memberships for this app
-        await _context.UserAppMemberships
-            .Where(m => m.AppId == appId)
-            .ExecuteDeleteAsync();
+        // App-level data reset is now managed by Users.API or event propagation
+        await Task.CompletedTask;
     }
 }

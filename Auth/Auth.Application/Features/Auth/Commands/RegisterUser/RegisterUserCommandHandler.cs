@@ -51,19 +51,17 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
             // Reload User with Roles/Memberships to ensure we have the latest state
             existingUser = await _userRepository.GetUserWithRolesAsync(existingUser.Id) ?? existingUser;
 
-            // B. Exists in THIS App
-            if (request.AppId.HasValue && existingUser.Memberships.Any(m => m.AppId == request.AppId.Value))
-            {
-                throw new InvalidOperationException("User is already registered in this application.");
-            }
+            // B. Existing User Registration
+            // Since Auth.API no longer has visibility into memberships, we publish the event to Users.API.
+            // Users.API's UserRegisteredConsumer is idempotent and will ignore profile creation if the user is already in the app.
 
             // C. Exists in OTHER App -> Register in New App
             if (request.AppId.HasValue)
             {
+                var roleId = await ResolveRoleIdAsync(request.AppId.Value);
                 await RegisterExistingUserInNewApp(existingUser, request.AppId.Value, request.VerificationType, request.RequiresAdminApproval);
                 
-                // Publish Event (UserRegisteredEvent or UserJoinedAppEvent? Using Registered for now as generic 'User Entered App')
-                await PublishUserRegisteredEvent(existingUser, request.AppId.Value, request.Password, cancellationToken);
+                await PublishUserRegisteredEvent(existingUser, request.AppId.Value, request.Password, roleId, cancellationToken);
                 
                 return existingUser.Id;
             }
@@ -81,16 +79,20 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
         ResolveNewUserStatus(newUser, request.VerificationType, request.RequiresAdminApproval);
 
         // Add Membership if App provided
+        Guid? assignedRoleId = null;
         if (request.AppId.HasValue)
         {
-            await AddMembershipAsync(newUser, request.AppId.Value, request.RequiresAdminApproval);
+            assignedRoleId = await ResolveRoleIdAsync(request.AppId.Value);
         }
 
         // Save
         await _userRepository.AddAsync(newUser);
 
         // Publish Event
-        await PublishUserRegisteredEvent(newUser, request.AppId.Value, request.Password, cancellationToken);
+        if (request.AppId.HasValue)
+        {
+            await PublishUserRegisteredEvent(newUser, request.AppId.Value, request.Password, assignedRoleId, cancellationToken);
+        }
 
         return newUser.Id;
     }
@@ -128,8 +130,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
 
     private async Task RegisterExistingUserInNewApp(User user, Guid appId, VerificationType verificationType, bool requiresAdminApproval)
     {
-        // 1. Add Membership
-        await AddMembershipAsync(user, appId, requiresAdminApproval);
+        // 1. Memberships are now natively handled by Users.API when the UserRegisteredEvent is consumed.
 
         // 2. Check Verification Requirements vs Current Status
         // If current user is missing verified fields required by this new app, degrade global status?
@@ -165,7 +166,7 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
         await _userRepository.UpdateAsync(user);
     }
 
-    private async Task AddMembershipAsync(User user, Guid appId, bool requiresAdminApproval)
+    private async Task<Guid> ResolveRoleIdAsync(Guid appId)
     {
         var userRole = await _userRepository.GetRoleByNameAsync(appId, "Visitor") 
                        ?? await _userRepository.GetRoleByNameAsync(appId, "User"); // Fallback
@@ -177,22 +178,10 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
             await _userRepository.AddRoleAsync(userRole);
         }
 
-        var membership = new UserAppMembership(user.Id, appId, userRole.Id);
-        
-        // Handle App Specific Status
-        if (requiresAdminApproval)
-        {
-            membership.SetStatus(AppUserStatus.PendingApproval);
-        }
-        else
-        {
-            membership.SetStatus(AppUserStatus.Active);
-        }
-
-        user.AddMembership(membership);
+        return userRole.Id;
     }
 
-    private async Task PublishUserRegisteredEvent(User user, Guid appId, string password, CancellationToken cancellationToken)
+    private async Task PublishUserRegisteredEvent(User user, Guid appId, string password, Guid? roleId, CancellationToken cancellationToken)
     {
         try
         {
@@ -202,7 +191,8 @@ public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, G
                 user.Email, 
                 user.Phone,
                 user.Email,
-                password
+                password,
+                roleId
             ), cancellationToken);
         }
         catch (Exception ex)

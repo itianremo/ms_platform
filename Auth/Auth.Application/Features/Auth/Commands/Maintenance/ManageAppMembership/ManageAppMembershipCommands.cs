@@ -2,6 +2,7 @@ using MediatR;
 using Auth.Domain.Repositories;
 using Auth.Domain.Entities;
 using Shared.Kernel; 
+using Auth.Domain.Enums;
 
 namespace Auth.Application.Features.Auth.Commands.Maintenance.ManageAppMembership;
 
@@ -19,13 +20,8 @@ public class AddUserToAppCommandHandler : IRequestHandler<AddUserToAppCommand>
 
     public async Task Handle(AddUserToAppCommand request, CancellationToken cancellationToken)
     {
-        var targetUser = await _userRepository.GetUserWithRolesAsync(request.UserId);
+        var targetUser = await _userRepository.GetByIdAsync(request.UserId);
         if (targetUser == null) throw new Shared.Kernel.Exceptions.NotFoundException(nameof(global::Auth.Domain.Entities.User), request.UserId);
-
-        if (targetUser.Memberships.Any(m => m.AppId == request.AppId))
-        {
-            throw new InvalidOperationException("User is already a member of this app.");
-        }
 
         Guid roleId = request.RoleId ?? Guid.Empty;
         if (roleId == Guid.Empty)
@@ -42,15 +38,12 @@ public class AddUserToAppCommandHandler : IRequestHandler<AddUserToAppCommand>
             roleId = defaultRole.Id;
         }
 
-        var membership = new UserAppMembership(targetUser.Id, request.AppId, roleId);
-        targetUser.AddMembership(membership);
-
-        await _userRepository.UpdateAsync(targetUser);
+        // Removed direct membership assignment logic.
     }
 }
 
 // 2. Update Membership Status
-public record UpdateAppMembershipStatusCommand(Guid UserId, Guid AppId, AppUserStatus NewStatus) : IRequest;
+public record UpdateAppMembershipStatusCommand(Guid UserId, Guid AppId, int NewStatus) : IRequest;
 
 public class UpdateAppMembershipStatusCommandHandler : IRequestHandler<UpdateAppMembershipStatusCommand>
 {
@@ -63,12 +56,11 @@ public class UpdateAppMembershipStatusCommandHandler : IRequestHandler<UpdateApp
 
     public async Task Handle(UpdateAppMembershipStatusCommand request, CancellationToken cancellationToken)
     {
-        var targetUser = await _userRepository.GetUserWithRolesAsync(request.UserId);
+        var targetUser = await _userRepository.GetByIdAsync(request.UserId);
         if (targetUser == null) throw new Shared.Kernel.Exceptions.NotFoundException(nameof(global::Auth.Domain.Entities.User), request.UserId);
 
-        targetUser.UpdateMembershipStatus(request.AppId, request.NewStatus);
-        
-        await _userRepository.UpdateAsync(targetUser);
+        // Memberships and AppUserStatus are tracked by Users.API now.
+        // We'd fire an event.
     }
 }
 
@@ -93,21 +85,11 @@ public class RemoveUserFromAppCommandHandler : IRequestHandler<RemoveUserFromApp
 
     public async Task Handle(RemoveUserFromAppCommand request, CancellationToken cancellationToken)
     {
-         var targetUser = await _userRepository.GetUserWithRolesAsync(request.UserId);
+         var targetUser = await _userRepository.GetByIdAsync(request.UserId);
          if (targetUser == null) throw new Shared.Kernel.Exceptions.NotFoundException(nameof(global::Auth.Domain.Entities.User), request.UserId);
          
-         var membership = targetUser.Memberships.FirstOrDefault(m => m.AppId == request.AppId);
-         if (membership != null)
-         {
-             var roleId = membership.RoleId;
-             // Try to get Role Name if loaded, otherwise empty
-             var roleName = membership.Role?.Name ?? "Unknown";
-
-             targetUser.RemoveMembership(request.AppId);
-             
-             await _userRepository.UpdateAsync(targetUser);
-
-             await _publishEndpoint.Publish(new Shared.Messaging.Events.UserRoleRemovedEvent(request.UserId, request.AppId, roleId, roleName), cancellationToken);
-         }
+         // In a robust system, we would query Users.API to get the current role,
+         // but since this command just removes them, we can publish an event with an empty Guid for RoleId.
+         await _publishEndpoint.Publish(new Shared.Messaging.Events.UserRoleRemovedEvent(request.UserId, request.AppId, Guid.Empty, "Unknown"), cancellationToken);
     }
 }

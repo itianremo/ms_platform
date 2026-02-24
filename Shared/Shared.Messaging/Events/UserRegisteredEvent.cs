@@ -11,8 +11,9 @@ public class UserRegisteredEvent : IDomainEvent
     public string Phone { get; set; }
     public string? InitialPassword { get; set; }
     public DateTime OccurredOn { get; set; } = DateTime.UtcNow;
+    public Guid? RoleId { get; set; }
 
-    public UserRegisteredEvent(Guid userId, Guid appId, string email, string phone, string displayName, string? initialPassword = null)
+    public UserRegisteredEvent(Guid userId, Guid appId, string email, string phone, string displayName, string? initialPassword = null, Guid? roleId = null)
     {
         UserId = userId;
         AppId = appId;
@@ -20,5 +21,7 @@ public class UserRegisteredEvent : IDomainEvent
         Phone = phone;
         DisplayName = displayName;
         InitialPassword = initialPassword;
+        RoleId = roleId;
+        OccurredOn = DateTime.UtcNow;
     }
 }

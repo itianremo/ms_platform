@@ -26,14 +26,7 @@ public class AssignRoleCommandHandler : IRequestHandler<AssignRoleCommand>
         if (role == null)
             throw new KeyNotFoundException("Role not found");
 
-        // Check if user already has this role in this app
-        // (Assuming logic to prevent duplicates exists or is handled by AddMembership)
-        
-        var membership = new UserAppMembership(request.UserId, request.AppId, request.RoleId);
-        
-        user.AddMembership(membership);
-        
-        await _userRepository.UpdateAsync(user);
+        // Memberships and App roles are now updated via Users.API listening to the RoleAssignedEvent.
 
         // Publish Event if Admin or Manager
         if (role.Name.Contains("Admin", StringComparison.OrdinalIgnoreCase) || role.Name.Contains("Manager", StringComparison.OrdinalIgnoreCase))

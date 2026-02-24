@@ -17,26 +17,23 @@ public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<Us
     {
         var users = await _repository.ListWithRolesAsync();
         
-        if (request.AppId.HasValue)
-        {
-            users = users.Where(u => u.Memberships.Any(m => m.AppId == request.AppId.Value)).ToList();
-        }
+        // Note: AppId filtering is disabled since memberships are now held in Users.API. 
+        // A cross-service HTTP call would be needed to filter by AppId.
 
         return users.Select(u => {
             var (firstName, lastName) = DeriveNameFromEmail(u.Email);
             return new UserDto(
                 u.Id,
                 u.Email,
-                u.Phone, 
+                u.Phone ?? "", 
                 firstName, 
                 lastName, 
                 u.Status == global::Auth.Domain.Entities.GlobalUserStatus.Active,
                 (int)u.Status,
-                u.Memberships.Select(m => m.Role.Name).Distinct().ToList(),
+                new List<string>(), // Roles
                 u.IsEmailVerified,
                 u.IsPhoneVerified,
-                u.Memberships.Select(m => new UserAppMembershipDto(m.AppId, m.RoleId, m.Role.Name, (int)m.Status, m.LastLoginUtc)).ToList(),
-                u.Logins.Select(l => l.LoginProvider).ToList(),
+                u.Logins?.Select(l => l.LoginProvider).ToList() ?? new List<string>(),
                 u.LastLoginUtc,
                 u.LastLoginAppId
             );

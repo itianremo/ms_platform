@@ -71,59 +71,16 @@ public class VerifyOtpCommandHandler : IRequestHandler<VerifyOtpCommand, global:
         if (request.Type == VerificationType.Email) fullUser.VerifyEmail();
         if (request.Type == VerificationType.Phone) fullUser.VerifyPhone();
 
-        // 5. Dynamic Status Update (Per App)
-        var requirements = await _userRepository.GetMemberAppRequirementsAsync(fullUser.Id);
-        bool identityVerified = true;
-        
-        if (requirements.Any())
-        {
-            foreach (var req in requirements)
-            {
-                // Check Identity Verification Status
-                bool isIdentityReady = true;
-                if ((req.VerificationType == VerificationType.Email || req.VerificationType == VerificationType.Both) && !fullUser.IsEmailVerified) isIdentityReady = false;
-                if ((req.VerificationType == VerificationType.Phone || req.VerificationType == VerificationType.Both) && !fullUser.IsPhoneVerified) isIdentityReady = false;
-
-                if (!isIdentityReady) 
-                {
-                    identityVerified = false;
-                    continue; // Cannot approve if identity not verified
-                }
-
-                // Determine Authorization Status
-                var targetStatus = AppUserStatus.Active;
-                if (req.RequiresAdminApproval)
-                {
-                    targetStatus = AppUserStatus.PendingApproval;
-                }
-
-                // Update Specific Membership
-                fullUser.UpdateMembershipStatus(req.AppId, targetStatus);
-            }
-
-            // Determine Global Identity Status (for Login blockers)
-            // If strictly Identity Verified (Email/Phone), we set Active.
-            // Authorization (Admin) is now handled by Membership Status.
-            if (identityVerified)
-            {
-                fullUser.SetStatus(GlobalUserStatus.Active);
-            }
-            else
-            {
-                // Determine partial status based on missing flags
-                if (!fullUser.IsEmailVerified && !fullUser.IsPhoneVerified) 
-                    fullUser.SetStatus(GlobalUserStatus.PendingAccountVerification);
-                else if (!fullUser.IsEmailVerified)
-                    fullUser.SetStatus(GlobalUserStatus.PendingEmailVerification);
-                else if (!fullUser.IsPhoneVerified)
-                    fullUser.SetStatus(GlobalUserStatus.PendingMobileVerification);
-            }
-        }
-        else
-        {
-             // No requirements -> Active
-             fullUser.SetStatus(GlobalUserStatus.Active);
-        }
+        // App-Level Status updates (like PendingApproval) are now handled by Users.API.
+        // We evaluate Global Identity Status based on overall verification progress.
+        if (fullUser.IsEmailVerified && fullUser.IsPhoneVerified)
+            fullUser.SetStatus(GlobalUserStatus.Active);
+        else if (!fullUser.IsEmailVerified && !fullUser.IsPhoneVerified) 
+            fullUser.SetStatus(GlobalUserStatus.PendingAccountVerification);
+        else if (!fullUser.IsEmailVerified)
+            fullUser.SetStatus(GlobalUserStatus.PendingEmailVerification);
+        else if (!fullUser.IsPhoneVerified)
+            fullUser.SetStatus(GlobalUserStatus.PendingMobileVerification);
 
         _logger.LogInformation("VerifyOTP: Updated User {UserId} GlobalStatus={GStatus}", fullUser.Id, fullUser.Status);
 

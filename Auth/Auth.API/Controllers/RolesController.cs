@@ -23,8 +23,15 @@ public class RolesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetRoles([FromQuery] Guid? appId)
+    public async Task<IActionResult> GetRoles()
     {
+        Guid? appId = null;
+        var headerValue = Request.Headers["App-Id"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(headerValue) && Guid.TryParse(headerValue, out var parsedAppId))
+        {
+            appId = parsedAppId;
+        }
+
         var result = await _mediator.Send(new Auth.Application.Features.Auth.Queries.GetRoles.GetRolesQuery(appId));
         return Ok(result);
     }

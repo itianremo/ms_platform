@@ -40,9 +40,10 @@ public class AuthController : ControllerBase
         try 
         {
             // Extract AppId from Header
-            if (Request.Headers.TryGetValue("X-App-Id", out var appIdValue) && Guid.TryParse(appIdValue, out var appId))
+            var headerValueAuth = Request.Headers["App-Id"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(headerValueAuth) && Guid.TryParse(headerValueAuth, out var appIdAuth))
             {
-                 command = command with { AppId = appId };
+                 command = command with { AppId = appIdAuth };
             }
 
             // Capture IP and UserAgent
@@ -136,7 +137,8 @@ public class AuthController : ControllerBase
         // But GenerateAccessToken might need context if user has multi app roles.
         // Let's grab AppId from header if present.
         Guid? appId = null;
-        if (Request.Headers.TryGetValue("X-App-Id", out var appIdValue) && Guid.TryParse(appIdValue, out var parsedAppId))
+        var headerValueReq = Request.Headers["App-Id"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(headerValueReq) && Guid.TryParse(headerValueReq, out var parsedAppId))
         {
              appId = parsedAppId;
         }
@@ -192,35 +194,39 @@ public class AuthController : ControllerBase
     [HttpPost("users/{id}/apps")]
     public async Task<IActionResult> AddUserToApp(Guid id, [FromBody] AddUserToAppRequest request)
     {
-        await _mediator.Send(new Auth.Application.Features.Auth.Commands.Maintenance.ManageAppMembership.AddUserToAppCommand(id, request.AppId, request.RoleId));
+        var appId = GetAppIdFromHeader();
+        await _mediator.Send(new Auth.Application.Features.Auth.Commands.Maintenance.ManageAppMembership.AddUserToAppCommand(id, appId, request.RoleId));
         return Ok();
     }
 
-    [HttpDelete("users/{id}/apps/{appId}")]
-    public async Task<IActionResult> RemoveUserFromApp(Guid id, Guid appId)
+    [HttpDelete("users/{id}/apps")]
+    public async Task<IActionResult> RemoveUserFromApp(Guid id)
     {
+        var appId = GetAppIdFromHeader();
         await _mediator.Send(new Auth.Application.Features.Auth.Commands.Maintenance.ManageAppMembership.RemoveUserFromAppCommand(id, appId));
         return Ok();
     }
 
-    [HttpPut("users/{id}/apps/{appId}/status")]
-    public async Task<IActionResult> UpdateAppStatus(Guid id, Guid appId, [FromBody] UpdateAppStatusRequest request)
+    [HttpPut("users/{id}/apps/status")]
+    public async Task<IActionResult> UpdateAppStatus(Guid id, [FromBody] UpdateAppStatusRequest request)
     {
-         await _mediator.Send(new Auth.Application.Features.Auth.Commands.Maintenance.ManageAppMembership.UpdateAppMembershipStatusCommand(id, appId, (AppUserStatus)request.Status));
+         var appId = GetAppIdFromHeader();
+         await _mediator.Send(new Auth.Application.Features.Auth.Commands.Maintenance.ManageAppMembership.UpdateAppMembershipStatusCommand(id, appId, request.Status));
          return Ok();
     }
     
     // Role Management
-    [HttpPut("users/{id}/apps/{appId}/role")]
-    public async Task<IActionResult> AssignRole(Guid id, Guid appId, [FromBody] AssignRoleRequest request)
+    [HttpPut("users/{id}/apps/role")]
+    public async Task<IActionResult> AssignRole(Guid id, [FromBody] AssignRoleRequest request)
     {
+        var appId = GetAppIdFromHeader();
         await _mediator.Send(new Auth.Application.Features.Auth.Commands.Maintenance.ManageUserRoles.AssignRoleCommand(id, appId, request.RoleName));
         return Ok();
     }
 
     public record UpdateUserStatusRequest(int Status);
     public record UpdateUserVerificationRequest(string Type, bool Verified);
-    public record AddUserToAppRequest(Guid AppId, Guid? RoleId);
+    public record AddUserToAppRequest(Guid? RoleId);
     public record UpdateAppStatusRequest(int Status);
     public record AssignRoleRequest(string RoleName);
 
@@ -246,8 +252,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("users")]
-    public async Task<IActionResult> GetAllUsers([FromQuery] Guid? appId)
+    public async Task<IActionResult> GetAllUsers()
     {
+        var appId = GetOptionalAppIdFromHeader();
         var result = await _mediator.Send(new Auth.Application.Features.Auth.Queries.GetAllUsers.GetAllUsersQuery(appId));
         return Ok(result);
     }
@@ -285,5 +292,24 @@ public class AuthController : ControllerBase
             Expires = DateTime.UtcNow.AddMinutes(expiryMinutes)
         };
         Response.Cookies.Append(name, token, cookieOptions);
+    }
+    private Guid GetAppIdFromHeader()
+    {
+        var headerValue = Request.Headers["App-Id"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(headerValue) && Guid.TryParse(headerValue, out var parsedGuid))
+        {
+            return parsedGuid;
+        }
+        throw new global::Auth.Domain.Exceptions.NotFoundException("App-Id header is missing or invalid");
+    }
+
+    private Guid? GetOptionalAppIdFromHeader()
+    {
+        var headerValue = Request.Headers["App-Id"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(headerValue) && Guid.TryParse(headerValue, out var parsedGuid))
+        {
+            return parsedGuid;
+        }
+        return null;
     }
 }

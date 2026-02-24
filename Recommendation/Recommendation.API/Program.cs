@@ -37,10 +37,7 @@ var trainingData = new List<RecommendationData>
 engine.Train(trainingData);
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-}
+app.UseSwagger();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
