@@ -52,6 +52,73 @@ To run the generated `Gateway_Collection.postman_collection.json` in Postman, en
 
 ### Apps Endpoint Catalog
 
+#### `GET` /apps/api/Apps
+
+> **Purpose**: Get All Apps (api/Apps)
+
+**Get All Apps**
+
+This endpoint executes the `GetAllApps` operation.
+
+**Authorization Context:**
+Publicly accessible endpoint (No authentication required).
+
+**Authentication:** None
+
+**Required Headers:**
+- `App-Id`: `{{app_id}}`
+- `Tenant-Id`: `{{tenant_id}}`
+
+**Expected Successful Response:**
+```json
+[
+    {
+        "Id": "00000000-0000-0000-0000-000000000000",
+        "Name": "Example Name",
+        "Description": "Detailed description of the resource.",
+        "BaseUrl": "https://example.com"
+    }
+]
+```
+
+---
+
+#### `POST` /apps/api/Apps
+
+> **Purpose**: Create App (api/Apps)
+
+**Create App**
+
+This endpoint executes the `CreateApp` operation.
+
+**Authorization Context:**
+Requires 'ManageApps' claim.
+
+**Authentication:** Bearer Token (`{{jwt_token}}`)
+
+**Required Headers:**
+- `Content-Type`: `application/json`
+- `App-Id`: `{{app_id}}`
+- `Tenant-Id`: `{{tenant_id}}`
+
+**Sample Request Payload:**
+```json
+{
+    "Name": "Example App",
+    "Description": "Detailed description of the app.",
+    "BaseUrl": "https://example.com"
+}
+```
+
+**Expected Successful Response:**
+```json
+{
+    "Id": "00000000-0000-0000-0000-000000000000"
+}
+```
+
+---
+
 #### `GET` /apps/api/Apps/{id}
 
 > **Purpose**: Get App By Id (api/Apps/)
@@ -176,6 +243,32 @@ Requires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps',
     "ExternalLoginsJson": "{}"
 }
 ```
+
+**Expected Successful Response:**
+```json
+{
+    "message": "Success"
+}
+```
+
+---
+
+#### `DELETE` /apps/api/Apps/{id}
+
+> **Purpose**: Delete App (api/Apps/{id})
+
+**Delete App**
+
+This endpoint executes the `DeleteApp` operation, permanently removing an App context from the global registry.
+
+**Authorization Context:**
+Requires 'AccessAll', 'DeleteApps', or 'ManageApps' permission claim.
+
+**Authentication:** Bearer Token (`{{jwt_token}}`)
+
+**Required Headers:**
+- `App-Id`: `{{app_id}}`
+- `Tenant-Id`: `{{tenant_id}}`
 
 **Expected Successful Response:**
 ```json
@@ -315,7 +408,7 @@ Publicly accessible endpoint (No authentication required).
 
 ### Audit Endpoint Catalog
 
-#### `GET` /audit/api/Audit/stats?days=demo_value
+#### `GET` /audit/api/Audit/stats?days=7
 
 > **Purpose**: Get Stats (api/Audit/)
 
@@ -357,7 +450,7 @@ Publicly accessible endpoint (No authentication required).
 This endpoint executes the `GetAppUserStats` operation. 
 
 **Authorization Context:**
-Publicly accessible endpoint (No authentication required).
+Requires 'DashboardRead' policy.
 
 **Authentication:** None
 
@@ -397,9 +490,9 @@ Publicly accessible endpoint (No authentication required).
 **Sample Request Payload:**
 ```json
 {
-    "Email": "user@example.com",
+    "Email": "admin@ump.com",
     "Phone": "+15551234567",
-    "Password": "SecureP@ssw0rd!",
+    "Password": "StrongPass123!",
     "VerificationType": {},
     "RequiresAdminApproval": true
 }
@@ -435,10 +528,10 @@ Publicly accessible endpoint (No authentication required).
 **Sample Request Payload:**
 ```json
 {
-    "Email": "user@example.com",
-    "Password": "SecureP@ssw0rd!",
-    "IpAddress": "sample_string_for_IpAddress",
-    "UserAgent": "sample_string_for_UserAgent"
+    "Email": "admin@ump.com",
+    "Password": "StrongPass123!",
+    "IpAddress": "192.168.1.1",
+    "UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
 }
 ```
 
@@ -472,7 +565,7 @@ Publicly accessible endpoint (No authentication required).
 **Sample Request Payload:**
 ```json
 {
-    "Email": "user@example.com",
+    "Email": "admin@ump.com",
     "Type": {}
 }
 ```
@@ -507,7 +600,7 @@ Publicly accessible endpoint (No authentication required).
 **Sample Request Payload:**
 ```json
 {
-    "Email": "user@example.com",
+    "Email": "admin@ump.com",
     "Code": "654321",
     "Type": {}
 }
@@ -543,7 +636,7 @@ Publicly accessible endpoint (No authentication required).
 **Sample Request Payload:**
 ```json
 {
-    "Email": "user@example.com"
+    "Email": "admin@ump.com"
 }
 ```
 
@@ -577,9 +670,9 @@ Publicly accessible endpoint (No authentication required).
 **Sample Request Payload:**
 ```json
 {
-    "Email": "user@example.com",
+    "Email": "admin@ump.com",
     "Code": "654321",
-    "NewPassword": "SecureP@ssw0rd!"
+    "NewPassword": "StrongPass123!"
 }
 ```
 
@@ -613,8 +706,8 @@ Publicly accessible endpoint (No authentication required).
 **Sample Request Payload:**
 ```json
 {
-    "OldEmail": "user@example.com",
-    "NewEmail": "user@example.com"
+    "OldEmail": "admin@ump.com",
+    "NewEmail": "admin@ump.com"
 }
 ```
 
@@ -648,7 +741,7 @@ Publicly accessible endpoint (No authentication required).
 **Sample Request Payload:**
 ```json
 {
-    "Email": "user@example.com",
+    "Email": "admin@ump.com",
     "Code": "654321"
 }
 ```
@@ -1215,7 +1308,7 @@ Publicly accessible endpoint (No authentication required).
 
 ---
 
-#### `GET` /chat/api/Chat/flagged?appId=demo_value
+#### `GET` /chat/api/Chat/flagged?appId=00000000-0000-0000-0000-000000000012
 
 > **Purpose**: Get Flagged Messages (api/Chat/)
 
@@ -1274,7 +1367,7 @@ Publicly accessible endpoint (No authentication required).
 
 ### Geo Endpoint Catalog
 
-#### `GET` /geo/api/Geo/nearby?appId=demo_value&lat=demo_value&lon=demo_value&radiusKm=demo_value
+#### `GET` /geo/api/Geo/nearby?appId=00000000-0000-0000-0000-000000000012&lat=demo_value&lon=demo_value&radiusKm=demo_value
 
 > **Purpose**: Get Nearby (api/Geo/)
 
@@ -1710,7 +1803,7 @@ Publicly accessible endpoint (No authentication required).
 **Sample Request Payload:**
 ```json
 {
-    "AppId": "sample_string_for_AppId",
+    "AppId": "Sample payload for AppId",
     "GatewayName": "Example Name",
     "IsEnabled": true,
     "ConfigJson": "{}"
@@ -1749,12 +1842,12 @@ Publicly accessible endpoint (No authentication required).
 {
     "UserId": "00000000-0000-0000-0000-000000000000",
     "PlanId": "c8d25a4d-decf-41c5-9098-aaf2b2f3072f",
-    "Email": "user@example.com",
-    "PaymentProvider": "sample_string_for_PaymentProvider",
+    "Email": "admin@ump.com",
+    "PaymentProvider": "Sample payload for PaymentProvider",
     "Success": true,
-    "Message": "sample_string_for_Message",
+    "Message": "Sample payload for Message",
     "SubscriptionId": "da87d77d-4212-4549-a3e9-5ec53af426f0",
-    "ProviderSubscriptionId": "sample_string_for_ProviderSubscriptionId",
+    "ProviderSubscriptionId": "Sample payload for ProviderSubscriptionId",
     "RedirectUrl": "https://example.com"
 }
 ```
@@ -1922,7 +2015,7 @@ Publicly accessible endpoint (No authentication required).
 
 ### Users Endpoint Catalog
 
-#### `GET` /users/api/Users/profile?userId=demo_value&appId=demo_value
+#### `GET` /users/api/Users/profile?userId=demo_value&appId=00000000-0000-0000-0000-000000000012
 
 > **Purpose**: Get Profile (api/Users/)
 
@@ -1976,11 +2069,11 @@ Publicly accessible endpoint (No authentication required).
     "UserId": "00000000-0000-0000-0000-000000000000",
     "AppId": "33333333-3333-3333-3333-333333333330",
     "DisplayName": "Example Name",
-    "Bio": "sample_string_for_Bio",
+    "Bio": "This is a realistic description generated for testing purposes.",
     "AvatarUrl": "https://example.com",
     "CustomDataJson": "{}",
     "DateOfBirth": "2026-02-23T12:00:00Z",
-    "Gender": "sample_string_for_Gender"
+    "Gender": "Sample payload for Gender"
 }
 ```
 
@@ -1993,7 +2086,7 @@ Publicly accessible endpoint (No authentication required).
 
 ---
 
-#### `GET` /users/api/Users/profiles?appId=demo_value
+#### `GET` /users/api/Users/profiles?appId=00000000-0000-0000-0000-000000000012
 
 > **Purpose**: Get Profiles (api/Users/)
 
@@ -2022,7 +2115,7 @@ Publicly accessible endpoint (No authentication required).
 
 ---
 
-#### `GET` /users/api/Users/dashboard/stats?appId=demo_value&startDate=demo_value&endDate=demo_value
+#### `GET` /users/api/Users/dashboard/stats?appId=00000000-0000-0000-0000-000000000012&startDate=demo_value&endDate=demo_value
 
 > **Purpose**: Get Dashboard Stats (api/Users/dashboard/)
 
@@ -2079,7 +2172,7 @@ Publicly accessible endpoint (No authentication required).
 
 ---
 
-#### `GET` /users/api/Users/Report?reporterId=demo_value&reportedId=demo_value
+#### `GET` /users/api/Users/Report?reporterId=00000000-0000-0000-0000-000000000001&reportedId=00000000-0000-0000-0000-000000000002
 
 > **Purpose**: Get  Reason (api/Users/)
 

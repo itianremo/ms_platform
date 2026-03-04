@@ -31,7 +31,13 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand>
             await _profileRepository.AddAsync(profile);
         }
 
-        profile.UpdateProfile(request.DisplayName, request.Bio, request.AvatarUrl, request.CustomDataJson, request.DateOfBirth, request.Gender);
+        string customData = "{}";
+        if (request.DynamicData != null && request.DynamicData.Count > 0)
+        {
+            customData = System.Text.Json.JsonSerializer.Serialize(request.DynamicData);
+        }
+
+        profile.UpdateProfile(request.DisplayName, request.Bio, request.AvatarUrl, customData, request.DateOfBirth, request.Gender);
         
         await _profileRepository.UpdateAsync(profile);
 

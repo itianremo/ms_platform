@@ -4,7 +4,7 @@ using Apps.Domain.Repositories;
 
 namespace Apps.Application.Features.Apps.Queries.GetAllApps;
 
-public class GetAllAppsQueryHandler : IRequestHandler<GetAllAppsQuery, List<AppConfig>>
+public class GetAllAppsQueryHandler : IRequestHandler<GetAllAppsQuery, List<AppDto>>
 {
     private readonly IAppRepository _repository;
     private readonly Shared.Kernel.Interfaces.ICacheService _cache;
@@ -15,14 +15,15 @@ public class GetAllAppsQueryHandler : IRequestHandler<GetAllAppsQuery, List<AppC
         _cache = cache;
     }
 
-    public async Task<List<AppConfig>> Handle(GetAllAppsQuery request, CancellationToken cancellationToken)
+    public async Task<List<AppDto>> Handle(GetAllAppsQuery request, CancellationToken cancellationToken)
     {
         string cacheKey = "apps_all";
-        var cached = await _cache.GetAsync<List<AppConfig>>(cacheKey, cancellationToken);
+        var cached = await _cache.GetAsync<List<AppDto>>(cacheKey, cancellationToken);
         if (cached != null) return cached;
 
         // In a real scenario, this should be paginated
-        var apps = await _repository.ListAsync();
+        var appsEntities = await _repository.ListAsync();
+        var apps = appsEntities.Select(a => a.ToDto()).ToList();
         
         await _cache.SetAsync(cacheKey, apps, TimeSpan.FromMinutes(30), cancellationToken);
         

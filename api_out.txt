@@ -1,0 +1,194 @@
+﻿{
+    "value":  [
+                  {
+                      "id":  "00000000-0000-0000-0000-000000000001",
+                      "name":  "UMP",
+                      "description":  "Unified Microservices Platform Dashboard",
+                      "baseUrl":  "http://localhost:3000/",
+                      "themeJson":  "corporate",
+                      "externalAuthProvidersJson":  "[\"google\", \"facebook\", \"twitter\", \"linkedin\"]",
+                      "privacyPolicy":  "# UMP Privacy Policy\nThis is the privacy policy for the UMP application.",
+                      "termsAndConditions":  "# UMP Terms and Conditions\nBy using UMP, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  1,
+                      "requiresAdminApproval":  true,
+                      "domainEvents":  [
+
+                                       ],
+                      "theme":  "system",
+                      "notifications":  {
+                                            "email":  true
+                                        }
+                  },
+                  {
+                      "id":  "00000000-0000-0000-0000-000000000002",
+                      "name":  "Wissler Admin",
+                      "description":  "Wissler Administrator Dashboard",
+                      "baseUrl":  "http://localhost:3004",
+                      "themeJson":  "default",
+                      "externalAuthProvidersJson":  "[]",
+                      "privacyPolicy":  "# Wissler Admin Privacy Policy\nThis is the privacy policy for the Wissler Admin application.",
+                      "termsAndConditions":  "# Wissler Admin Terms and Conditions\nBy using Wissler Admin, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  1,
+                      "requiresAdminApproval":  true,
+                      "domainEvents":  [
+
+                                       ]
+                  },
+                  {
+                      "id":  "00000000-0000-0000-0000-000000000003",
+                      "name":  "FitIT Admin",
+                      "description":  "FitIT Administrator Dashboard",
+                      "baseUrl":  "http://localhost:3003",
+                      "themeJson":  "default",
+                      "externalAuthProvidersJson":  "[]",
+                      "privacyPolicy":  "# FitIT Admin Privacy Policy\nThis is the privacy policy for the FitIT Admin application.",
+                      "termsAndConditions":  "# FitIT Admin Terms and Conditions\nBy using FitIT Admin, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  1,
+                      "requiresAdminApproval":  true,
+                      "domainEvents":  [
+
+                                       ]
+                  },
+                  {
+                      "id":  "00000000-0000-0000-0000-000000000012",
+                      "name":  "Wissler App",
+                      "description":  "Dating and Social Application",
+                      "baseUrl":  "",
+                      "themeJson":  "dating-theme",
+                      "externalAuthProvidersJson":  "[\"google\", \"apple\", \"facebook\"]",
+                      "privacyPolicy":  "# Wissler App Privacy Policy\nThis is the privacy policy for the Wissler mobile application.",
+                      "termsAndConditions":  "# Wissler App Terms and Conditions\nBy using Wissler App, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  3,
+                      "requiresAdminApproval":  true,
+                      "domainEvents":  [
+
+                                       ]
+                  },
+                  {
+                      "id":  "00000000-0000-0000-0000-000000000013",
+                      "name":  "FitIT App",
+                      "description":  "Sports and Fitness Application",
+                      "baseUrl":  "",
+                      "themeJson":  "default",
+                      "externalAuthProvidersJson":  "[]",
+                      "privacyPolicy":  "# FitIT App Privacy Policy\nThis is the privacy policy for the FitIT mobile application.",
+                      "termsAndConditions":  "# FitIT App Terms and Conditions\nBy using FitIT App, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  0,
+                      "requiresAdminApproval":  false,
+                      "domainEvents":  [
+
+                                       ]
+                  },
+                  {
+                      "id":  "11111111-1111-1111-1111-111111111111",
+                      "name":  "FitIT",
+                      "description":  "Sports and Fitness Application",
+                      "baseUrl":  "http://localhost:3001",
+                      "themeJson":  "default",
+                      "externalAuthProvidersJson":  "[]",
+                      "privacyPolicy":  "# FitIT Privacy Policy\nThis is the privacy policy for the FitIT application.",
+                      "termsAndConditions":  "# FitIT Terms and Conditions\nBy using FitIT, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  0,
+                      "requiresAdminApproval":  false,
+                      "domainEvents":  [
+
+                                       ],
+                      "units":  "metric",
+                      "goal":  "maintain",
+                      "notifications":  {
+                                            "push":  true
+                                        }
+                  },
+                  {
+                      "id":  "11111111-1111-1111-1111-111111111112",
+                      "name":  "FitIT Beta",
+                      "description":  "Sports and Fitness Application (Beta)",
+                      "baseUrl":  "http://localhost:3001",
+                      "themeJson":  "default",
+                      "externalAuthProvidersJson":  "[]",
+                      "privacyPolicy":  "# FitIT Beta Privacy Policy\nThis is the privacy policy for the FitIT application.",
+                      "termsAndConditions":  "# FitIT Beta Terms and Conditions\nBy using FitIT Beta, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  0,
+                      "requiresAdminApproval":  false,
+                      "domainEvents":  [
+
+                                       ]
+                  },
+                  {
+                      "id":  "11111111-1111-1111-1111-111111111113",
+                      "name":  "FitIT Staging",
+                      "description":  "Sports and Fitness Application (Staging)",
+                      "baseUrl":  "http://localhost:3001",
+                      "themeJson":  "default",
+                      "externalAuthProvidersJson":  "[]",
+                      "privacyPolicy":  "# FitIT Staging Privacy Policy\nThis is the privacy policy for the FitIT application.",
+                      "termsAndConditions":  "# FitIT Staging Terms and Conditions\nBy using FitIT Staging, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  0,
+                      "requiresAdminApproval":  false,
+                      "domainEvents":  [
+
+                                       ]
+                  },
+                  {
+                      "id":  "22222222-2222-2222-2222-222222222222",
+                      "name":  "wissler",
+                      "description":  "Dating and Social Application",
+                      "baseUrl":  "http://localhost:3002",
+                      "themeJson":  "dating-theme",
+                      "externalAuthProvidersJson":  "[\"google\", \"apple\", \"facebook\"]",
+                      "privacyPolicy":  "# Privacy Policy for Wissler\r\n\r\n**Effective Date:** October 2023\r\n\r\n## 1. Introduction\r\nWelcome to Wissler. We respect your privacy and are committed to protecting your personal data. This privacy policy will inform you as to how we look after your personal data when you visit our application and tell you about your privacy rights and how the law protects you, particularly in compliance with the Egyptian Personal Data Protection Law No. 151 of 2020.\r\n\r\n## 2. Important Information and Who We Are\r\nWissler is the controller and responsible for your personal data.\r\n\r\n## 3. The Data We Collect About You\r\nWe may collect, use, store and transfer different kinds of personal data about you which we have grouped together follows:\r\n- **Identity Data:** includes first name, last name, username or similar identifier, marital status, title, date of birth and gender.\r\n- **Contact Data:** includes email address and telephone numbers.\r\n- **Location Data:** includes your current location for matching purposes.\r\n\r\n## 4. How We Use Your Personal Data\r\nWe will only use your personal data when the law allows us to. Most commonly, we will use your personal data in the following circumstances:\r\n- Where we need to perform the contract we are about to enter into or have entered into with you.\r\n- Where it is necessary for our legitimate interests (or those of a third party) and your interests and fundamental rights do not override those interests.\r\n- Where we need to comply with a legal or regulatory obligation.\r\n\r\n## 5. Data Security\r\nWe have put in place appropriate security measures to prevent your personal data from being accidentally lost, used or accessed in an unauthorized way, altered or disclosed.\r\n\r\n## 6. Your Legal Rights\r\nUnder certain circumstances, you have rights under data protection laws in relation to your personal data, including the right to access, correct, erase, restrict, transfer, or object to processing of your personal data.",
+                      "termsAndConditions":  "# Wissler Terms and Conditions\nBy using Wissler, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  3,
+                      "requiresAdminApproval":  true,
+                      "domainEvents":  [
+
+                                       ],
+                      "privacy":  "public",
+                      "notifications":  {
+                                            "matches":  true
+                                        }
+                  },
+                  {
+                      "id":  "22222222-2222-2222-2222-222222222223",
+                      "name":  "wissler Beta",
+                      "description":  "Dating and Social Application (Beta)",
+                      "baseUrl":  "http://localhost:3002",
+                      "themeJson":  "dating-theme",
+                      "externalAuthProvidersJson":  "[\"google\", \"apple\", \"facebook\"]",
+                      "privacyPolicy":  "# Wissler Beta Privacy Policy\nThis is the privacy policy for the Wissler application.",
+                      "termsAndConditions":  "# Wissler Beta Terms and Conditions\nBy using Wissler Beta, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  3,
+                      "requiresAdminApproval":  true,
+                      "domainEvents":  [
+
+                                       ]
+                  },
+                  {
+                      "id":  "22222222-2222-2222-2222-222222222224",
+                      "name":  "wissler Staging",
+                      "description":  "Dating and Social Application (Staging)",
+                      "baseUrl":  "http://localhost:3002",
+                      "themeJson":  "dating-theme",
+                      "externalAuthProvidersJson":  "[\"google\", \"apple\", \"facebook\"]",
+                      "privacyPolicy":  "# Wissler Staging Privacy Policy\nThis is the privacy policy for the Wissler application.",
+                      "termsAndConditions":  "# Wissler Staging Terms and Conditions\nBy using Wissler Staging, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  3,
+                      "requiresAdminApproval":  true,
+                      "domainEvents":  [
+
+                                       ]
+                  }
+              ],
+    "Count":  11
+}

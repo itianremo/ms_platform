@@ -1,0 +1,146 @@
+﻿{
+    "value":  [
+                  {
+                      "id":  "00000000-0000-0000-0000-000000000001",
+                      "name":  "UMP",
+                      "description":  "Unified Microservices Platform Dashboard",
+                      "baseUrl":  "http://localhost:3000/",
+                      "themeJson":  "corporate",
+                      "externalAuthProvidersJson":  "[\"google\", \"facebook\", \"twitter\", \"linkedin\"]",
+                      "privacyPolicy":  "# UMP Privacy Policy\nThis is the privacy policy for the UMP application.",
+                      "termsAndConditions":  "# UMP Terms and Conditions\nBy using UMP, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  1,
+                      "requiresAdminApproval":  true,
+                      "domainEvents":  [
+
+                                       ],
+                      "sysConfig":  {
+                                        "theme":  "system",
+                                        "collapsedmenu":  true
+                                    },
+                      "notifications":  {
+                                            "email":  true,
+                                            "push":  true,
+                                            "sms":  true
+                                        }
+                  },
+                  {
+                      "id":  "00000000-0000-0000-0000-000000000002",
+                      "name":  "Wissler Admin",
+                      "description":  "Wissler Administrator Dashboard",
+                      "baseUrl":  "http://localhost:3004",
+                      "themeJson":  "default",
+                      "externalAuthProvidersJson":  "[]",
+                      "privacyPolicy":  "# Wissler Admin Privacy Policy\nThis is the privacy policy for the Wissler Admin application.",
+                      "termsAndConditions":  "# Wissler Admin Terms and Conditions\nBy using Wissler Admin, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  1,
+                      "requiresAdminApproval":  true,
+                      "domainEvents":  [
+
+                                       ],
+                      "sysConfig":  {
+                                        "theme":  "dark",
+                                        "collapsedmenu":  true
+                                    },
+                      "notifications":  {
+                                            "email":  true,
+                                            "push":  true,
+                                            "sms":  true
+                                        }
+                  },
+                  {
+                      "id":  "00000000-0000-0000-0000-000000000003",
+                      "name":  "FitIT Admin",
+                      "description":  "FitIT Administrator Dashboard",
+                      "baseUrl":  "http://localhost:3003",
+                      "themeJson":  "default",
+                      "externalAuthProvidersJson":  "[]",
+                      "privacyPolicy":  "# FitIT Admin Privacy Policy\nThis is the privacy policy for the FitIT Admin application.",
+                      "termsAndConditions":  "# FitIT Admin Terms and Conditions\nBy using FitIT Admin, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  1,
+                      "requiresAdminApproval":  true,
+                      "domainEvents":  [
+
+                                       ],
+                      "sysConfig":  {
+                                        "theme":  "light",
+                                        "collapsedmenu":  true
+                                    },
+                      "notifications":  {
+                                            "email":  true,
+                                            "push":  true,
+                                            "sms":  true
+                                        }
+                  },
+                  {
+                      "id":  "00000000-0000-0000-0000-000000000012",
+                      "name":  "Wissler App",
+                      "description":  "Dating and Social Application",
+                      "baseUrl":  "WisslerApp",
+                      "themeJson":  "dating-theme",
+                      "externalAuthProvidersJson":  "[\"google\", \"apple\", \"facebook\"]",
+                      "privacyPolicy":  "# Wissler App Privacy Policy\nThis is the privacy policy for the Wissler mobile application.",
+                      "termsAndConditions":  "# Wissler App Terms and Conditions\nBy using Wissler App, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  3,
+                      "requiresAdminApproval":  true,
+                      "domainEvents":  [
+
+                                       ],
+                      "sysConfig":  {
+                                        "theme":  "light"
+                                    },
+                      "notifications":  {
+                                            "email":  true,
+                                            "push":  true,
+                                            "sms":  true
+                                        },
+                      "userprofile":  {
+                                          "height":  "175cm",
+                                          "smoking":  "Non-smoker",
+                                          "drinking":  "Socially",
+                                          "children":  "Don\u0027t have children",
+                                          "religion":  "Agnostic",
+                                          "education":  "Bachelor\u0027s Degree"
+                                      },
+                      "filters":  {
+                                      "gender":  "all",
+                                      "intent":  "all",
+                                      "ageRange":  "18-35",
+                                      "distance":  50
+                                  }
+                  },
+                  {
+                      "id":  "00000000-0000-0000-0000-000000000013",
+                      "name":  "FitIT App",
+                      "description":  "Sports and Fitness Application",
+                      "baseUrl":  "FititApp",
+                      "themeJson":  "default",
+                      "externalAuthProvidersJson":  "[]",
+                      "privacyPolicy":  "# FitIT App Privacy Policy\nThis is the privacy policy for the FitIT mobile application.",
+                      "termsAndConditions":  "# FitIT App Terms and Conditions\nBy using FitIT App, you agree to these terms.",
+                      "isActive":  true,
+                      "verificationType":  0,
+                      "requiresAdminApproval":  false,
+                      "domainEvents":  [
+
+                                       ],
+                      "sysConfig":  {
+                                        "theme":  "dark"
+                                    },
+                      "notifications":  {
+                                            "email":  true,
+                                            "push":  true,
+                                            "sms":  true
+                                        },
+                      "userprofile":  {
+                                          "units":  "metric",
+                                          "goal":  "maintain"
+                                      }
+                  }
+              ],
+    "Count":  5
+}

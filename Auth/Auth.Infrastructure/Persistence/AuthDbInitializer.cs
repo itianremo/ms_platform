@@ -112,9 +112,11 @@ public class AuthDbInitializer
         // Initialize Roles for All Known Apps
         var appIds = new[] 
         {
-            Guid.Parse("00000000-0000-0000-0000-000000000001"), // Global
-            Guid.Parse("11111111-1111-1111-1111-111111111111"), // FitIT
-            Guid.Parse("22222222-2222-2222-2222-222222222222"), // Wissler
+            Guid.Parse("00000000-0000-0000-0000-000000000001"), // Global Admin
+            Guid.Parse("00000000-0000-0000-0000-000000000002"), // Wissler Admin
+            Guid.Parse("00000000-0000-0000-0000-000000000003"), // FitIT Admin
+            Guid.Parse("00000000-0000-0000-0000-000000000012"), // Wissler App
+            Guid.Parse("00000000-0000-0000-0000-000000000013"), // FitIT App
         };
         
         var seedRoles = await LoadJsonAsync<List<SeedRoleDto>>("seed-roles.json");
@@ -162,6 +164,19 @@ public class AuthDbInitializer
         var seedUsers = JsonSerializer.Deserialize<List<SeedUserDto>>(json);
 
         if (seedUsers == null) return;
+
+        // Cleanup any users not in the seed array
+        var allDbUsers = await context.Users.ToListAsync();
+        var seedEmails = seedUsers.Select(x => x.Email.ToLower()).ToHashSet();
+        foreach (var dbUser in allDbUsers)
+        {
+            if (!seedEmails.Contains(dbUser.Email.ToLower()))
+            {
+                context.Users.Remove(dbUser);
+                _logger.LogInformation("Removed unseeded user: {Email}", dbUser.Email);
+            }
+        }
+        await context.SaveChangesAsync();
 
         foreach (var seedUser in seedUsers)
         {
@@ -222,6 +237,62 @@ public class AuthDbInitializer
 
                 await userRepository.UpdateAsync(user); // Ensure changes are saved
                 _logger.LogInformation("Updated existing seed user: {Email}", seedUser.Email);
+            }
+
+            // Bind Roles (Native EF Core Many-to-Many via ms_auth schema, meaning we insert to UserRoles)
+            await SyncUserRolesAsync(context, user.Id, seedUser.Email, seedUser.Roles);
+        }
+    }
+
+    private async Task SyncUserRolesAsync(AuthDbContext context, Guid userId, string email, List<string> seedRoles)
+    {
+        var globalAdminAppId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+        var wisslerAdminAppId = Guid.Parse("00000000-0000-0000-0000-000000000002");
+        var wisslerAppId = Guid.Parse("00000000-0000-0000-0000-000000000012");
+        var fititAppId = Guid.Parse("00000000-0000-0000-0000-000000000013");
+
+        var targetApps = new List<Guid>();
+
+        // Logically map user to Apps based on requirements
+        if (email.Contains("admin@ump.com")) 
+        {
+            targetApps.Add(globalAdminAppId);
+        }
+        else if (email.StartsWith("admin@wissler.com") || email.StartsWith("manager@wissler.com")) 
+        {
+            targetApps.Add(wisslerAdminAppId);
+        }
+        else if (email.StartsWith("vis15"))
+        {
+            targetApps.Add(wisslerAppId);
+            targetApps.Add(fititAppId);
+        }
+        else if (email.StartsWith("vis13") || email.StartsWith("vis14"))
+        {
+            targetApps.Add(fititAppId);
+        }
+        else if (email.StartsWith("vis"))
+        {
+            targetApps.Add(wisslerAppId);
+        }
+
+        // Roles resolution
+        string activeRoleName = "Visitor";
+        if (email.Contains("admin@ump.com")) activeRoleName = "SuperAdmin";
+        else if (email.Contains("admin@wissler.com") || email.Contains("manager@wissler.com")) activeRoleName = "ManageUsers";
+
+        foreach (var appId in targetApps)
+        {
+            var role = await context.Roles.FirstOrDefaultAsync(r => r.AppId == appId && r.Name == activeRoleName);
+            if (role != null)
+            {
+                // Check if user already has this role in this App
+                var sqlCheck = "SELECT COUNT(1) FROM [UserAppMemberships] WHERE [UserId] = {0} AND [RoleId] = {1} AND [AppId] = {2}";
+                var count = await context.Database.ExecuteSqlRawAsync(
+                    "IF NOT EXISTS (SELECT 1 FROM [UserAppMemberships] WHERE [UserId] = {0} AND [RoleId] = {1} AND [AppId] = {2}) " +
+                    "INSERT INTO [UserAppMemberships] ([Id], [UserId], [AppId], [RoleId], [Status]) " +
+                    "VALUES (NEWID(), {0}, {2}, {1}, 'Active')", 
+                    userId, role.Id, appId);
             }
         }
     }

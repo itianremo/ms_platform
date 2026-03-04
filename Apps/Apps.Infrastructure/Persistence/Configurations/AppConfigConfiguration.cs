@@ -11,7 +11,7 @@ public class AppConfigConfiguration : IEntityTypeConfiguration<AppConfig>
         builder.HasKey(a => a.Id);
         builder.Property(a => a.Name).IsRequired().HasMaxLength(100);
         builder.HasIndex(a => a.Name).IsUnique();
-        
-        builder.Property(a => a.BaseUrl).HasMaxLength(500);
+        builder.Property(a => a.BaseUrl).HasMaxLength(200);
+        builder.Property(a => a.DefaultUserProfileJson).HasColumnType("nvarchar(max)");
     }
 }

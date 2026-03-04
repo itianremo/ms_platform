@@ -3,6 +3,9 @@ using Users.Application;
 using Shared.Infrastructure.Extensions;
 using Users.Infrastructure;
 using Users.Infrastructure.Persistence;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 ObservabilityExtensions.ConfigureSerilog(new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
@@ -21,6 +24,24 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddSharedHealthChecks(builder.Configuration);
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ReadUsers", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type.Equals("permission", StringComparison.OrdinalIgnoreCase) && 
+                (c.Value == "AccessAll" || c.Value == "ReadUsers" || c.Value == "ManageUsers" || c.Value == "FreeSubscription" || c.Value == "VipSubscription"))));
+
+    options.AddPolicy("WriteUsers", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type.Equals("permission", StringComparison.OrdinalIgnoreCase) && 
+                (c.Value == "AccessAll" || c.Value == "WriteUsers" || c.Value == "ManageUsers" || c.Value == "FreeSubscription" || c.Value == "VipSubscription"))));
+
+    options.AddPolicy("ManageUsers", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type.Equals("permission", StringComparison.OrdinalIgnoreCase) && 
+                (c.Value == "AccessAll" || c.Value == "ManageUsers"))));
+});
 
 var app = builder.Build();
 

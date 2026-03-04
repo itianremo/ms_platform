@@ -1,10 +1,11 @@
 using MediatR;
 using Apps.Domain.Entities;
+using Apps.Application.Features.Apps.Queries.GetAllApps;
 using Apps.Domain.Repositories;
 
 namespace Apps.Application.Features.Apps.Queries.GetAppById;
 
-public class GetAppByIdQueryHandler : IRequestHandler<GetAppByIdQuery, AppConfig?>
+public class GetAppByIdQueryHandler : IRequestHandler<GetAppByIdQuery, AppDto?>
 {
     private readonly IAppRepository _repository;
 
@@ -13,8 +14,9 @@ public class GetAppByIdQueryHandler : IRequestHandler<GetAppByIdQuery, AppConfig
         _repository = repository;
     }
 
-    public async Task<AppConfig?> Handle(GetAppByIdQuery request, CancellationToken cancellationToken)
+    public async Task<AppDto?> Handle(GetAppByIdQuery request, CancellationToken cancellationToken)
     {
-        return await _repository.GetByIdAsync(request.Id);
+        var app = await _repository.GetByIdAsync(request.Id);
+        return app?.ToDto();
     }
 }

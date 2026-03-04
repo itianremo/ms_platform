@@ -41,7 +41,6 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, AuthRes
     {
         public Guid RoleId { get; set; }
         public int Status { get; set; }
-        public DateTime? SubscriptionExpiry { get; set; }
     }
 
     public async Task<AuthResponse> Handle(LoginUserCommand request, CancellationToken cancellationToken)
@@ -124,11 +123,6 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, AuthRes
                         }
 
                         appRole = await _userRepository.GetRoleByIdAsync(profile.RoleId);
-
-                        if (profile.SubscriptionExpiry.HasValue && profile.SubscriptionExpiry.Value < DateTime.UtcNow)
-                        {
-                            suppressRoles = true;
-                        }
                     }
                 }
             }
@@ -147,7 +141,7 @@ public class LoginUserCommandHandler : IRequestHandler<LoginUserCommand, AuthRes
                      if (globalResponse.IsSuccessStatusCode)
                      {
                          var globalProfile = await globalResponse.Content.ReadFromJsonAsync<LocalAuthProfileDto>(cancellationToken: cancellationToken);
-                         if (globalProfile != null && globalProfile.Status == 0) // Active
+                         if (globalProfile != null)
                          {
                              var globalRole = await _userRepository.GetRoleByIdAsync(globalProfile.RoleId);
                              if (globalRole?.Name == "SuperAdmin") superAdminRole = globalRole;

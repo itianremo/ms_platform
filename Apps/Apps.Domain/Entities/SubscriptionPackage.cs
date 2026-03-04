@@ -2,34 +2,48 @@ using Shared.Kernel;
 
 namespace Apps.Domain.Entities;
 
+public enum PackageType
+{
+    Subscription = 0,
+    Consumable = 1 // e.g. Coins
+}
+
 public class SubscriptionPackage : Entity
 {
-    public string Name { get; private set; }
-    public string Description { get; private set; }
-    public decimal Price { get; private set; }
+    public string Name { get; private set; } = string.Empty;
+    public string Description { get; private set; } = string.Empty;
     public decimal Discount { get; private set; }
-    public string Currency { get; private set; }
     public SubscriptionPeriod Period { get; private set; }
     public Guid AppId { get; private set; }
     public bool IsActive { get; private set; }
+    
+    public PackageType Type { get; private set; }
+    public int CoinsAmount { get; private set; }
+    public string LocalizedPricingJson { get; private set; } = "{}";
 
     private SubscriptionPackage() { }
 
-    public SubscriptionPackage(Guid appId, string name, string description, decimal price, decimal discount, SubscriptionPeriod period, string currency = "USD")
+    public SubscriptionPackage(Guid appId, string name, string description, decimal discount, SubscriptionPeriod period, PackageType type = PackageType.Subscription, int coinsAmount = 0, string localizedPricingJson = "{}")
     {
         Id = Guid.NewGuid();
         AppId = appId;
         Name = name;
         Description = description;
-        Price = price;
         Discount = discount;
-        Currency = currency;
         Period = period;
         IsActive = true;
+        Type = type;
+        CoinsAmount = coinsAmount;
+        LocalizedPricingJson = localizedPricingJson;
     }
 
     public void Deactivate() => IsActive = false;
     public void Activate() => IsActive = true;
+    
+    public void UpdatePricing(string localizedPricingJson)
+    {
+        LocalizedPricingJson = localizedPricingJson;
+    }
 }
 
 public enum SubscriptionPeriod

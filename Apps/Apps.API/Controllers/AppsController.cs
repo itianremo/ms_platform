@@ -2,6 +2,7 @@ using Apps.Application.Features.Apps.Commands.CreateApp;
 using Apps.Application.Features.Apps.Commands.UpdateApp;
 using Apps.Application.Features.Apps.Commands.DeactivateApp;
 using Apps.Application.Features.Apps.Commands.UpdateExternalAuthConfig;
+using Apps.Application.Features.Apps.Commands.DeleteApp;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -10,6 +11,7 @@ namespace Apps.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class AppsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -20,14 +22,15 @@ public class AppsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Policy = "ManageApps")]
+    [Authorize(Policy = "WriteApps")]
     public async Task<IActionResult> CreateApp([FromBody] CreateAppCommand command)
     {
-        var appId = await _mediator.Send(command);
-        return CreatedAtAction(nameof(CreateApp), new { id = appId }, new { Id = appId });
+        var appDto = await _mediator.Send(command);
+        return Ok(appDto);
     }
 
     [HttpGet]
+    [Authorize(Policy = "ReadApps")]
     public async Task<IActionResult> GetAllApps()
     {
         var result = await _mediator.Send(new Apps.Application.Features.Apps.Queries.GetAllApps.GetAllAppsQuery());
@@ -35,6 +38,7 @@ public class AppsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Policy = "ReadApps")]
     public async Task<IActionResult> GetAppById(Guid id)
     {
         var result = await _mediator.Send(new Apps.Application.Features.Apps.Queries.GetAppById.GetAppByIdQuery(id));
@@ -43,17 +47,23 @@ public class AppsController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(Policy = "ManageApps")]
+    [Authorize(Policy = "WriteApps")]
     public async Task<IActionResult> UpdateApp(Guid id, [FromBody] UpdateAppCommand command)
     {
-        if (id != command.Id) return BadRequest();
+        if (command.Id != Guid.Empty && id != command.Id) return BadRequest();
+        
+        if (command.Id == Guid.Empty)
+        {
+            command.Id = id;
+        }
+        
         var result = await _mediator.Send(command);
-        if (!result) return NotFound();
-        return NoContent();
+        if (result == null) return NotFound();
+        return Ok(result);
     }
 
     [HttpPatch("{id}/status")]
-    [Authorize(Policy = "ManageApps")]
+    [Authorize(Policy = "WriteApps")]
     public async Task<IActionResult> ToggleStatus(Guid id, [FromBody] DeactivateAppCommand command)
     {
         if (id != command.Id) return BadRequest();
@@ -62,7 +72,7 @@ public class AppsController : ControllerBase
         return NoContent();
     }
     [HttpPatch("{id}/external-auth")]
-    [Authorize(Policy = "ManageApps")]
+    [Authorize(Policy = "WriteApps")]
     public async Task<IActionResult> UpdateExternalAuth(Guid id, [FromBody] UpdateExternalAuthConfigCommand command)
     {
         if (id != command.Id) return BadRequest();
@@ -71,10 +81,20 @@ public class AppsController : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("{id}/packages")]
-    public async Task<IActionResult> GetPackages(Guid id)
+    [HttpDelete("{id}")]
+    [Authorize(Policy = "DeleteApps")]
+    public async Task<IActionResult> DeleteApp(Guid id)
     {
-        var result = await _mediator.Send(new Apps.Application.Features.Apps.Queries.GetPackagesByApp.GetPackagesByAppQuery(id));
+        var result = await _mediator.Send(new DeleteAppCommand(id));
+        if (!result) return NotFound();
+        return NoContent();
+    }
+
+    [HttpGet("{id}/packages")]
+    [Authorize(Policy = "ReadApps")]
+    public async Task<IActionResult> GetPackages(Guid id, [FromQuery] string? country = null)
+    {
+        var result = await _mediator.Send(new Apps.Application.Features.Apps.Queries.GetPackagesByApp.GetPackagesByAppQuery(id, country));
         return Ok(result);
     }
 

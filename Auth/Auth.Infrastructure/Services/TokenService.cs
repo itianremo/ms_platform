@@ -45,6 +45,8 @@ public class TokenService : ITokenService
             // Add Roles and Permissions for this App (ONLY IF NOT SUPPRESSED)
             if (!suppressRoles)
             {
+                var uniquePermissions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
                 if (appRole != null)
                 {
                     claims.Add(new Claim(ClaimTypes.Role, appRole.Name));
@@ -53,7 +55,7 @@ public class TokenService : ITokenService
                     {
                         foreach (var perm in appRole.Permissions)
                         {
-                            claims.Add(new Claim("permission", perm.Name));
+                            uniquePermissions.Add(perm.Name);
                         }
                     }
                 }
@@ -61,7 +63,19 @@ public class TokenService : ITokenService
                 if (superAdminRole != null && appRole?.Name != "SuperAdmin")
                 {
                     claims.Add(new Claim(ClaimTypes.Role, "SuperAdmin"));
-                    claims.Add(new Claim("permission", "AccessAll"));
+                    
+                    if (superAdminRole.Permissions != null)
+                    {
+                        foreach (var perm in superAdminRole.Permissions)
+                        {
+                            uniquePermissions.Add(perm.Name);
+                        }
+                    }
+                }
+
+                foreach (var permName in uniquePermissions)
+                {
+                    claims.Add(new Claim("permission", permName));
                 }
             }
         }

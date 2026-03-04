@@ -1,277 +1,278 @@
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
+using System.Text.Json.Serialization;
 using Apps.Domain.Entities;
-using Shared.Kernel;
+using Apps.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Logging;
+using Shared.Kernel;
 
 namespace Apps.Infrastructure.Persistence;
 
-public static class AppsDbInitializer
+public class AppsDbInitializer
 {
-    public static async Task SeedAsync(AppsDbContext context, ILogger logger)
+    public static async Task InitializeAsync(AppsDbContext context, ILogger logger)
     {
-            // Robust Retry Logic for Container Cold Starts
-            int maxRetries = 10;
-            int delaySeconds = 2;
-            
-            for (int i = 0; i < maxRetries; i++)
-            {
-                try 
-                {
-                    // Ensure DB Created and Migrated
-                    await context.Database.MigrateAsync();
-                    
-                    // No need for explicit Table check with Migrations, but good for sanity
-                    // var databaseCreator = context.Database.GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>();
-                    // if (!await databaseCreator.HasTablesAsync()) ...
-                    
-                    logger.LogInformation("Database initialization check passed.");
-                    break; // Success
-                }
-                catch (Exception ex)
-                {
-                    if (i == maxRetries - 1)
-                    {
-                        logger.LogError(ex, "Critical: Database initialization failed after {Retries} attempts. Giving up.", maxRetries);
-                        throw; // Rethrow to stop startup since this is critical
-                    }
-                    
-                    logger.LogWarning(ex, "Database connection failed (Attempt {Attempt}/{Max}). Retrying in {Delay}s...", i + 1, maxRetries, delaySeconds);
-                    await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
-                     // Exponential Backoff? Or Linear? Linear is fine for startup.
-                }
-            }
-
-
-        var seedDataPath = Path.Combine(AppContext.BaseDirectory, "seed-apps.json");
-        if (!File.Exists(seedDataPath))
-        {
-            logger.LogWarning("Seed apps file not found at {Path}", seedDataPath);
-            return;
-        }
-
-        var json = await File.ReadAllTextAsync(seedDataPath);
-        var seedApps = JsonSerializer.Deserialize<List<SeedAppDto>>(json); // Default is case-sensitive or use options
-
-        if (seedApps == null) return;
-
-        foreach (var seed in seedApps)
-        {
-            // Check if app exists by ID or Name to avoid duplicates
-            var existingApp = await context.Apps.FirstOrDefaultAsync(a => a.Id == seed.Id || a.Name == seed.Name);
-            if (existingApp != null && seed.Id != Guid.Empty && existingApp.Id != seed.Id) 
-            {
-                logger.LogWarning("App {Name} exists with wrong ID {ExistingId}. Expecting {ExpectedId}. Deleting to re-seed.", seed.Name, existingApp.Id, seed.Id);
-                context.Apps.Remove(existingApp);
-                await context.SaveChangesAsync();
-                existingApp = null;
-            }
-
-            if (existingApp == null)
-            {
-                // Create New
-                var newApp = new AppConfig(seed.Name, seed.Description, seed.BaseUrl, seed.Id);
-                newApp.UpdateTheme(seed.ThemeJson);
-                newApp.UpdateDefaultUserProfile(seed.DefaultUserProfileJson ?? "{}");
-                newApp.UpdateExternalAuthProviders(seed.ExternalAuthProvidersJson ?? "{}");
-                newApp.UpdateVerificationType((VerificationType)seed.VerificationType);
-                newApp.UpdateRequirements(seed.RequiresAdminApproval);
-                
-                if (seed.IsActive) newApp.Activate(); else newApp.Deactivate();
-
-                await context.Apps.AddAsync(newApp);
-                logger.LogInformation("Seeded App: {Name}", seed.Name);
-            }
-            else
-            {
-                // Update specific fields if needed
-                if (string.IsNullOrEmpty(existingApp.DefaultUserProfileJson) || existingApp.DefaultUserProfileJson == "{}")
-                {
-                    if (!string.IsNullOrEmpty(seed.DefaultUserProfileJson) && seed.DefaultUserProfileJson != "{}")
-                    {
-                        existingApp.UpdateDefaultUserProfile(seed.DefaultUserProfileJson);
-                        logger.LogInformation("Updated App {Name} with DefaultUserProfileJson", seed.Name);
-                    }
-                }
-                
-                // Update ExternalAuthProvidersJson if missing
-                if (string.IsNullOrEmpty(existingApp.ExternalAuthProvidersJson) || existingApp.ExternalAuthProvidersJson == "{}")
-                {
-                    if (!string.IsNullOrEmpty(seed.ExternalAuthProvidersJson) && seed.ExternalAuthProvidersJson != "{}")
-                    {
-                        existingApp.UpdateExternalAuthProviders(seed.ExternalAuthProvidersJson);
-                        logger.LogInformation("Updated App {Name} with ExternalAuthProvidersJson", seed.Name);
-                    }
-                }
-
-                // Targeted Fix for System App (Admin Dashboard)
-                // If it exists but has VerificationType = None (0) and we expect it to be secure, fix it.
-                // This handles the dev environment case where the app was seeded before security was enforced.
-                if (existingApp.Id == Guid.Parse("00000000-0000-0000-0000-000000000001") && 
-                    existingApp.VerificationType == VerificationType.None)
-                {
-                    existingApp.UpdateVerificationType((VerificationType)seed.VerificationType);
-                    existingApp.UpdateRequirements(seed.RequiresAdminApproval);
-                    // Force activation if inactive?
-                    if (!existingApp.IsActive && seed.IsActive) existingApp.Activate();
-                    
-                    logger.LogInformation("System App {Name} found with insecure settings. Updated to match seed.", seed.Name);
-                }
-                else 
-                {
-                    logger.LogInformation("App {Name} already exists, skipping seed.", seed.Name);
-                }
-            }
-        }
-        
         try
         {
-            await context.SaveChangesAsync();
+            if (context.Database.IsSqlServer())
+            {
+                await context.Database.MigrateAsync();
+                logger.LogInformation("Database migrated successfully.");
+            }
+
+            await SeedAppsAsync(context, logger);
+            await SeedUserSubscriptionsAsync(context, logger);
+            
+            logger.LogInformation("Database initialization completed.");
         }
         catch (Exception ex)
         {
-            // Log but don't crash if there's a duplicate key error
-            logger.LogWarning(ex, "Error saving apps seed data (likely duplicates). Continuing...");
+            logger.LogError(ex, "An error occurred while initializing the database.");
+            throw;
         }
+    }
+
+    private static async Task SeedAppsAsync(AppsDbContext context, ILogger logger)
+    {
+        // Seed Apps
+        var seedAppsPath = Path.Combine(AppContext.BaseDirectory, "seed-apps.json");
+        if (File.Exists(seedAppsPath))
+        {
+            var jsonApps = await File.ReadAllTextAsync(seedAppsPath);
+            // Fix parsing case insensitive
+            var opt = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var seedApps = JsonSerializer.Deserialize<List<SeedAppDto>>(jsonApps, opt);
+
+            if (seedApps != null)
+            {
+                foreach (var seed in seedApps)
+                {
+                    var existingApp = await context.Apps.FirstOrDefaultAsync(a => a.Id == seed.Id);
+                    
+                    string dynamicJson = "{}";
+                    if (seed.DynamicData != null && seed.DynamicData.Count > 0)
+                    {
+                        dynamicJson = JsonSerializer.Serialize(seed.DynamicData);
+                    }
+
+                    if (existingApp == null)
+                    {
+                        // Create New
+                        var newApp = new AppConfig(seed.Name, seed.description, seed.baseUrl, seed.Id);
+                        newApp.UpdateDefaultUserProfile(dynamicJson);
+                        newApp.UpdateExternalAuthProviders(seed.externalAuthProvidersJson ?? "{}");
+                        newApp.UpdatePrivacyPolicy(seed.PrivacyPolicy ?? "");
+                        newApp.UpdateTermsAndConditions(seed.TermsAndConditions ?? "");
+                        
+                        // Verification configuration
+                        if (seed.VerificationType == 3) // KYC -> Use Both as closest approximation or None for now. Let's use Both.
+                            newApp.UpdateVerificationType(VerificationType.Both);
+                        else if (seed.VerificationType == 2) // Mobile -> Phone
+                            newApp.UpdateVerificationType(VerificationType.Phone);
+                        else if (seed.VerificationType == 1) // Email
+                            newApp.UpdateVerificationType(VerificationType.Email);
+                            
+                        if (seed.RequiresAdminApproval)
+                            newApp.UpdateRequirements(true);
+                            
+                        if (!seed.IsActive)
+                            newApp.Deactivate();
+
+                        await context.Apps.AddAsync(newApp);
+                        logger.LogInformation("Seeded App: {Name}", seed.Name);
+                    }
+                    else
+                    {
+                        // Update specific fields if needed
+                        if (string.IsNullOrEmpty(existingApp.DefaultUserProfileJson) || existingApp.DefaultUserProfileJson == "{}")
+                        {
+                            if (dynamicJson != "{}")
+                            {
+                                existingApp.UpdateDefaultUserProfile(dynamicJson);
+                                logger.LogInformation("Updated App {Name} with DefaultUserProfileJson", seed.Name);
+                            }
+                        }
+
+                        if (string.IsNullOrEmpty(existingApp.PrivacyPolicy))
+                        {
+                            existingApp.UpdatePrivacyPolicy(seed.PrivacyPolicy ?? "");
+                            logger.LogInformation("Updated App {Name} with PrivacyPolicy", seed.Name);
+                        }
+
+                        if (string.IsNullOrEmpty(existingApp.TermsAndConditions))
+                        {
+                            existingApp.UpdateTermsAndConditions(seed.TermsAndConditions ?? "");
+                            logger.LogInformation("Updated App {Name} with TermsAndConditions", seed.Name);
+                        }
+                    }
+                }
+                await context.SaveChangesAsync();
+            }
+        }
+
         // Seed Packages
         var seedPackagesPath = Path.Combine(AppContext.BaseDirectory, "seed-packages.json");
         if (File.Exists(seedPackagesPath))
         {
             var jsonPackages = await File.ReadAllTextAsync(seedPackagesPath);
-            var seedPackages = JsonSerializer.Deserialize<List<SeedPackageDto>>(jsonPackages);
+            var opt = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var seedPackages = JsonSerializer.Deserialize<List<SeedPackageDto>>(jsonPackages, opt);
             
             if (seedPackages != null)
             {
+                var seededPackageKeys = new HashSet<string>();
+
                 foreach (var sp in seedPackages)
                 {
-                    // Check if package exists for this App by Name (Unique Name per App assumption)
+                    seededPackageKeys.Add($"{sp.AppId}_{sp.Name}");
+
+                    // Check if package exists for this App by Name
                     var existingPkg = await context.SubscriptionPackages
                         .FirstOrDefaultAsync(p => p.AppId == sp.AppId && p.Name == sp.Name);
                     
                     if (existingPkg == null)
                     {
-                        var pkg = new SubscriptionPackage(sp.AppId, sp.Name, sp.Description, sp.Price, sp.Discount, (SubscriptionPeriod)sp.Period);
+                        var pkg = new SubscriptionPackage(sp.AppId, sp.Name, sp.Description, sp.Discount, (SubscriptionPeriod)sp.Period, (PackageType)sp.Type, sp.CoinsAmount, sp.LocalizedPricingJson);
+                        if (sp.isActive) pkg.Activate(); else pkg.Deactivate();
+
                         await context.SubscriptionPackages.AddAsync(pkg);
                         logger.LogInformation("Seeded Package: {Name} for App {AppId}", sp.Name, sp.AppId);
                     }
+                    else
+                    {
+                        if (sp.isActive && !existingPkg.IsActive) existingPkg.Activate();
+                        else if (!sp.isActive && existingPkg.IsActive) existingPkg.Deactivate();
+
+                        // Sync dynamic properties
+                        existingPkg.UpdatePricing(sp.LocalizedPricingJson);
+                    }
                 }
+                
+                // Cleanup unseeded packages
+                var allPackages = await context.SubscriptionPackages.ToListAsync();
+                foreach (var dbPkg in allPackages)
+                {
+                    if (!seededPackageKeys.Contains($"{dbPkg.AppId}_{dbPkg.Name}"))
+                    {
+                        context.SubscriptionPackages.Remove(dbPkg);
+                        logger.LogInformation("Removed unseeded Package: {Name} for App {AppId}", dbPkg.Name, dbPkg.AppId);
+                    }
+                }
+
                 await context.SaveChangesAsync();
             }
         }
-
-        // Hardcoded Seeding for Wissler (Dynamic Request)
-        var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
-        var wisslerPackages = new List<(string Name, decimal Price, SubscriptionPeriod Period)>
-        {
-            ("1 Week", 49, SubscriptionPeriod.Weekly),
-            ("2 Weeks", 89, SubscriptionPeriod.BiWeekly),
-            ("1 Month", 149, SubscriptionPeriod.Monthly),
-            ("3 Months", 399, SubscriptionPeriod.Quarterly),
-            ("6 Months", 649, SubscriptionPeriod.SemiAnnually),
-            ("1 Year", 1000, SubscriptionPeriod.Yearly),
-            ("Unlimited", 1700, SubscriptionPeriod.Unlimited)
-        };
-
-        foreach (var (name, price, period) in wisslerPackages)
-        {
-             var existingPkg = await context.SubscriptionPackages
-                .FirstOrDefaultAsync(p => p.AppId == wisslerAppId && p.Name == name);
-
-            if (existingPkg == null)
-            {
-                var pkg = new SubscriptionPackage(
-                    wisslerAppId, 
-                    name, 
-                    $"Access to premium features for {name}", 
-                    price, 
-                    0, 
-                    period,
-                    "EGP"
-                );
-                await context.SubscriptionPackages.AddAsync(pkg);
-                logger.LogInformation("Seeded Wissler Package: {Name} - {Price} EGP", name, price);
-            }
-        }
-        await context.SaveChangesAsync();
-
-        // Ensure VIP Unlimited Package exists for ALL Apps (for Admin Auto-Grant)
-        var allApps = await context.Apps.ToListAsync();
-        foreach (var app in allApps)
-        {
-            // Seed Privacy Policy for Wissler
-            if (app.Id == Guid.Parse("22222222-2222-2222-2222-222222222222"))
-            {
-                var policy = @"# Privacy Policy for Wissler
-
-**Effective Date:** October 2023
-
-## 1. Introduction
-Welcome to Wissler. We respect your privacy and are committed to protecting your personal data. This privacy policy will inform you as to how we look after your personal data when you visit our application and tell you about your privacy rights and how the law protects you, particularly in compliance with the Egyptian Personal Data Protection Law No. 151 of 2020.
-
-## 2. Important Information and Who We Are
-Wissler is the controller and responsible for your personal data.
-
-## 3. The Data We Collect About You
-We may collect, use, store and transfer different kinds of personal data about you which we have grouped together follows:
-- **Identity Data:** includes first name, last name, username or similar identifier, marital status, title, date of birth and gender.
-- **Contact Data:** includes email address and telephone numbers.
-- **Location Data:** includes your current location for matching purposes.
-
-## 4. How We Use Your Personal Data
-We will only use your personal data when the law allows us to. Most commonly, we will use your personal data in the following circumstances:
-- Where we need to perform the contract we are about to enter into or have entered into with you.
-- Where it is necessary for our legitimate interests (or those of a third party) and your interests and fundamental rights do not override those interests.
-- Where we need to comply with a legal or regulatory obligation.
-
-## 5. Data Security
-We have put in place appropriate security measures to prevent your personal data from being accidentally lost, used or accessed in an unauthorized way, altered or disclosed.
-
-## 6. Your Legal Rights
-Under certain circumstances, you have rights under data protection laws in relation to your personal data, including the right to access, correct, erase, restrict, transfer, or object to processing of your personal data.";
-                
-                if (string.IsNullOrEmpty(app.PrivacyPolicy) || app.PrivacyPolicy.Length < 10)
-                {
-                    app.UpdatePrivacyPolicy(policy);
-                    logger.LogInformation("Seeded Privacy Policy for Wissler App");
-                }
-            }
-
-            var vipPackage = await context.SubscriptionPackages
-                .FirstOrDefaultAsync(p => p.AppId == app.Id && p.Name == "VIP Unlimited");
-            
-            if (vipPackage == null)
-            {
-                // Create VIP Unlimited
-                var newVip = new SubscriptionPackage(app.Id, "VIP Unlimited", "Auto-granted to Admins", 0, 0, SubscriptionPeriod.Unlimited);
-                await context.SubscriptionPackages.AddAsync(newVip);
-                logger.LogInformation("Seeded VIP Unlimited Package for App {Name}", app.Name);
-            }
-        }
-        await context.SaveChangesAsync();
     }
 
+    private static decimal GetDefaultPrice(SubscriptionPackage pkg)
+    {
+        try 
+        {
+            if (!string.IsNullOrWhiteSpace(pkg.LocalizedPricingJson) && pkg.LocalizedPricingJson != "{}")
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(pkg.LocalizedPricingJson);
+                if (doc.RootElement.TryGetProperty("Default", out var def) && def.TryGetProperty("Price", out var p))
+                {
+                    decimal price = p.GetDecimal() - pkg.Discount;
+                    return price > 0 ? price : 0m;
+                }
+            }
+        }
+        catch { }
+        return 0m;
+    }
+
+    private static async Task SeedUserSubscriptionsAsync(AppsDbContext context, ILogger logger)
+    {
+        var wisslerAppId = Guid.Parse("00000000-0000-0000-0000-000000000012");
+
+        // Check if subscriptions exist
+        if (await context.UserSubscriptions.AnyAsync(x => x.AppId == wisslerAppId))
+        {
+            return;
+        }
+
+        var packages = await context.SubscriptionPackages.Where(p => p.AppId == wisslerAppId && p.Type == PackageType.Subscription).ToListAsync();
+        if (packages.Count == 0) return;
+
+        var weekly = packages.FirstOrDefault(p => p.Name.Contains("Weekly"));
+        var monthly = packages.FirstOrDefault(p => p.Name.Contains("Monthly") && !p.Name.Contains("Bi"));
+        var unlimited = packages.FirstOrDefault(p => p.Name.Contains("Unlimited"));
+
+        var coins = packages.FirstOrDefault(p => p.Type == PackageType.Consumable);
+
+        if (weekly == null || monthly == null || unlimited == null) return;
+
+        logger.LogInformation("Seeding Egyptian User Subscription histories for Wissler...");
+
+        decimal weeklyPrice = GetDefaultPrice(weekly);
+        decimal monthlyPrice = GetDefaultPrice(monthly);
+        decimal unlimitedPrice = GetDefaultPrice(unlimited);
+        decimal coinsPrice = coins != null ? GetDefaultPrice(coins) : 0m;
+
+        // vis1 to vis5 have histories
+        for (int i = 1; i <= 5; i++)
+        {
+            var userId = Guid.Parse($"00000000-0000-0000-0000-000000000{i:03d}");
+            
+            // Historical expired package (3 months ago)
+            var olderSub = new UserSubscription(userId, wisslerAppId, monthly.Id, DateTime.UtcNow.AddDays(-90), DateTime.UtcNow.AddDays(-60), monthlyPrice, "{}");
+            olderSub.ExpireNow();
+            await context.UserSubscriptions.AddAsync(olderSub);
+
+            // Historical expired package
+            var pastSub = new UserSubscription(userId, wisslerAppId, weekly.Id, DateTime.UtcNow.AddDays(-30), DateTime.UtcNow.AddDays(-23), weeklyPrice, "{}");
+            pastSub.ExpireNow();
+            await context.UserSubscriptions.AddAsync(pastSub);
+
+            if (coins != null)
+            {
+                // Buy coins package historically
+                var coinsSub = new UserSubscription(userId, wisslerAppId, coins.Id, DateTime.UtcNow.AddDays(-15), DateTime.UtcNow.AddDays(-15), coinsPrice, "{}");
+                coinsSub.ExpireNow();
+                await context.UserSubscriptions.AddAsync(coinsSub);
+            }
+
+            // Active package
+            var activeSub = new UserSubscription(userId, wisslerAppId, monthly.Id, DateTime.UtcNow.AddDays(-2), DateTime.UtcNow.AddDays(28), monthlyPrice, "{}");
+            await context.UserSubscriptions.AddAsync(activeSub);
+        }
+
+        // vis6 has Unlimited
+        var u6 = Guid.Parse("00000000-0000-0000-0000-000000000006");
+        var subUnlimited = new UserSubscription(u6, wisslerAppId, unlimited.Id, DateTime.UtcNow.AddDays(-10), DateTime.UtcNow.AddDays(9999), unlimitedPrice, "{}");
+        await context.UserSubscriptions.AddAsync(subUnlimited);
+
+        await context.SaveChangesAsync();
+    }
     private class SeedAppDto
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string BaseUrl { get; set; }
-        public string ThemeJson { get; set; }
-        public string DefaultUserProfileJson { get; set; }
-        public string ExternalAuthProvidersJson { get; set; } // Added
+        public string Name { get; set; } = string.Empty;
+        public string description { get; set; } = string.Empty;
+        public string baseUrl { get; set; } = string.Empty;
+        public string externalAuthProvidersJson { get; set; } = "[]";
+        public string PrivacyPolicy { get; set; } = string.Empty;
+        public string TermsAndConditions { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public int VerificationType { get; set; }
         public bool RequiresAdminApproval { get; set; }
+
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement> DynamicData { get; set; }
     }
 
     private class SeedPackageDto
     {
         public Guid AppId { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public decimal Discount { get; set; }
         public int Period { get; set; }
+        public bool isActive { get; set; }
+        public int Type { get; set; }
+        public int CoinsAmount { get; set; }
+        public string LocalizedPricingJson { get; set; } = "{}";
     }
 }

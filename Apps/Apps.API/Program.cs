@@ -50,12 +50,22 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("ManageApps", policy => 
+    options.AddPolicy("ReadApps", policy => 
         policy.RequireAssertion(context =>
-            context.User.HasClaim(c => c.Type == "Permission" && (c.Value == "AccessAll" || c.Value == "ManageApps")) || 
-            (context.User.HasClaim(c => c.Type == "Permission" && c.Value == "AssignApps") &&
-             context.User.HasClaim(c => c.Type == "Permission" && c.Value == "EditApps") &&
-             context.User.HasClaim(c => c.Type == "Permission" && c.Value == "CreateApps"))
+            context.User.HasClaim(c => c.Type.Equals("permission", StringComparison.OrdinalIgnoreCase) && 
+                (c.Value == "AccessAll" || c.Value == "AssignApps" || c.Value == "EditApps" || c.Value == "ManageApps" || c.Value == "FreeSubscription" || c.Value == "VipSubscription"))
+        ));
+
+    options.AddPolicy("WriteApps", policy => 
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type.Equals("permission", StringComparison.OrdinalIgnoreCase) && 
+                (c.Value == "AccessAll" || c.Value == "EditApps" || c.Value == "ManageApps"))
+        ));
+
+    options.AddPolicy("DeleteApps", policy => 
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type.Equals("permission", StringComparison.OrdinalIgnoreCase) && 
+                (c.Value == "AccessAll" || c.Value == "DeleteApps" || c.Value == "ManageApps"))
         ));
 });
 
@@ -75,8 +85,8 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<Apps.Infrastructure.Persistence.AppsDbContext>();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    await Apps.Infrastructure.Persistence.AppsDbInitializer.SeedAsync(context, logger);
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Apps.Infrastructure.Persistence.AppsDbInitializer>>();
+    await Apps.Infrastructure.Persistence.AppsDbInitializer.InitializeAsync(context, logger);
 }
 
 // Configure the HTTP request pipeline.

@@ -3,6 +3,7 @@ using Apps.Domain.Entities;
 using Apps.Domain.Repositories;
 using MassTransit;
 using Shared.Messaging.Events;
+using System.Text.Json;
 
 namespace Apps.Application.Features.Subscriptions.Commands.GrantSubscription;
 
@@ -52,13 +53,30 @@ public class GrantSubscriptionCommandHandler : IRequestHandler<GrantSubscription
 
         string features = package.Description; 
         
+        decimal basePrice = 0m;
+        try 
+        {
+            if (!string.IsNullOrWhiteSpace(package.LocalizedPricingJson) && package.LocalizedPricingJson != "{}")
+            {
+                using var doc = JsonDocument.Parse(package.LocalizedPricingJson);
+                if (doc.RootElement.TryGetProperty("Default", out var defaultEl) && defaultEl.TryGetProperty("Price", out var priceEl))
+                {
+                    basePrice = priceEl.GetDecimal();
+                }
+            }
+        }
+        catch { /* Fallback to 0 if parsing fails */ }
+
+        decimal pricePaid = basePrice - package.Discount;
+        if (pricePaid < 0) pricePaid = 0m;
+
         var subscription = new UserSubscription(
             request.UserId, 
             request.AppId, 
             request.PackageId, 
             startDate, 
             endDate, 
-            package.Price - package.Discount, 
+            pricePaid, 
             features
         );
 
@@ -71,7 +89,9 @@ public class GrantSubscriptionCommandHandler : IRequestHandler<GrantSubscription
             PackageId = request.PackageId,
             StartDate = startDate,
             EndDate = endDate,
-            IsActive = true
+            IsActive = true,
+            PricePaid = pricePaid,
+            CoinsAmount = package.CoinsAmount
         }, cancellationToken);
 
         return subscription.Id;

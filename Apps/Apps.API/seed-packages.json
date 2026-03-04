@@ -1,90 +1,156 @@
 [
     {
-        "AppId": "11111111-1111-1111-1111-111111111111",
+        "AppId": "00000000-0000-0000-0000-000000000013",
         "Name": "Monthly",
         "Description": "FitIT Monthly Subscription",
-        "Price": 9.99,
-        "Discount": 0,
-        "Period": 2
+        "Discount": 10,
+        "Period": 1,
+        "isActive": true,
+        "Type": 0,
+        "CoinsAmount": 0,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 10.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 99.99, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 10.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 36.73, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 37.51, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 36.41, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 3.77, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 3.85, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 3.08, \"Currency\": \"KWD\"}}"
     },
     {
-        "AppId": "11111111-1111-1111-1111-111111111111",
+        "AppId": "00000000-0000-0000-0000-000000000013",
         "Name": "Quarterly",
         "Description": "FitIT 3 Months",
-        "Price": 24.99,
-        "Discount": 0,
-        "Period": 3
+        "Discount": 20,
+        "Period": 3,
+        "isActive": true,
+        "Type": 0,
+        "CoinsAmount": 0,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 14.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 139.99, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 14.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 51.42, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 52.51, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 50.97, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 5.28, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 5.39, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 4.30, \"Currency\": \"KWD\"}}"
     },
     {
-        "AppId": "11111111-1111-1111-1111-111111111111",
+        "AppId": "00000000-0000-0000-0000-000000000013",
         "Name": "Semi-Annual",
         "Description": "FitIT 6 Months",
-        "Price": 49.99,
-        "Discount": 0,
-        "Period": 6
+        "Discount": 30,
+        "Period": 6,
+        "isActive": true,
+        "Type": 0,
+        "CoinsAmount": 0,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 42.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 419.99, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 42.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 154.27, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 157.54, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 152.92, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 15.83, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 16.17, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 12.92, \"Currency\": \"KWD\"}}"
     },
     {
-        "AppId": "11111111-1111-1111-1111-111111111111",
+        "AppId": "00000000-0000-0000-0000-000000000013",
         "Name": "Annual",
         "Description": "FitIT Yearly Subscription",
-        "Price": 89.99,
-        "Discount": 0,
-        "Period": 12
+        "Discount": 40,
+        "Period": 12,
+        "isActive": true,
+        "Type": 0,
+        "CoinsAmount": 0,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 80.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 799.99, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 80.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 293.84, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 300.08, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 291.28, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 30.16, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 30.80, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 24.61, \"Currency\": \"KWD\"}}"
     },
     {
-        "AppId": "11111111-1111-1111-1111-111111111111",
+        "AppId": "00000000-0000-0000-0000-000000000013",
         "Name": "Unlimited",
         "Description": "FitIT Lifetime Access",
-        "Price": 199.99,
-        "Discount": 0,
-        "Period": 99
+        "Discount": 50,
+        "Period": 99,
+        "isActive": true,
+        "Type": 0,
+        "CoinsAmount": 0,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 100.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 999.99, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 100.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 367.30, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 375.10, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 364.10, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 37.70, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 38.50, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 30.76, \"Currency\": \"KWD\"}}"
     },
     {
-        "AppId": "11111111-1111-1111-1111-111111111111",
-        "Name": "VIP",
-        "Description": "VIP Access. Features: Exclusive workouts, Personal Nutrition Plan, Ad-free experience.",
-        "Price": 29.99,
-        "Discount": 5.00,
-        "Period": 2
-    },
-    {
-        "AppId": "22222222-2222-2222-2222-222222222222",
+        "AppId": "00000000-0000-0000-0000-000000000012",
         "Name": "Weekly",
         "Description": "Wissler Weekly Pass",
-        "Price": 4.99,
-        "Discount": 0,
-        "Period": 1
+        "Discount": 10,
+        "Period": 1,
+        "isActive": true,
+        "Type": 0,
+        "CoinsAmount": 0,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 5.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 49.99, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 5.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 18.37, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 18.76, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 18.21, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 1.89, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 1.93, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 1.54, \"Currency\": \"KWD\"}}"
     },
     {
-        "AppId": "22222222-2222-2222-2222-222222222222",
+        "AppId": "00000000-0000-0000-0000-000000000012",
         "Name": "Bi-Weekly",
         "Description": "Wissler 2 Weeks",
-        "Price": 8.99,
-        "Discount": 0,
-        "Period": 1
+        "Discount": 20,
+        "Period": 2,
+        "isActive": true,
+        "Type": 0,
+        "CoinsAmount": 0,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 7.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 69.99, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 7.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 25.71, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 26.26, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 25.49, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 2.64, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 2.70, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 2.15, \"Currency\": \"KWD\"}}"
     },
     {
-        "AppId": "22222222-2222-2222-2222-222222222222",
+        "AppId": "00000000-0000-0000-0000-000000000012",
         "Name": "Monthly",
         "Description": "Wissler Monthly",
-        "Price": 14.99,
-        "Discount": 0,
-        "Period": 2
+        "Discount": 30,
+        "Period": 4,
+        "isActive": true,
+        "Type": 0,
+        "CoinsAmount": 0,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 21.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 209.99, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 21.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 77.13, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 78.77, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 76.46, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 7.92, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 8.09, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 6.46, \"Currency\": \"KWD\"}}"
     },
     {
-        "AppId": "22222222-2222-2222-2222-222222222222",
+        "AppId": "00000000-0000-0000-0000-000000000012",
         "Name": "Unlimited",
         "Description": "Wissler Lifetime",
-        "Price": 49.99,
-        "Discount": 0,
-        "Period": 99
+        "Discount": 20,
+        "Period": 99,
+        "isActive": true,
+        "Type": 0,
+        "CoinsAmount": 0,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 100.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 999.99, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 100.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 367.30, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 375.10, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 364.10, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 37.70, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 38.50, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 30.76, \"Currency\": \"KWD\"}}"
     },
     {
-        "AppId": "22222222-2222-2222-2222-222222222222",
-        "Name": "VIP",
-        "Description": "VIP Access. Features: Unlimited Swipes, See who liked you, Boost profile.",
-        "Price": 19.99,
-        "Discount": 2.00,
-        "Period": 2
+        "AppId": "00000000-0000-0000-0000-000000000012",
+        "Name": "50 Coins",
+        "Description": "Pack of 50 Wissler Coins",
+        "Discount": 0,
+        "Period": 9999,
+        "isActive": true,
+        "Type": 1,
+        "CoinsAmount": 50,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 5.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 50.0, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 5.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 18.37, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 18.76, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 18.21, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 1.89, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 1.93, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 1.54, \"Currency\": \"KWD\"}}"
+    },
+    {
+        "AppId": "00000000-0000-0000-0000-000000000012",
+        "Name": "100 Coins",
+        "Description": "Pack of 100 Wissler Coins",
+        "Discount": 0,
+        "Period": 9999,
+        "isActive": true,
+        "Type": 1,
+        "CoinsAmount": 100,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 10.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 100.0, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 10.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 36.73, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 37.51, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 36.41, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 3.77, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 3.85, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 3.08, \"Currency\": \"KWD\"}}"
+    },
+    {
+        "AppId": "00000000-0000-0000-0000-000000000012",
+        "Name": "200 Coins",
+        "Description": "Pack of 200 Wissler Coins",
+        "Discount": 0,
+        "Period": 9999,
+        "isActive": true,
+        "Type": 1,
+        "CoinsAmount": 200,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 20.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 200.0, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 20.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 73.46, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 75.02, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 72.82, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 7.54, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 7.70, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 6.15, \"Currency\": \"KWD\"}}"
+    },
+    {
+        "AppId": "00000000-0000-0000-0000-000000000012",
+        "Name": "500 Coins",
+        "Description": "Pack of 500 Wissler Coins",
+        "Discount": 0,
+        "Period": 9999,
+        "isActive": true,
+        "Type": 1,
+        "CoinsAmount": 500,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 50.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 500.0, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 50.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 183.65, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 187.55, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 182.05, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 18.85, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 19.25, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 15.38, \"Currency\": \"KWD\"}}"
+    },
+    {
+        "AppId": "00000000-0000-0000-0000-000000000012",
+        "Name": "1000 Coins",
+        "Description": "Pack of 1000 Wissler Coins",
+        "Discount": 0,
+        "Period": 9999,
+        "isActive": true,
+        "Type": 1,
+        "CoinsAmount": 1000,
+        "LocalizedPricingJson": "{\"DEFAULT\": {\"Price\": 100.0, \"Currency\": \"USD\"}, \"EG\": {\"Price\": 1000.0, \"Currency\": \"EGP\"}, \"US\": {\"Price\": 100.0, \"Currency\": \"USD\"}, \"AE\": {\"Price\": 367.30, \"Currency\": \"AED\"}, \"SA\": {\"Price\": 375.10, \"Currency\": \"SAR\"}, \"QA\": {\"Price\": 364.10, \"Currency\": \"QAR\"}, \"BH\": {\"Price\": 37.70, \"Currency\": \"BHD\"}, \"OM\": {\"Price\": 38.50, \"Currency\": \"OMR\"}, \"KW\": {\"Price\": 30.76, \"Currency\": \"KWD\"}}"
     }
 ]

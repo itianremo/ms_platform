@@ -1,9 +1,10 @@
 {
   "info": {
-    "_postman_id": "31097403-5023-403f-a46e-185993635653",
+    "_postman_id": "98dd033b-f9b9-4fab-8af7-79921e5c02b2",
     "name": "Gateway API Collection (Detailed)",
     "description": "Comprehensive Postman collection detailing all unified Gateway endpoints. \n\n**Required Environment Variables:**\n- `gateway_url`: The base URL, e.g., `http://localhost:7032`\n- `app_id`: Application ID UUID context\n- `tenant_id`: Tenant UUID context\n- `jwt_token`: Bearer token for authorized requests.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "9334876"
   },
   "item": [
     {
@@ -13,8 +14,18 @@
           "name": "Apps",
           "item": [
             {
-              "name": "Get App By Id (api/Apps/{id})",
+              "name": "Get All Apps (api/Apps)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -29,29 +40,17 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/apps/api/Apps/{id}",
+                  "raw": "{{gateway_url}}/apps/api/Apps",
                   "host": [
                     "{{gateway_url}}"
                   ],
                   "path": [
                     "apps",
                     "api",
-                    "Apps",
-                    "{id}"
-                  ],
-                  "query": []
-                },
-                "description": "**Get App By Id**\n\nThis endpoint executes the `GetAppById` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps').",
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{jwt_token}}",
-                      "type": "string"
-                    }
+                    "Apps"
                   ]
-                }
+                },
+                "description": "**Get All Apps**\n\nThis endpoint executes the `GetAllApps` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
               },
               "response": [
                 {
@@ -63,16 +62,187 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/apps/api/Apps/{id}",
-                      "host": "{{gateway_url}}",
-                      "path": "apps api Apps {id}",
-                      "query": ""
+                      "raw": "{{gateway_url}}/apps api Apps",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "apps api Apps"
+                      ]
                     },
-                    "description": "**Get App By Id**\n\nThis endpoint executes the `GetAppById` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps').",
-                    "auth": {
-                      "type": "bearer",
-                      "bearer": ""
+                    "description": "**Get All Apps**\n\nThis endpoint executes the `GetAllApps` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
                     }
+                  ],
+                  "cookie": [],
+                  "body": "[\n    {\n        \"Id\": \"00000000-0000-0000-0000-000000000000\",\n        \"Name\": \"Example Name\",\n        \"Description\": \"Detailed description of the resource.\",\n        \"BaseUrl\": \"https://example.com\"\n    }\n]"
+                }
+              ]
+            },
+            {
+              "name": "Create App (api/Apps)",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "App-Id",
+                    "value": "{{app_id}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Tenant-Id",
+                    "value": "{{tenant_id}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Sample App\",\n    \"description\": \"This is a realistic description generated for testing purposes.\",\n    \"baseUrl\": \"https://example.com\",\n    \"externalAuthProvidersJson\": \"[\\\"google\\\", \\\"facebook\\\"]\",\n    \"privacyPolicy\": \"# sample privacy policy\",\n    \"termsAndConditions\": \"# sample terms\",\n    \"isActive\": true,\n    \"verificationType\": 0,\n    \"requiresAdminApproval\": false,\n    \"sysConfig\": {\n        \"theme\": \"light\",\n        \"collapsedmenu\": false\n    },\n    \"notifications\": {\n        \"email\": true,\n        \"push\": true,\n        \"sms\": true\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{gateway_url}}/apps/api/Apps",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "apps",
+                    "api",
+                    "Apps"
+                  ]
+                },
+                "description": "**Create App**\n\nThis endpoint executes the `CreateApp` operation. \n\n**Authorization Context:**\nRequires 'ManageApps' claim."
+              },
+              "response": [
+                {
+                  "name": "Successful Response",
+                  "originalRequest": {
+                    "auth": {
+                      "type": "bearer"
+                    },
+                    "method": "POST",
+                    "header": [
+                      "@{key=Content-Type; value=application/json; type=text}",
+                      "@{key=App-Id; value={{app_id}}; type=text}",
+                      "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n    \"name\": \"Sample App\",\n    \"description\": \"Detailed description of the app.\",\n    \"baseUrl\": \"https://example.com\",\n    \"externalAuthProvidersJson\": \"[\\\"google\\\", \\\"facebook\\\"]\",\n    \"privacyPolicy\": \"# sample privacy policy\",\n    \"termsAndConditions\": \"# sample terms\",\n    \"isActive\": true,\n    \"verificationType\": 0,\n    \"requiresAdminApproval\": false,\n    \"sysConfig\": {\n        \"theme\": \"light\",\n        \"collapsedmenu\": false\n    },\n    \"notifications\": {\n        \"email\": true,\n        \"push\": true,\n        \"sms\": true\n    }\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/apps api Apps",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "apps api Apps"
+                      ]
+                    },
+                    "description": "**Create App**\n\nThis endpoint executes the `CreateApp` operation. \n\n**Authorization Context:**\nRequires 'ManageApps' claim."
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n    \"message\": \"Success\",\n    \"Id\": \"00000000-0000-0000-0000-000000000000\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "Get App By Id (api/Apps/{id})",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "App-Id",
+                    "value": "{{app_id}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Tenant-Id",
+                    "value": "{{tenant_id}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{gateway_url}}/apps/api/Apps/00000000-0000-0000-0000-000000000012",
+                  "host": [
+                    "{{gateway_url}}"
+                  ],
+                  "path": [
+                    "apps",
+                    "api",
+                    "Apps",
+                    "00000000-0000-0000-0000-000000000012"
+                  ]
+                },
+                "description": "**Get App By Id**\n\nThis endpoint executes the `GetAppById` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps')."
+              },
+              "response": [
+                {
+                  "name": "Successful Response",
+                  "originalRequest": {
+                    "auth": {
+                      "type": "bearer"
+                    },
+                    "method": "GET",
+                    "header": [
+                      "@{key=App-Id; value={{app_id}}; type=text}",
+                      "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
+                    ],
+                    "url": {
+                      "raw": "{{gateway_url}}/apps api Apps {id}",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "apps api Apps {id}"
+                      ]
+                    },
+                    "description": "**Get App By Id**\n\nThis endpoint executes the `GetAppById` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps')."
                   },
                   "status": "OK",
                   "code": 200,
@@ -91,6 +261,16 @@
             {
               "name": "Update App (api/Apps/{id})",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [
                   {
@@ -109,8 +289,17 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"id\": \"00000000-0000-0000-0000-000000000002\",\n    \"name\": \"Wissler Admin\",\n    \"description\": \"Wissler Administrator Dashboard\",\n    \"baseUrl\": \"http://localhost:3004\",\n    \"externalAuthProvidersJson\": \"[\\\"google\\\", \\\"facebook\\\", \\\"twitter\\\", \\\"linkedin\\\"]\",\n    \"privacyPolicy\": \"# Wissler Admin Privacy Policy\\nThis is the privacy policy for the Wissler Admin application.\",\n    \"termsAndConditions\": \"# Wissler Admin Terms and Conditions\\nBy using Wissler Admin, you agree to these terms.\",\n    \"isActive\": true,\n    \"verificationType\": 1,\n    \"requiresAdminApproval\": true,\n    \"domainEvents\": [],\n    \"sysConfig\": {\n        \"theme\": \"dark\",\n        \"collapsedmenu\": true\n    },\n    \"notifications\": {\n        \"email\": true,\n        \"push\": true,\n        \"sms\": false\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
-                  "raw": "{{gateway_url}}/apps/api/Apps/{id}",
+                  "raw": "{{gateway_url}}/apps/api/Apps/00000000-0000-0000-0000-000000000002",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -118,57 +307,38 @@
                     "apps",
                     "api",
                     "Apps",
-                    "{id}"
-                  ],
-                  "query": []
-                },
-                "description": "**Update App**\n\nThis endpoint executes the `UpdateApp` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps').",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"Id\": \"400c3b9f-8dbe-4c78-96e9-07ef54bd1614\",\n    \"Name\": \"Example Name\",\n    \"Description\": \"Detailed description of the resource.\",\n    \"BaseUrl\": \"https://example.com\",\n    \"ThemeJson\": \"{}\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{jwt_token}}",
-                      "type": "string"
-                    }
+                    "00000000-0000-0000-0000-000000000002"
                   ]
-                }
+                },
+                "description": "**Update App**\n\nThis endpoint executes the `UpdateApp` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps')."
               },
               "response": [
                 {
                   "name": "Successful Response",
                   "originalRequest": {
+                    "auth": {
+                      "type": "bearer"
+                    },
                     "method": "PUT",
                     "header": [
                       "@{key=Content-Type; value=application/json; type=text}",
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/apps/api/Apps/{id}",
-                      "host": "{{gateway_url}}",
-                      "path": "apps api Apps {id}",
-                      "query": ""
-                    },
-                    "description": "**Update App**\n\nThis endpoint executes the `UpdateApp` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps').",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"Id\": \"400c3b9f-8dbe-4c78-96e9-07ef54bd1614\",\n    \"Name\": \"Example Name\",\n    \"Description\": \"Detailed description of the resource.\",\n    \"BaseUrl\": \"https://example.com\",\n    \"ThemeJson\": \"{}\"\n}",
-                      "options": "@{raw=}"
+                      "raw": "{\n    \"id\": \"400c3b9f-8dbe-4c78-96e9-07ef54bd1614\",\n    \"name\": \"Example Name\",\n    \"description\": \"Detailed description of the resource.\",\n    \"baseUrl\": \"https://example.com\",\n    \"externalAuthProvidersJson\": \"[\\\"google\\\", \\\"facebook\\\"]\",\n    \"privacyPolicy\": \"# sample privacy policy\",\n    \"termsAndConditions\": \"# sample terms\",\n    \"isActive\": true,\n    \"verificationType\": 0,\n    \"requiresAdminApproval\": false,\n    \"sysConfig\": {\n        \"theme\": \"light\",\n        \"collapsedmenu\": false\n    },\n    \"notifications\": {\n        \"email\": true,\n        \"push\": true,\n        \"sms\": true\n    }\n}"
                     },
-                    "auth": {
-                      "type": "bearer",
-                      "bearer": ""
-                    }
+                    "url": {
+                      "raw": "{{gateway_url}}/apps api Apps {id}",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "apps api Apps {id}"
+                      ]
+                    },
+                    "description": "**Update App**\n\nThis endpoint executes the `UpdateApp` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps')."
                   },
                   "status": "OK",
                   "code": 200,
@@ -187,6 +357,16 @@
             {
               "name": "Toggle Status (api/Apps/{id}/status)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PATCH",
                 "header": [
                   {
@@ -205,6 +385,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"Id\": \"471e3daa-056c-42fd-816a-55175b97b8d7\",\n    \"IsActive\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/apps/api/Apps/{id}/status",
                   "host": [
@@ -216,56 +405,37 @@
                     "Apps",
                     "{id}",
                     "status"
-                  ],
-                  "query": []
-                },
-                "description": "**Toggle Status**\n\nThis endpoint executes the `ToggleStatus` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps').",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"Id\": \"471e3daa-056c-42fd-816a-55175b97b8d7\",\n    \"IsActive\": true\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{jwt_token}}",
-                      "type": "string"
-                    }
                   ]
-                }
+                },
+                "description": "**Toggle Status**\n\nThis endpoint executes the `ToggleStatus` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps')."
               },
               "response": [
                 {
                   "name": "Successful Response",
                   "originalRequest": {
+                    "auth": {
+                      "type": "bearer"
+                    },
                     "method": "PATCH",
                     "header": [
                       "@{key=Content-Type; value=application/json; type=text}",
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/apps/api/Apps/{id}/status",
-                      "host": "{{gateway_url}}",
-                      "path": "apps api Apps {id} status",
-                      "query": ""
-                    },
-                    "description": "**Toggle Status**\n\nThis endpoint executes the `ToggleStatus` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps').",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"Id\": \"471e3daa-056c-42fd-816a-55175b97b8d7\",\n    \"IsActive\": true\n}",
-                      "options": "@{raw=}"
+                      "raw": "{\n    \"Id\": \"471e3daa-056c-42fd-816a-55175b97b8d7\",\n    \"IsActive\": true\n}"
                     },
-                    "auth": {
-                      "type": "bearer",
-                      "bearer": ""
-                    }
+                    "url": {
+                      "raw": "{{gateway_url}}/apps api Apps {id} status",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "apps api Apps {id} status"
+                      ]
+                    },
+                    "description": "**Toggle Status**\n\nThis endpoint executes the `ToggleStatus` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps')."
                   },
                   "status": "OK",
                   "code": 200,
@@ -284,6 +454,16 @@
             {
               "name": "Update External Auth (api/Apps/{id}/external-auth)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PATCH",
                 "header": [
                   {
@@ -302,6 +482,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"Id\": \"84304a79-218a-4902-91c7-0de2045cb091\",\n    \"ExternalLoginsJson\": \"{}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/apps/api/Apps/{id}/external-auth",
                   "host": [
@@ -313,56 +502,37 @@
                     "Apps",
                     "{id}",
                     "external-auth"
-                  ],
-                  "query": []
-                },
-                "description": "**Update External Auth**\n\nThis endpoint executes the `UpdateExternalAuth` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps').",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"Id\": \"84304a79-218a-4902-91c7-0de2045cb091\",\n    \"ExternalLoginsJson\": \"{}\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{jwt_token}}",
-                      "type": "string"
-                    }
                   ]
-                }
+                },
+                "description": "**Update External Auth**\n\nThis endpoint executes the `UpdateExternalAuth` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps')."
               },
               "response": [
                 {
                   "name": "Successful Response",
                   "originalRequest": {
+                    "auth": {
+                      "type": "bearer"
+                    },
                     "method": "PATCH",
                     "header": [
                       "@{key=Content-Type; value=application/json; type=text}",
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/apps/api/Apps/{id}/external-auth",
-                      "host": "{{gateway_url}}",
-                      "path": "apps api Apps {id} external-auth",
-                      "query": ""
-                    },
-                    "description": "**Update External Auth**\n\nThis endpoint executes the `UpdateExternalAuth` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps').",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"Id\": \"84304a79-218a-4902-91c7-0de2045cb091\",\n    \"ExternalLoginsJson\": \"{}\"\n}",
-                      "options": "@{raw=}"
+                      "raw": "{\n    \"Id\": \"84304a79-218a-4902-91c7-0de2045cb091\",\n    \"ExternalLoginsJson\": \"{}\"\n}"
                     },
-                    "auth": {
-                      "type": "bearer",
-                      "bearer": ""
-                    }
+                    "url": {
+                      "raw": "{{gateway_url}}/apps api Apps {id} external-auth",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "apps api Apps {id} external-auth"
+                      ]
+                    },
+                    "description": "**Update External Auth**\n\nThis endpoint executes the `UpdateExternalAuth` operation. \n\n**Authorization Context:**\nRequires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps', 'CreateApps')."
                   },
                   "status": "OK",
                   "code": 200,
@@ -381,6 +551,16 @@
             {
               "name": "Get Packages (api/Apps/{id}/packages)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -395,7 +575,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/apps/api/Apps/{id}/packages",
+                  "raw": "{{gateway_url}}/apps/api/Apps/00000000-0000-0000-0000-000000000012/packages",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -403,10 +583,9 @@
                     "apps",
                     "api",
                     "Apps",
-                    "{id}",
+                    "00000000-0000-0000-0000-000000000012",
                     "packages"
-                  ],
-                  "query": []
+                  ]
                 },
                 "description": "**Get Packages**\n\nThis endpoint executes the `GetPackages` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
               },
@@ -420,10 +599,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/apps/api/Apps/{id}/packages",
-                      "host": "{{gateway_url}}",
-                      "path": "apps api Apps {id} packages",
-                      "query": ""
+                      "raw": "{{gateway_url}}/apps api Apps {id} packages",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "apps api Apps {id} packages"
+                      ]
                     },
                     "description": "**Get Packages**\n\nThis endpoint executes the `GetPackages` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -470,10 +652,19 @@
                     "users",
                     "{userId}",
                     "subscriptions"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Get User Subscriptions**\n\nThis endpoint executes the `GetUserSubscriptions` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get User Subscriptions**\n\nThis endpoint executes the `GetUserSubscriptions` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -485,10 +676,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/apps/api/Apps/{appId}/users/{userId}/subscriptions",
-                      "host": "{{gateway_url}}",
-                      "path": "apps api Apps {appId} users {userId} subscriptions",
-                      "query": ""
+                      "raw": "{{gateway_url}}/apps api Apps {appId} users {userId} subscriptions",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "apps api Apps {appId} users {userId} subscriptions"
+                      ]
                     },
                     "description": "**Get User Subscriptions**\n\nThis endpoint executes the `GetUserSubscriptions` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -527,6 +721,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"PackageId\": \"57596d3c-2c6e-487f-928d-5b527c0413fb\",\n    \"StartDate\": \"2026-03-02T12:00:00Z\",\n    \"EndDate\": \"2026-03-02T12:00:00Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/apps/api/Apps/{appId}/users/{userId}/subscriptions",
                   "host": [
@@ -540,18 +743,18 @@
                     "users",
                     "{userId}",
                     "subscriptions"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Grant Subscription**\n\nThis endpoint executes the `GrantSubscription` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"PackageId\": \"57596d3c-2c6e-487f-928d-5b527c0413fb\",\n    \"StartDate\": \"2026-02-23T12:00:00Z\",\n    \"EndDate\": \"2026-02-23T12:00:00Z\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Grant Subscription**\n\nThis endpoint executes the `GrantSubscription` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -564,18 +767,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/apps/api/Apps/{appId}/users/{userId}/subscriptions",
-                      "host": "{{gateway_url}}",
-                      "path": "apps api Apps {appId} users {userId} subscriptions",
-                      "query": ""
-                    },
-                    "description": "**Grant Subscription**\n\nThis endpoint executes the `GrantSubscription` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"PackageId\": \"57596d3c-2c6e-487f-928d-5b527c0413fb\",\n    \"StartDate\": \"2026-02-23T12:00:00Z\",\n    \"EndDate\": \"2026-02-23T12:00:00Z\"\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"PackageId\": \"57596d3c-2c6e-487f-928d-5b527c0413fb\",\n    \"StartDate\": \"2026-02-23T12:00:00Z\",\n    \"EndDate\": \"2026-02-23T12:00:00Z\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/apps api Apps {appId} users {userId} subscriptions",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "apps api Apps {appId} users {userId} subscriptions"
+                      ]
+                    },
+                    "description": "**Grant Subscription**\n\nThis endpoint executes the `GrantSubscription` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -612,6 +817,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"SubscriptionId\": \"fb9964f0-26ca-4c1e-b25c-a3d0faebd78a\",\n    \"IsActive\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/apps/api/Apps/{appId}/subscriptions/{id}/status",
                   "host": [
@@ -625,18 +839,18 @@
                     "subscriptions",
                     "{id}",
                     "status"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Change Subscription Status**\n\nThis endpoint executes the `ChangeSubscriptionStatus` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"SubscriptionId\": \"fb9964f0-26ca-4c1e-b25c-a3d0faebd78a\",\n    \"IsActive\": true\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Change Subscription Status**\n\nThis endpoint executes the `ChangeSubscriptionStatus` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -649,18 +863,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/apps/api/Apps/{appId}/subscriptions/{id}/status",
-                      "host": "{{gateway_url}}",
-                      "path": "apps api Apps {appId} subscriptions {id} status",
-                      "query": ""
-                    },
-                    "description": "**Change Subscription Status**\n\nThis endpoint executes the `ChangeSubscriptionStatus` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"SubscriptionId\": \"fb9964f0-26ca-4c1e-b25c-a3d0faebd78a\",\n    \"IsActive\": true\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"SubscriptionId\": \"fb9964f0-26ca-4c1e-b25c-a3d0faebd78a\",\n    \"IsActive\": true\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/apps api Apps {appId} subscriptions {id} status",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "apps api Apps {appId} subscriptions {id} status"
+                      ]
+                    },
+                    "description": "**Change Subscription Status**\n\nThis endpoint executes the `ChangeSubscriptionStatus` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -703,7 +919,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/audit/api/Audit/stats?days=demo_value",
+                  "raw": "{{gateway_url}}/audit/api/Audit/stats?days=7",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -721,7 +937,17 @@
                     }
                   ]
                 },
-                "description": "**Get Stats**\n\nThis endpoint executes the `GetStats` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Stats**\n\nThis endpoint executes the `GetStats` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -733,10 +959,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/audit/api/Audit/stats?days=demo_value",
-                      "host": "{{gateway_url}}",
-                      "path": "audit api Audit stats",
-                      "query": ""
+                      "raw": "{{gateway_url}}/audit api Audit stats",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "audit api Audit stats"
+                      ]
                     },
                     "description": "**Get Stats**\n\nThis endpoint executes the `GetStats` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -767,6 +996,16 @@
             {
               "name": "Get App User Stats (api/Analytics/app-user-stats)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -790,10 +1029,9 @@
                     "api",
                     "Analytics",
                     "app-user-stats"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Get App User Stats**\n\nThis endpoint executes the `GetAppUserStats` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get App User Stats**\n\nThis endpoint executes the `GetAppUserStats` operation. \n\n**Authorization Context:**\nRequires 'DashboardRead' policy."
               },
               "response": [
                 {
@@ -805,12 +1043,15 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Analytics/app-user-stats",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Analytics app-user-stats",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Analytics app-user-stats",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Analytics app-user-stats"
+                      ]
                     },
-                    "description": "**Get App User Stats**\n\nThis endpoint executes the `GetAppUserStats` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                    "description": "**Get App User Stats**\n\nThis endpoint executes the `GetAppUserStats` operation. \n\n**Authorization Context:**\nRequires 'DashboardRead' policy."
                   },
                   "status": "OK",
                   "code": 200,
@@ -852,6 +1093,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"Email\": \"admin@ump.com\",\n    \"Phone\": \"+15551234567\",\n    \"Password\": \"SecureP@ssw0rd!\",\n    \"VerificationType\": {},\n    \"RequiresAdminApproval\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/auth/api/Auth/register",
                   "host": [
@@ -862,19 +1112,9 @@
                     "api",
                     "Auth",
                     "register"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Register**\n\nThis endpoint executes the `Register` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"Email\": \"user@example.com\",\n    \"Phone\": \"+15551234567\",\n    \"Password\": \"SecureP@ssw0rd!\",\n    \"VerificationType\": {},\n    \"RequiresAdminApproval\": true\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "**Register**\n\nThis endpoint executes the `Register` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
               },
               "response": [
                 {
@@ -886,18 +1126,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/register",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth register",
-                      "query": ""
-                    },
-                    "description": "**Register**\n\nThis endpoint executes the `Register` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"Email\": \"user@example.com\",\n    \"Phone\": \"+15551234567\",\n    \"Password\": \"SecureP@ssw0rd!\",\n    \"VerificationType\": {},\n    \"RequiresAdminApproval\": true\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"Email\": \"admin@ump.com\",\n    \"Phone\": \"+15551234567\",\n    \"Password\": \"SecureP@ssw0rd!\",\n    \"VerificationType\": {},\n    \"RequiresAdminApproval\": true\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/auth api Auth register",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth register"
+                      ]
+                    },
+                    "description": "**Register**\n\nThis endpoint executes the `Register` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -915,6 +1157,20 @@
             },
             {
               "name": "Login (api/Auth/login)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();",
+                      "if (jsonData.accessToken) { pm.environment.set('jwt_token', jsonData.accessToken); }"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -934,6 +1190,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"Email\": \"admin@ump.com\",\n    \"Password\": \"Password123!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/auth/api/Auth/login",
                   "host": [
@@ -944,19 +1209,9 @@
                     "api",
                     "Auth",
                     "login"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Login**\n\nThis endpoint executes the `Login` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"Email\": \"user@example.com\",\n    \"Password\": \"SecureP@ssw0rd!\",\n    \"IpAddress\": \"sample_string_for_IpAddress\",\n    \"UserAgent\": \"sample_string_for_UserAgent\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "**Login**\n\nThis endpoint executes the `Login` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
               },
               "response": [
                 {
@@ -968,18 +1223,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/login",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth login",
-                      "query": ""
-                    },
-                    "description": "**Login**\n\nThis endpoint executes the `Login` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"Email\": \"user@example.com\",\n    \"Password\": \"SecureP@ssw0rd!\",\n    \"IpAddress\": \"sample_string_for_IpAddress\",\n    \"UserAgent\": \"sample_string_for_UserAgent\"\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"Email\": \"admin@ump.com\",\n    \"Password\": \"SecureP@ssw0rd!\",\n    \"IpAddress\": \"192.168.1.1\",\n    \"UserAgent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64)\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/auth api Auth login",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth login"
+                      ]
+                    },
+                    "description": "**Login**\n\nThis endpoint executes the `Login` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -992,18 +1249,6 @@
                   ],
                   "cookie": [],
                   "body": "{\n    \"message\": \"Success\"\n}"
-                }
-              ],
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "exec": [
-                      "var jsonData = pm.response.json();",
-                      "if (jsonData.accessToken) { pm.environment.set('jwt_token', jsonData.accessToken); }"
-                    ],
-                    "type": "text/javascript"
-                  }
                 }
               ]
             },
@@ -1028,6 +1273,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"Email\": \"admin@ump.com\",\n    \"Type\": {}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/auth/api/Auth/otp/request",
                   "host": [
@@ -1039,18 +1293,18 @@
                     "Auth",
                     "otp",
                     "request"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Request Otp**\n\nThis endpoint executes the `RequestOtp` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"Email\": \"user@example.com\",\n    \"Type\": {}\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Request Otp**\n\nThis endpoint executes the `RequestOtp` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -1063,18 +1317,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/otp/request",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth otp request",
-                      "query": ""
-                    },
-                    "description": "**Request Otp**\n\nThis endpoint executes the `RequestOtp` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"Email\": \"user@example.com\",\n    \"Type\": {}\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"Email\": \"admin@ump.com\",\n    \"Type\": {}\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/auth api Auth otp request",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth otp request"
+                      ]
+                    },
+                    "description": "**Request Otp**\n\nThis endpoint executes the `RequestOtp` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -1111,6 +1367,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"Email\": \"admin@ump.com\",\n    \"Code\": \"Sample payload for Code\",\n    \"Type\": {}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/auth/api/Auth/otp/verify",
                   "host": [
@@ -1122,18 +1387,18 @@
                     "Auth",
                     "otp",
                     "verify"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Verify Otp**\n\nThis endpoint executes the `VerifyOtp` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"Email\": \"user@example.com\",\n    \"Code\": \"654321\",\n    \"Type\": {}\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Verify Otp**\n\nThis endpoint executes the `VerifyOtp` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -1146,18 +1411,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/otp/verify",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth otp verify",
-                      "query": ""
-                    },
-                    "description": "**Verify Otp**\n\nThis endpoint executes the `VerifyOtp` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"Email\": \"user@example.com\",\n    \"Code\": \"654321\",\n    \"Type\": {}\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"Email\": \"admin@ump.com\",\n    \"Code\": \"654321\",\n    \"Type\": {}\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/auth api Auth otp verify",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth otp verify"
+                      ]
+                    },
+                    "description": "**Verify Otp**\n\nThis endpoint executes the `VerifyOtp` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -1194,6 +1461,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"Email\": \"admin@ump.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/auth/api/Auth/password/forgot",
                   "host": [
@@ -1205,18 +1481,18 @@
                     "Auth",
                     "password",
                     "forgot"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Forgot Password**\n\nThis endpoint executes the `ForgotPassword` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"Email\": \"user@example.com\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Forgot Password**\n\nThis endpoint executes the `ForgotPassword` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -1229,18 +1505,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/password/forgot",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth password forgot",
-                      "query": ""
-                    },
-                    "description": "**Forgot Password**\n\nThis endpoint executes the `ForgotPassword` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"Email\": \"user@example.com\"\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"Email\": \"admin@ump.com\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/auth api Auth password forgot",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth password forgot"
+                      ]
+                    },
+                    "description": "**Forgot Password**\n\nThis endpoint executes the `ForgotPassword` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -1277,6 +1555,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"Email\": \"admin@ump.com\",\n    \"Code\": \"Sample payload for Code\",\n    \"NewPassword\": \"SecureP@ssw0rd!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/auth/api/Auth/password/reset",
                   "host": [
@@ -1288,18 +1575,18 @@
                     "Auth",
                     "password",
                     "reset"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Reset Password**\n\nThis endpoint executes the `ResetPassword` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"Email\": \"user@example.com\",\n    \"Code\": \"654321\",\n    \"NewPassword\": \"SecureP@ssw0rd!\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Reset Password**\n\nThis endpoint executes the `ResetPassword` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -1312,18 +1599,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/password/reset",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth password reset",
-                      "query": ""
-                    },
-                    "description": "**Reset Password**\n\nThis endpoint executes the `ResetPassword` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"Email\": \"user@example.com\",\n    \"Code\": \"654321\",\n    \"NewPassword\": \"SecureP@ssw0rd!\"\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"Email\": \"admin@ump.com\",\n    \"Code\": \"654321\",\n    \"NewPassword\": \"SecureP@ssw0rd!\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/auth api Auth password reset",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth password reset"
+                      ]
+                    },
+                    "description": "**Reset Password**\n\nThis endpoint executes the `ResetPassword` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -1360,6 +1649,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"OldEmail\": \"admin@ump.com\",\n    \"NewEmail\": \"admin@ump.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/auth/api/Auth/reactivate/initiate",
                   "host": [
@@ -1371,18 +1669,18 @@
                     "Auth",
                     "reactivate",
                     "initiate"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Initiate Reactivation**\n\nThis endpoint executes the `InitiateReactivation` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"OldEmail\": \"user@example.com\",\n    \"NewEmail\": \"user@example.com\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Initiate Reactivation**\n\nThis endpoint executes the `InitiateReactivation` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -1395,18 +1693,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/reactivate/initiate",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth reactivate initiate",
-                      "query": ""
-                    },
-                    "description": "**Initiate Reactivation**\n\nThis endpoint executes the `InitiateReactivation` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"OldEmail\": \"user@example.com\",\n    \"NewEmail\": \"user@example.com\"\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"OldEmail\": \"admin@ump.com\",\n    \"NewEmail\": \"admin@ump.com\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/auth api Auth reactivate initiate",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth reactivate initiate"
+                      ]
+                    },
+                    "description": "**Initiate Reactivation**\n\nThis endpoint executes the `InitiateReactivation` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -1443,6 +1743,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"Email\": \"admin@ump.com\",\n    \"Code\": \"Sample payload for Code\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/auth/api/Auth/reactivate/verify",
                   "host": [
@@ -1454,18 +1763,18 @@
                     "Auth",
                     "reactivate",
                     "verify"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Verify Reactivation**\n\nThis endpoint executes the `VerifyReactivation` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"Email\": \"user@example.com\",\n    \"Code\": \"654321\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Verify Reactivation**\n\nThis endpoint executes the `VerifyReactivation` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -1478,18 +1787,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/reactivate/verify",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth reactivate verify",
-                      "query": ""
-                    },
-                    "description": "**Verify Reactivation**\n\nThis endpoint executes the `VerifyReactivation` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"Email\": \"user@example.com\",\n    \"Code\": \"654321\"\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"Email\": \"admin@ump.com\",\n    \"Code\": \"654321\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/auth api Auth reactivate verify",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth reactivate verify"
+                      ]
+                    },
+                    "description": "**Verify Reactivation**\n\nThis endpoint executes the `VerifyReactivation` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -1531,10 +1842,19 @@
                     "api",
                     "Auth",
                     "refresh"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Refresh**\n\nThis endpoint executes the `Refresh` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Refresh**\n\nThis endpoint executes the `Refresh` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -1546,10 +1866,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/refresh",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth refresh",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Auth refresh",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth refresh"
+                      ]
                     },
                     "description": "**Refresh**\n\nThis endpoint executes the `Refresh` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -1593,10 +1916,19 @@
                     "api",
                     "Auth",
                     "sessions"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Get Sessions**\n\nThis endpoint executes the `GetSessions` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Sessions**\n\nThis endpoint executes the `GetSessions` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -1608,10 +1940,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/sessions",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth sessions",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Auth sessions",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth sessions"
+                      ]
                     },
                     "description": "**Get Sessions**\n\nThis endpoint executes the `GetSessions` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -1632,6 +1967,16 @@
             {
               "name": "Update User Status (api/Auth/users/{id}/status)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [
                   {
@@ -1657,41 +2002,32 @@
                     "users",
                     "{id}",
                     "status"
-                  ],
-                  "query": []
-                },
-                "description": "**Update User Status**\n\nThis endpoint executes the `UpdateUserStatus` operation. \n\n**Authorization Context:**\nRequires Role(s): SuperAdmin OR UsersManager.",
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{jwt_token}}",
-                      "type": "string"
-                    }
                   ]
-                }
+                },
+                "description": "**Update User Status**\n\nThis endpoint executes the `UpdateUserStatus` operation. \n\n**Authorization Context:**\nRequires Role(s): SuperAdmin OR UsersManager."
               },
               "response": [
                 {
                   "name": "Successful Response",
                   "originalRequest": {
+                    "auth": {
+                      "type": "bearer"
+                    },
                     "method": "PUT",
                     "header": [
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/users/{id}/status",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth users {id} status",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Auth users {id} status",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth users {id} status"
+                      ]
                     },
-                    "description": "**Update User Status**\n\nThis endpoint executes the `UpdateUserStatus` operation. \n\n**Authorization Context:**\nRequires Role(s): SuperAdmin OR UsersManager.",
-                    "auth": {
-                      "type": "bearer",
-                      "bearer": ""
-                    }
+                    "description": "**Update User Status**\n\nThis endpoint executes the `UpdateUserStatus` operation. \n\n**Authorization Context:**\nRequires Role(s): SuperAdmin OR UsersManager."
                   },
                   "status": "OK",
                   "code": 200,
@@ -1735,10 +2071,19 @@
                     "users",
                     "{id}",
                     "verify"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Update User Verification**\n\nThis endpoint executes the `UpdateUserVerification` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Update User Verification**\n\nThis endpoint executes the `UpdateUserVerification` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -1750,10 +2095,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/users/{id}/verify",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth users {id} verify",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Auth users {id} verify",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth users {id} verify"
+                      ]
                     },
                     "description": "**Update User Verification**\n\nThis endpoint executes the `UpdateUserVerification` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -1799,10 +2147,19 @@
                     "users",
                     "{id}",
                     "apps"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Add User To App**\n\nThis endpoint executes the `AddUserToApp` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Add User To App**\n\nThis endpoint executes the `AddUserToApp` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -1814,10 +2171,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/users/{id}/apps",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth users {id} apps",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Auth users {id} apps",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth users {id} apps"
+                      ]
                     },
                     "description": "**Add User To App**\n\nThis endpoint executes the `AddUserToApp` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -1864,10 +2224,19 @@
                     "{id}",
                     "apps",
                     "{appId}"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Remove User From App**\n\nThis endpoint executes the `RemoveUserFromApp` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Remove User From App**\n\nThis endpoint executes the `RemoveUserFromApp` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -1879,10 +2248,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/users/{id}/apps/{appId}",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth users {id} apps {appId}",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Auth users {id} apps {appId}",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth users {id} apps {appId}"
+                      ]
                     },
                     "description": "**Remove User From App**\n\nThis endpoint executes the `RemoveUserFromApp` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -1930,10 +2302,19 @@
                     "apps",
                     "{appId}",
                     "status"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Update App Status**\n\nThis endpoint executes the `UpdateAppStatus` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Update App Status**\n\nThis endpoint executes the `UpdateAppStatus` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -1945,10 +2326,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/users/{id}/apps/{appId}/status",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth users {id} apps {appId} status",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Auth users {id} apps {appId} status",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth users {id} apps {appId} status"
+                      ]
                     },
                     "description": "**Update App Status**\n\nThis endpoint executes the `UpdateAppStatus` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -1996,10 +2380,19 @@
                     "apps",
                     "{appId}",
                     "role"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Assign Role**\n\nThis endpoint executes the `AssignRole` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Assign Role**\n\nThis endpoint executes the `AssignRole` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2011,10 +2404,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/users/{id}/apps/{appId}/role",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth users {id} apps {appId} role",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Auth users {id} apps {appId} role",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth users {id} apps {appId} role"
+                      ]
                     },
                     "description": "**Assign Role**\n\nThis endpoint executes the `AssignRole` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2059,10 +2455,19 @@
                     "Auth",
                     "sessions",
                     "{sessionId}"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Revoke Session**\n\nThis endpoint executes the `RevokeSession` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Revoke Session**\n\nThis endpoint executes the `RevokeSession` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2074,10 +2479,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/sessions/{sessionId}",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth sessions {sessionId}",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Auth sessions {sessionId}",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth sessions {sessionId}"
+                      ]
                     },
                     "description": "**Revoke Session**\n\nThis endpoint executes the `RevokeSession` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2121,10 +2529,19 @@
                     "api",
                     "Auth",
                     "users"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Get All Users**\n\nThis endpoint executes the `GetAllUsers` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get All Users**\n\nThis endpoint executes the `GetAllUsers` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2136,10 +2553,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/users?appId=demo_value",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth users",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Auth users",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth users"
+                      ]
                     },
                     "description": "**Get All Users**\n\nThis endpoint executes the `GetAllUsers` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2183,10 +2603,19 @@
                     "api",
                     "Auth",
                     "logout"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Logout**\n\nThis endpoint executes the `Logout` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Logout**\n\nThis endpoint executes the `Logout` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2198,10 +2627,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Auth/logout",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Auth logout",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Auth logout",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Auth logout"
+                      ]
                     },
                     "description": "**Logout**\n\nThis endpoint executes the `Logout` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2251,8 +2683,7 @@
                     "ExternalAuth",
                     "login",
                     "{provider}"
-                  ],
-                  "query": []
+                  ]
                 },
                 "description": "**Callback**\n\nThis endpoint executes the `Callback` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
               },
@@ -2266,10 +2697,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/ExternalAuth/login/{provider}",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api ExternalAuth login {provider}",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api ExternalAuth login {provider}",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api ExternalAuth login {provider}"
+                      ]
                     },
                     "description": "**Callback**\n\nThis endpoint executes the `Callback` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2313,10 +2747,19 @@
                     "api",
                     "ExternalAuth",
                     "callback"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Callback**\n\nThis endpoint executes the `Callback` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Callback**\n\nThis endpoint executes the `Callback` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2328,10 +2771,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/ExternalAuth/callback",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api ExternalAuth callback",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api ExternalAuth callback",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api ExternalAuth callback"
+                      ]
                     },
                     "description": "**Callback**\n\nThis endpoint executes the `Callback` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2376,10 +2822,19 @@
                     "ExternalAuth",
                     "link",
                     "{provider}"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Callback Link**\n\nThis endpoint executes the `CallbackLink` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Callback Link**\n\nThis endpoint executes the `CallbackLink` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2391,10 +2846,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/ExternalAuth/link/{provider}",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api ExternalAuth link {provider}",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api ExternalAuth link {provider}",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api ExternalAuth link {provider}"
+                      ]
                     },
                     "description": "**Callback Link**\n\nThis endpoint executes the `CallbackLink` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2438,10 +2896,19 @@
                     "api",
                     "ExternalAuth",
                     "link-callback"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Callback Link**\n\nThis endpoint executes the `CallbackLink` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Callback Link**\n\nThis endpoint executes the `CallbackLink` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2453,10 +2920,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/ExternalAuth/link-callback",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api ExternalAuth link-callback",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api ExternalAuth link-callback",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api ExternalAuth link-callback"
+                      ]
                     },
                     "description": "**Callback Link**\n\nThis endpoint executes the `CallbackLink` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2503,10 +2973,19 @@
                     "{userId}",
                     "links",
                     "{provider}"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Unlink**\n\nThis endpoint executes the `Unlink` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Unlink**\n\nThis endpoint executes the `Unlink` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2518,10 +2997,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/ExternalAuth/users/{userId}/links/{provider}",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api ExternalAuth users {userId} links {provider}",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api ExternalAuth users {userId} links {provider}",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api ExternalAuth users {userId} links {provider}"
+                      ]
                     },
                     "description": "**Unlink**\n\nThis endpoint executes the `Unlink` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2571,10 +3053,19 @@
                     "Maintenance",
                     "reset",
                     "{appId}"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Reset App Data**\n\nThis endpoint executes the `ResetAppData` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Reset App Data**\n\nThis endpoint executes the `ResetAppData` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2586,10 +3077,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Maintenance/reset/{appId}",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Maintenance reset {appId}",
-                      "query": ""
+                      "raw": "{{gateway_url}}/auth api Maintenance reset {appId}",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Maintenance reset {appId}"
+                      ]
                     },
                     "description": "**Reset App Data**\n\nThis endpoint executes the `ResetAppData` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2652,7 +3146,17 @@
                     }
                   ]
                 },
-                "description": "**Check Permission**\n\nThis endpoint executes the `CheckPermission` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Check Permission**\n\nThis endpoint executes the `CheckPermission` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2664,10 +3168,18 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/auth/api/Permissions/check?userId=demo_value&appId=demo_value&permission=demo_value",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Permissions check",
-                      "query": "  "
+                      "raw": "{{gateway_url}}/auth api Permissions check?&&",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Permissions check"
+                      ],
+                      "query": [
+                        " ",
+                        " ",
+                        " "
+                      ]
                     },
                     "description": "**Check Permission**\n\nThis endpoint executes the `CheckPermission` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2711,6 +3223,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"RoleId\": \"Admin\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/auth/api/Roles/assign",
                   "host": [
@@ -2721,18 +3242,18 @@
                     "api",
                     "Roles",
                     "assign"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Assign Role**\n\nThis endpoint executes the `AssignRole` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"RoleId\": \"bba2be1f-7acd-48ee-b65e-d91905234882\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Assign Role**\n\nThis endpoint executes the `AssignRole` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -2745,18 +3266,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/auth/api/Roles/assign",
-                      "host": "{{gateway_url}}",
-                      "path": "auth api Roles assign",
-                      "query": ""
-                    },
-                    "description": "**Assign Role**\n\nThis endpoint executes the `AssignRole` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"RoleId\": \"bba2be1f-7acd-48ee-b65e-d91905234882\"\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"RoleId\": \"bba2be1f-7acd-48ee-b65e-d91905234882\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/auth api Roles assign",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "auth api Roles assign"
+                      ]
+                    },
+                    "description": "**Assign Role**\n\nThis endpoint executes the `AssignRole` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -2822,7 +3345,17 @@
                     }
                   ]
                 },
-                "description": "**Get History**\n\nThis endpoint executes the `GetHistory` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get History**\n\nThis endpoint executes the `GetHistory` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2834,10 +3367,16 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/chat/api/Chat/history?senderId=demo_value&recipientId=demo_value",
-                      "host": "{{gateway_url}}",
-                      "path": "chat api Chat history",
-                      "query": " "
+                      "raw": "{{gateway_url}}/chat api Chat history?",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "chat api Chat history"
+                      ],
+                      "query": [
+                        " "
+                      ]
                     },
                     "description": "**Get History**\n\nThis endpoint executes the `GetHistory` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2872,7 +3411,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/chat/api/Chat/flagged?appId=demo_value",
+                  "raw": "{{gateway_url}}/chat/api/Chat/flagged?appId=00000000-0000-0000-0000-000000000012",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -2890,7 +3429,17 @@
                     }
                   ]
                 },
-                "description": "**Get Flagged Messages**\n\nThis endpoint executes the `GetFlaggedMessages` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Flagged Messages**\n\nThis endpoint executes the `GetFlaggedMessages` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2902,10 +3451,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/chat/api/Chat/flagged?appId=demo_value",
-                      "host": "{{gateway_url}}",
-                      "path": "chat api Chat flagged",
-                      "query": ""
+                      "raw": "{{gateway_url}}/chat api Chat flagged",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "chat api Chat flagged"
+                      ]
                     },
                     "description": "**Get Flagged Messages**\n\nThis endpoint executes the `GetFlaggedMessages` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -2949,10 +3501,19 @@
                     "api",
                     "Chat",
                     "channels"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Create Channel**\n\nThis endpoint executes the `CreateChannel` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Create Channel**\n\nThis endpoint executes the `CreateChannel` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -2964,10 +3525,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/chat/api/Chat/channels",
-                      "host": "{{gateway_url}}",
-                      "path": "chat api Chat channels",
-                      "query": ""
+                      "raw": "{{gateway_url}}/chat api Chat channels",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "chat api Chat channels"
+                      ]
                     },
                     "description": "**Create Channel**\n\nThis endpoint executes the `CreateChannel` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3012,7 +3576,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/geo/api/Geo/nearby?appId=demo_value&lat=demo_value&lon=demo_value&radiusKm=demo_value",
+                  "raw": "{{gateway_url}}/geo/api/Geo/nearby?appId=00000000-0000-0000-0000-000000000012&lat=demo_value&lon=demo_value&radiusKm=demo_value",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -3045,7 +3609,17 @@
                     }
                   ]
                 },
-                "description": "**Get Nearby**\n\nThis endpoint executes the `GetNearby` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Nearby**\n\nThis endpoint executes the `GetNearby` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3057,10 +3631,20 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/geo/api/Geo/nearby?appId=demo_value&lat=demo_value&lon=demo_value&radiusKm=demo_value",
-                      "host": "{{gateway_url}}",
-                      "path": "geo api Geo nearby",
-                      "query": "   "
+                      "raw": "{{gateway_url}}/geo api Geo nearby?&&&&",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "geo api Geo nearby"
+                      ],
+                      "query": [
+                        " ",
+                        " ",
+                        " ",
+                        " ",
+                        " "
+                      ]
                     },
                     "description": "**Get Nearby**\n\nThis endpoint executes the `GetNearby` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3099,6 +3683,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"UserId\": 100,\n    \"Latitude\": 34.0522,\n    \"Longitude\": -118.2437\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/geo/api/Geo/location",
                   "host": [
@@ -3109,18 +3702,18 @@
                     "api",
                     "Geo",
                     "location"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Update Location**\n\nThis endpoint executes the `UpdateLocation` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"UserId\": 1,\n    \"Latitude\": 1.5,\n    \"Longitude\": 1.5\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Update Location**\n\nThis endpoint executes the `UpdateLocation` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -3133,18 +3726,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/geo/api/Geo/location",
-                      "host": "{{gateway_url}}",
-                      "path": "geo api Geo location",
-                      "query": ""
-                    },
-                    "description": "**Update Location**\n\nThis endpoint executes the `UpdateLocation` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"UserId\": 1,\n    \"Latitude\": 1.5,\n    \"Longitude\": 1.5\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"UserId\": 1,\n    \"Latitude\": 1.5,\n    \"Longitude\": 1.5\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/geo api Geo location",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "geo api Geo location"
+                      ]
+                    },
+                    "description": "**Update Location**\n\nThis endpoint executes the `UpdateLocation` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -3191,10 +3786,19 @@
                     "api",
                     "Lookups",
                     "countries"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Get Countries**\n\nThis endpoint executes the `GetCountries` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Countries**\n\nThis endpoint executes the `GetCountries` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3206,10 +3810,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/geo/api/Lookups/countries",
-                      "host": "{{gateway_url}}",
-                      "path": "geo api Lookups countries",
-                      "query": ""
+                      "raw": "{{gateway_url}}/geo api Lookups countries",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "geo api Lookups countries"
+                      ]
                     },
                     "description": "**Get Countries**\n\nThis endpoint executes the `GetCountries` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3254,10 +3861,19 @@
                     "Lookups",
                     "cities",
                     "{countryId}"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Get Cities**\n\nThis endpoint executes the `GetCities` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Cities**\n\nThis endpoint executes the `GetCities` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3269,10 +3885,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/geo/api/Lookups/cities/{countryId}",
-                      "host": "{{gateway_url}}",
-                      "path": "geo api Lookups cities {countryId}",
-                      "query": ""
+                      "raw": "{{gateway_url}}/geo api Lookups cities {countryId}",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "geo api Lookups cities {countryId}"
+                      ]
                     },
                     "description": "**Get Cities**\n\nThis endpoint executes the `GetCities` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3326,10 +3945,19 @@
                     "api",
                     "Media",
                     "upload"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Upload**\n\nThis endpoint executes the `Upload` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Upload**\n\nThis endpoint executes the `Upload` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3341,10 +3969,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/media/api/Media/upload",
-                      "host": "{{gateway_url}}",
-                      "path": "media api Media upload",
-                      "query": ""
+                      "raw": "{{gateway_url}}/media api Media upload",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "media api Media upload"
+                      ]
                     },
                     "description": "**Upload**\n\nThis endpoint executes the `Upload` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3388,10 +4019,19 @@
                     "api",
                     "Media",
                     "flagged"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Get Url**\n\nThis endpoint executes the `GetUrl` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Url**\n\nThis endpoint executes the `GetUrl` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3403,10 +4043,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/media/api/Media/flagged",
-                      "host": "{{gateway_url}}",
-                      "path": "media api Media flagged",
-                      "query": ""
+                      "raw": "{{gateway_url}}/media api Media flagged",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "media api Media flagged"
+                      ]
                     },
                     "description": "**Get Url**\n\nThis endpoint executes the `GetUrl` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3451,10 +4094,19 @@
                     "Media",
                     "{id}",
                     "url"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Get Url**\n\nThis endpoint executes the `GetUrl` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Url**\n\nThis endpoint executes the `GetUrl` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3466,10 +4118,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/media/api/Media/{id}/url",
-                      "host": "{{gateway_url}}",
-                      "path": "media api Media {id} url",
-                      "query": ""
+                      "raw": "{{gateway_url}}/media api Media {id} url",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "media api Media {id} url"
+                      ]
                     },
                     "description": "**Get Url**\n\nThis endpoint executes the `GetUrl` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3523,10 +4178,19 @@
                     "api",
                     "Config",
                     "test-sms"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Test Sms**\n\nThis endpoint executes the `TestSms` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Test Sms**\n\nThis endpoint executes the `TestSms` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3538,10 +4202,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/notifications/api/Config/test-sms",
-                      "host": "{{gateway_url}}",
-                      "path": "notifications api Config test-sms",
-                      "query": ""
+                      "raw": "{{gateway_url}}/notifications api Config test-sms",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "notifications api Config test-sms"
+                      ]
                     },
                     "description": "**Test Sms**\n\nThis endpoint executes the `TestSms` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3585,10 +4252,19 @@
                     "api",
                     "Config",
                     "test-email"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Test Email**\n\nThis endpoint executes the `TestEmail` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Test Email**\n\nThis endpoint executes the `TestEmail` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3600,10 +4276,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/notifications/api/Config/test-email",
-                      "host": "{{gateway_url}}",
-                      "path": "notifications api Config test-email",
-                      "query": ""
+                      "raw": "{{gateway_url}}/notifications api Config test-email",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "notifications api Config test-email"
+                      ]
                     },
                     "description": "**Test Email**\n\nThis endpoint executes the `TestEmail` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3652,10 +4331,19 @@
                     "api",
                     "Notifications",
                     "unread"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Get Unread**\n\nThis endpoint executes the `GetUnread` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Unread**\n\nThis endpoint executes the `GetUnread` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3667,10 +4355,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/notifications/api/Notifications/unread",
-                      "host": "{{gateway_url}}",
-                      "path": "notifications api Notifications unread",
-                      "query": ""
+                      "raw": "{{gateway_url}}/notifications api Notifications unread",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "notifications api Notifications unread"
+                      ]
                     },
                     "description": "**Get Unread**\n\nThis endpoint executes the `GetUnread` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3715,10 +4406,19 @@
                     "Notifications",
                     "{id}",
                     "read"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Mark As Read**\n\nThis endpoint executes the `MarkAsRead` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Mark As Read**\n\nThis endpoint executes the `MarkAsRead` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3730,10 +4430,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/notifications/api/Notifications/{id}/read",
-                      "host": "{{gateway_url}}",
-                      "path": "notifications api Notifications {id} read",
-                      "query": ""
+                      "raw": "{{gateway_url}}/notifications api Notifications {id} read",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "notifications api Notifications {id} read"
+                      ]
                     },
                     "description": "**Mark As Read**\n\nThis endpoint executes the `MarkAsRead` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3777,10 +4480,19 @@
                     "api",
                     "Notifications",
                     "read-all"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Mark All As Read**\n\nThis endpoint executes the `MarkAllAsRead` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Mark All As Read**\n\nThis endpoint executes the `MarkAllAsRead` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3792,10 +4504,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/notifications/api/Notifications/read-all",
-                      "host": "{{gateway_url}}",
-                      "path": "notifications api Notifications read-all",
-                      "query": ""
+                      "raw": "{{gateway_url}}/notifications api Notifications read-all",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "notifications api Notifications read-all"
+                      ]
                     },
                     "description": "**Mark All As Read**\n\nThis endpoint executes the `MarkAllAsRead` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3849,10 +4564,19 @@
                     "api",
                     "payments",
                     "checkout"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Create Checkout Session**\n\nThis endpoint executes the `CreateCheckoutSession` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Create Checkout Session**\n\nThis endpoint executes the `CreateCheckoutSession` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3864,10 +4588,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/payments/api/payments/checkout",
-                      "host": "{{gateway_url}}",
-                      "path": "payments api payments checkout",
-                      "query": ""
+                      "raw": "{{gateway_url}}/payments api payments checkout",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "payments api payments checkout"
+                      ]
                     },
                     "description": "**Create Checkout Session**\n\nThis endpoint executes the `CreateCheckoutSession` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3917,10 +4644,19 @@
                     "Payments",
                     "config",
                     "{appId}"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Get Available Methods**\n\nThis endpoint executes the `GetAvailableMethods` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Available Methods**\n\nThis endpoint executes the `GetAvailableMethods` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -3932,10 +4668,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/payments/api/Payments/config/{appId}",
-                      "host": "{{gateway_url}}",
-                      "path": "payments api Payments config {appId}",
-                      "query": ""
+                      "raw": "{{gateway_url}}/payments api Payments config {appId}",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "payments api Payments config {appId}"
+                      ]
                     },
                     "description": "**Get Available Methods**\n\nThis endpoint executes the `GetAvailableMethods` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -3974,6 +4713,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"GatewayName\": \"Sample payload for GatewayName\",\n    \"IsEnabled\": true,\n    \"ConfigJson\": \"{}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/payments/api/Payments/config",
                   "host": [
@@ -3984,18 +4732,18 @@
                     "api",
                     "Payments",
                     "config"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Configure Method**\n\nThis endpoint executes the `ConfigureMethod` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"GatewayName\": \"Example Name\",\n    \"IsEnabled\": true,\n    \"ConfigJson\": \"{}\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Configure Method**\n\nThis endpoint executes the `ConfigureMethod` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -4008,18 +4756,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/payments/api/Payments/config",
-                      "host": "{{gateway_url}}",
-                      "path": "payments api Payments config",
-                      "query": ""
-                    },
-                    "description": "**Configure Method**\n\nThis endpoint executes the `ConfigureMethod` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"GatewayName\": \"Example Name\",\n    \"IsEnabled\": true,\n    \"ConfigJson\": \"{}\"\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"GatewayName\": \"Example Name\",\n    \"IsEnabled\": true,\n    \"ConfigJson\": \"{}\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/payments api Payments config",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "payments api Payments config"
+                      ]
+                    },
+                    "description": "**Configure Method**\n\nThis endpoint executes the `ConfigureMethod` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -4056,6 +4806,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"PlanId\": \"c8d25a4d-decf-41c5-9098-aaf2b2f3072f\",\n    \"Email\": \"admin@ump.com\",\n    \"PaymentProvider\": \"Sample payload for PaymentProvider\",\n    \"Success\": true,\n    \"Message\": \"Sample payload for Message\",\n    \"SubscriptionId\": \"da87d77d-4212-4549-a3e9-5ec53af426f0\",\n    \"ProviderSubscriptionId\": \"Sample payload for ProviderSubscriptionId\",\n    \"RedirectUrl\": \"https://example.com/image.jpg\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/payments/api/Payments/subscribe",
                   "host": [
@@ -4066,18 +4825,18 @@
                     "api",
                     "Payments",
                     "subscribe"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Subscribe**\n\nThis endpoint executes the `Subscribe` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"PlanId\": \"c8d25a4d-decf-41c5-9098-aaf2b2f3072f\",\n    \"Email\": \"user@example.com\",\n    \"PaymentProvider\": \"sample_string_for_PaymentProvider\",\n    \"Success\": true,\n    \"Message\": \"sample_string_for_Message\",\n    \"SubscriptionId\": \"da87d77d-4212-4549-a3e9-5ec53af426f0\",\n    \"ProviderSubscriptionId\": \"sample_string_for_ProviderSubscriptionId\",\n    \"RedirectUrl\": \"https://example.com\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Subscribe**\n\nThis endpoint executes the `Subscribe` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -4090,18 +4849,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/payments/api/Payments/subscribe",
-                      "host": "{{gateway_url}}",
-                      "path": "payments api Payments subscribe",
-                      "query": ""
-                    },
-                    "description": "**Subscribe**\n\nThis endpoint executes the `Subscribe` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"PlanId\": \"c8d25a4d-decf-41c5-9098-aaf2b2f3072f\",\n    \"Email\": \"user@example.com\",\n    \"PaymentProvider\": \"sample_string_for_PaymentProvider\",\n    \"Success\": true,\n    \"Message\": \"sample_string_for_Message\",\n    \"SubscriptionId\": \"da87d77d-4212-4549-a3e9-5ec53af426f0\",\n    \"ProviderSubscriptionId\": \"sample_string_for_ProviderSubscriptionId\",\n    \"RedirectUrl\": \"https://example.com\"\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"PlanId\": \"c8d25a4d-decf-41c5-9098-aaf2b2f3072f\",\n    \"Email\": \"admin@ump.com\",\n    \"PaymentProvider\": \"Sample payload for PaymentProvider\",\n    \"Success\": true,\n    \"Message\": \"Sample payload for Message\",\n    \"SubscriptionId\": \"da87d77d-4212-4549-a3e9-5ec53af426f0\",\n    \"ProviderSubscriptionId\": \"Sample payload for ProviderSubscriptionId\",\n    \"RedirectUrl\": \"https://example.com\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/payments api Payments subscribe",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "payments api Payments subscribe"
+                      ]
+                    },
+                    "description": "**Subscribe**\n\nThis endpoint executes the `Subscribe` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -4157,7 +4918,17 @@
                     }
                   ]
                 },
-                "description": "**Get Analytics**\n\nThis endpoint executes the `GetAnalytics` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Analytics**\n\nThis endpoint executes the `GetAnalytics` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -4169,10 +4940,16 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/payments/api/Payments/analytics?startDate=demo_value&endDate=demo_value",
-                      "host": "{{gateway_url}}",
-                      "path": "payments api Payments analytics",
-                      "query": " "
+                      "raw": "{{gateway_url}}/payments api Payments analytics?",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "payments api Payments analytics"
+                      ],
+                      "query": [
+                        " "
+                      ]
                     },
                     "description": "**Get Analytics**\n\nThis endpoint executes the `GetAnalytics` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -4216,10 +4993,19 @@
                     "api",
                     "Payments",
                     "plans"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Get Plans**\n\nThis endpoint executes the `GetPlans` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Plans**\n\nThis endpoint executes the `GetPlans` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -4231,10 +5017,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/payments/api/Payments/plans",
-                      "host": "{{gateway_url}}",
-                      "path": "payments api Payments plans",
-                      "query": ""
+                      "raw": "{{gateway_url}}/payments api Payments plans",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "payments api Payments plans"
+                      ]
                     },
                     "description": "**Get Plans**\n\nThis endpoint executes the `GetPlans` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -4283,10 +5072,19 @@
                     "api",
                     "webhooks",
                     "stripe"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Handle**\n\nThis endpoint executes the `Handle` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Handle**\n\nThis endpoint executes the `Handle` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -4298,10 +5096,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/payments/api/webhooks/stripe",
-                      "host": "{{gateway_url}}",
-                      "path": "payments api webhooks stripe",
-                      "query": ""
+                      "raw": "{{gateway_url}}/payments api webhooks stripe",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "payments api webhooks stripe"
+                      ]
                     },
                     "description": "**Handle**\n\nThis endpoint executes the `Handle` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -4344,6 +5145,16 @@
             {
               "name": "Get Dashboard Stats (api/Analytics/dashboard)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -4381,38 +5192,33 @@
                     }
                   ]
                 },
-                "description": "**Get Dashboard Stats**\n\nThis endpoint executes the `GetDashboardStats` operation. \n\n**Authorization Context:**\nRequires Role(s): GlobalAdmin GlobalAdmin.",
-                "auth": {
-                  "type": "bearer",
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "value": "{{jwt_token}}",
-                      "type": "string"
-                    }
-                  ]
-                }
+                "description": "**Get Dashboard Stats**\n\nThis endpoint executes the `GetDashboardStats` operation. \n\n**Authorization Context:**\nRequires Role(s): GlobalAdmin GlobalAdmin."
               },
               "response": [
                 {
                   "name": "Successful Response",
                   "originalRequest": {
+                    "auth": {
+                      "type": "bearer"
+                    },
                     "method": "GET",
                     "header": [
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/users/api/Analytics/dashboard?startDate=demo_value&endDate=demo_value",
-                      "host": "{{gateway_url}}",
-                      "path": "users api Analytics dashboard",
-                      "query": " "
+                      "raw": "{{gateway_url}}/users api Analytics dashboard?",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "users api Analytics dashboard"
+                      ],
+                      "query": [
+                        " "
+                      ]
                     },
-                    "description": "**Get Dashboard Stats**\n\nThis endpoint executes the `GetDashboardStats` operation. \n\n**Authorization Context:**\nRequires Role(s): GlobalAdmin GlobalAdmin.",
-                    "auth": {
-                      "type": "bearer",
-                      "bearer": ""
-                    }
+                    "description": "**Get Dashboard Stats**\n\nThis endpoint executes the `GetDashboardStats` operation. \n\n**Authorization Context:**\nRequires Role(s): GlobalAdmin GlobalAdmin."
                   },
                   "status": "OK",
                   "code": 200,
@@ -4460,10 +5266,19 @@
                     "Maintenance",
                     "reset",
                     "{appId}"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Reset App Data**\n\nThis endpoint executes the `ResetAppData` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Reset App Data**\n\nThis endpoint executes the `ResetAppData` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -4475,10 +5290,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/users/api/Maintenance/reset/{appId}",
-                      "host": "{{gateway_url}}",
-                      "path": "users api Maintenance reset {appId}",
-                      "query": ""
+                      "raw": "{{gateway_url}}/users api Maintenance reset {appId}",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "users api Maintenance reset {appId}"
+                      ]
                     },
                     "description": "**Reset App Data**\n\nThis endpoint executes the `ResetAppData` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -4518,7 +5336,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/users/api/Users/profile?userId=demo_value&appId=demo_value",
+                  "raw": "{{gateway_url}}/users/api/Users/profile?userId=demo_value&appId=00000000-0000-0000-0000-000000000012",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -4541,7 +5359,17 @@
                     }
                   ]
                 },
-                "description": "**Get Profile**\n\nThis endpoint executes the `GetProfile` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Profile**\n\nThis endpoint executes the `GetProfile` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -4553,10 +5381,16 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/users/api/Users/profile?userId=demo_value&appId=demo_value",
-                      "host": "{{gateway_url}}",
-                      "path": "users api Users profile",
-                      "query": " "
+                      "raw": "{{gateway_url}}/users api Users profile?",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "users api Users profile"
+                      ],
+                      "query": [
+                        " "
+                      ]
                     },
                     "description": "**Get Profile**\n\nThis endpoint executes the `GetProfile` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -4595,6 +5429,15 @@
                     "type": "text"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"DisplayName\": \"John Doe\",\n    \"Bio\": \"This is a realistic description generated for testing purposes.\",\n    \"AvatarUrl\": \"https://example.com/image.jpg\",\n    \"CustomDataJson\": \"{}\",\n    \"DateOfBirth\": \"2026-03-02T12:00:00Z\",\n    \"Gender\": \"Sample payload for Gender\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "{{gateway_url}}/users/api/Users/profile",
                   "host": [
@@ -4605,18 +5448,18 @@
                     "api",
                     "Users",
                     "profile"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Update Profile**\n\nThis endpoint executes the `UpdateProfile` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"DisplayName\": \"Example Name\",\n    \"Bio\": \"sample_string_for_Bio\",\n    \"AvatarUrl\": \"https://example.com\",\n    \"CustomDataJson\": \"{}\",\n    \"DateOfBirth\": \"2026-02-23T12:00:00Z\",\n    \"Gender\": \"sample_string_for_Gender\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
+                "description": "**Update Profile**\n\nThis endpoint executes the `UpdateProfile` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
                     }
-                  }
+                  ],
+                  "type": "bearer"
                 }
               },
               "response": [
@@ -4629,18 +5472,20 @@
                       "@{key=App-Id; value={{app_id}}; type=text}",
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
-                    "url": {
-                      "raw": "{{gateway_url}}/users/api/Users/profile",
-                      "host": "{{gateway_url}}",
-                      "path": "users api Users profile",
-                      "query": ""
-                    },
-                    "description": "**Update Profile**\n\nThis endpoint executes the `UpdateProfile` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required).",
                     "body": {
                       "mode": "raw",
-                      "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"DisplayName\": \"Example Name\",\n    \"Bio\": \"sample_string_for_Bio\",\n    \"AvatarUrl\": \"https://example.com\",\n    \"CustomDataJson\": \"{}\",\n    \"DateOfBirth\": \"2026-02-23T12:00:00Z\",\n    \"Gender\": \"sample_string_for_Gender\"\n}",
-                      "options": "@{raw=}"
-                    }
+                      "raw": "{\n    \"UserId\": \"00000000-0000-0000-0000-000000000000\",\n    \"DisplayName\": \"Example Name\",\n    \"Bio\": \"This is a realistic description generated for testing purposes.\",\n    \"AvatarUrl\": \"https://example.com\",\n    \"CustomDataJson\": \"{}\",\n    \"DateOfBirth\": \"2026-02-23T12:00:00Z\",\n    \"Gender\": \"Sample payload for Gender\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{gateway_url}}/users api Users profile",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "users api Users profile"
+                      ]
+                    },
+                    "description": "**Update Profile**\n\nThis endpoint executes the `UpdateProfile` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
                   "status": "OK",
                   "code": 200,
@@ -4673,7 +5518,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/users/api/Users/profiles?appId=demo_value",
+                  "raw": "{{gateway_url}}/users/api/Users/profiles?appId=00000000-0000-0000-0000-000000000012",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -4691,7 +5536,17 @@
                     }
                   ]
                 },
-                "description": "**Get Profiles**\n\nThis endpoint executes the `GetProfiles` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Profiles**\n\nThis endpoint executes the `GetProfiles` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -4703,10 +5558,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/users/api/Users/profiles?appId=demo_value",
-                      "host": "{{gateway_url}}",
-                      "path": "users api Users profiles",
-                      "query": ""
+                      "raw": "{{gateway_url}}/users api Users profiles",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "users api Users profiles"
+                      ]
                     },
                     "description": "**Get Profiles**\n\nThis endpoint executes the `GetProfiles` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -4741,7 +5599,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/users/api/Users/dashboard/stats?appId=demo_value&startDate=demo_value&endDate=demo_value",
+                  "raw": "{{gateway_url}}/users/api/Users/dashboard/stats?appId=00000000-0000-0000-0000-000000000012&startDate=demo_value&endDate=demo_value",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -4770,7 +5628,17 @@
                     }
                   ]
                 },
-                "description": "**Get Dashboard Stats**\n\nThis endpoint executes the `GetDashboardStats` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Dashboard Stats**\n\nThis endpoint executes the `GetDashboardStats` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -4782,10 +5650,18 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/users/api/Users/dashboard/stats?appId=demo_value&startDate=demo_value&endDate=demo_value",
-                      "host": "{{gateway_url}}",
-                      "path": "users api Users dashboard stats",
-                      "query": "  "
+                      "raw": "{{gateway_url}}/users api Users dashboard stats?&&",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "users api Users dashboard stats"
+                      ],
+                      "query": [
+                        " ",
+                        " ",
+                        " "
+                      ]
                     },
                     "description": "**Get Dashboard Stats**\n\nThis endpoint executes the `GetDashboardStats` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -4829,10 +5705,19 @@
                     "api",
                     "Users",
                     "ReportReasons"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Get Report Reasons**\n\nThis endpoint executes the `GetReportReasons` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Report Reasons**\n\nThis endpoint executes the `GetReportReasons` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -4844,10 +5729,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/users/api/Users/ReportReasons",
-                      "host": "{{gateway_url}}",
-                      "path": "users api Users ReportReasons",
-                      "query": ""
+                      "raw": "{{gateway_url}}/users api Users ReportReasons",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "users api Users ReportReasons"
+                      ]
                     },
                     "description": "**Get Report Reasons**\n\nThis endpoint executes the `GetReportReasons` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -4882,7 +5770,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/users/api/Users/Report?reporterId=demo_value&reportedId=demo_value",
+                  "raw": "{{gateway_url}}/users/api/Users/Report?reporterId=00000000-0000-0000-0000-000000000001&reportedId=00000000-0000-0000-0000-000000000002",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -4905,7 +5793,17 @@
                     }
                   ]
                 },
-                "description": "**Get Report Reason**\n\nThis endpoint executes the `GetReportReason` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Get Report Reason**\n\nThis endpoint executes the `GetReportReason` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -4917,10 +5815,16 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/users/api/Users/Report?reporterId=demo_value&reportedId=demo_value",
-                      "host": "{{gateway_url}}",
-                      "path": "users api Users Report",
-                      "query": " "
+                      "raw": "{{gateway_url}}/users api Users Report?",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "users api Users Report"
+                      ],
+                      "query": [
+                        " "
+                      ]
                     },
                     "description": "**Get Report Reason**\n\nThis endpoint executes the `GetReportReason` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },
@@ -4964,10 +5868,19 @@
                     "api",
                     "Users",
                     "Report"
-                  ],
-                  "query": []
+                  ]
                 },
-                "description": "**Report User**\n\nThis endpoint executes the `ReportUser` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
+                "description": "**Report User**\n\nThis endpoint executes the `ReportUser` operation. \n\n**Authorization Context:**\nRequires Authentication.",
+                "auth": {
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "type": "string",
+                      "value": "{{jwt_token}}"
+                    }
+                  ],
+                  "type": "bearer"
+                }
               },
               "response": [
                 {
@@ -4979,10 +5892,13 @@
                       "@{key=Tenant-Id; value={{tenant_id}}; type=text}"
                     ],
                     "url": {
-                      "raw": "{{gateway_url}}/users/api/Users/Report",
-                      "host": "{{gateway_url}}",
-                      "path": "users api Users Report",
-                      "query": ""
+                      "raw": "{{gateway_url}}/users api Users Report",
+                      "host": [
+                        "{{gateway_url}}"
+                      ],
+                      "path": [
+                        "users api Users Report"
+                      ]
                     },
                     "description": "**Report User**\n\nThis endpoint executes the `ReportUser` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
                   },

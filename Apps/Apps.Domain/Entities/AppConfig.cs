@@ -1,4 +1,5 @@
 using Shared.Kernel;
+using Apps.Domain.Events;
 
 namespace Apps.Domain.Entities;
 
@@ -9,10 +10,10 @@ public class AppConfig : Entity
     public string Name { get; private set; } = null!;
     public string Description { get; private set; } = null!;
     public string BaseUrl { get; private set; } = null!;
-    public string ThemeJson { get; private set; } = "{}";
     public string DefaultUserProfileJson { get; private set; } = "{}";
     public string ExternalAuthProvidersJson { get; private set; } = "{}";
     public string PrivacyPolicy { get; private set; } = "";
+    public string TermsAndConditions { get; private set; } = "";
     
     public bool IsActive { get; private set; }
     public VerificationType VerificationType { get; private set; }
@@ -40,14 +41,12 @@ public class AppConfig : Entity
         VerificationType = VerificationType.None; // Default exception
         RequiresAdminApproval = false;
 
-        ThemeJson = "{}";
         DefaultUserProfileJson = "{}";
         ExternalAuthProvidersJson = "{}";
-    }
+        PrivacyPolicy = "";
+        TermsAndConditions = "";
 
-    public void UpdateTheme(string themeJson)
-    {
-        ThemeJson = themeJson;
+        AddDomainEvent(new AppCreatedEvent(Id, Name));
     }
 
     public void UpdateDefaultUserProfile(string json)
@@ -63,6 +62,11 @@ public class AppConfig : Entity
     public void UpdatePrivacyPolicy(string policy)
     {
         PrivacyPolicy = policy;
+    }
+
+    public void UpdateTermsAndConditions(string terms)
+    {
+        TermsAndConditions = terms;
     }
 
     public void UpdateDetails(string name, string description, string baseUrl)

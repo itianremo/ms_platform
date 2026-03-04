@@ -8,4 +8,6 @@ public class SubscriptionGrantedEvent
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public bool IsActive { get; set; }
+    public decimal PricePaid { get; set; }
+    public int CoinsAmount { get; set; }
 }

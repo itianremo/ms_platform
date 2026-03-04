@@ -120,12 +120,12 @@ public class UserRepository : IUserRepository
 
     public async Task<Role?> GetRoleByNameAsync(Guid appId, string roleName)
     {
-        return await _context.Roles.FirstOrDefaultAsync(r => r.AppId == appId && r.Name == roleName);
+        return await _context.Roles.Include(r => r.Permissions).FirstOrDefaultAsync(r => r.AppId == appId && r.Name == roleName);
     }
 
     public async Task<Role?> GetRoleByIdAsync(Guid roleId)
     {
-        return await _context.Roles.FirstOrDefaultAsync(r => r.Id == roleId);
+        return await _context.Roles.Include(r => r.Permissions).FirstOrDefaultAsync(r => r.Id == roleId);
     }
 
     public async Task<User?> GetUserWithSessionsAsync(Guid userId)

@@ -141,18 +141,14 @@ namespace Auth.Infrastructure.Migrations
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("SettingsJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("SubscriptionExpiry")
-                        .HasColumnType("datetime2");
-
                     b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UserSubscriptionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -290,13 +286,15 @@ namespace Auth.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Auth.Domain.Entities.User", null)
-                        .WithMany("Memberships")
+                    b.HasOne("Auth.Domain.Entities.User", "User")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Role");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Auth.Domain.Entities.UserLogin", b =>
@@ -339,8 +337,6 @@ namespace Auth.Infrastructure.Migrations
             modelBuilder.Entity("Auth.Domain.Entities.User", b =>
                 {
                     b.Navigation("Logins");
-
-                    b.Navigation("Memberships");
 
                     b.Navigation("Sessions");
                 });

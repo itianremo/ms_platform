@@ -1,0 +1,177 @@
+﻿FROM (
+    SELECT TOP(1) [r].[Id], [r].[AppId], [r].[IsSealed], [r].[Name]
+    FROM [Roles] AS [r]
+    WHERE [r].[Name] = @__sr_Name_0 AND [r].[AppId] = @__8__locals1_appId_1
+) AS [t]
+LEFT JOIN (
+    SELECT [r0].[PermissionsId], [r0].[RoleId], [p].[Id], [p].[Description], [p].[Name]
+    FROM [RolePermissions] AS [r0]
+    INNER JOIN [Permissions] AS [p] ON [r0].[PermissionsId] = [p].[Id]
+) AS [t0] ON [t].[Id] = [t0].[RoleId]
+ORDER BY [t].[Id], [t0].[PermissionsId], [t0].[RoleId]
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__permName_0='?' (Size = 100)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[Description], [p].[Name]
+FROM [Permissions] AS [p]
+WHERE [p].[Name] = @__permName_0
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__sr_Name_0='?' (Size = 50), @__8__locals1_appId_1='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [t].[Id], [t].[AppId], [t].[IsSealed], [t].[Name], [t0].[PermissionsId], [t0].[RoleId], [t0].[Id], [t0].[Description], [t0].[Name]
+FROM (
+    SELECT TOP(1) [r].[Id], [r].[AppId], [r].[IsSealed], [r].[Name]
+    FROM [Roles] AS [r]
+    WHERE [r].[Name] = @__sr_Name_0 AND [r].[AppId] = @__8__locals1_appId_1
+) AS [t]
+LEFT JOIN (
+    SELECT [r0].[PermissionsId], [r0].[RoleId], [p].[Id], [p].[Description], [p].[Name]
+    FROM [RolePermissions] AS [r0]
+    INNER JOIN [Permissions] AS [p] ON [r0].[PermissionsId] = [p].[Id]
+) AS [t0] ON [t].[Id] = [t0].[RoleId]
+ORDER BY [t].[Id], [t0].[PermissionsId], [t0].[RoleId]
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__sr_Name_0='?' (Size = 50), @__8__locals1_appId_1='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [t].[Id], [t].[AppId], [t].[IsSealed], [t].[Name], [t0].[PermissionsId], [t0].[RoleId], [t0].[Id], [t0].[Description], [t0].[Name]
+FROM (
+    SELECT TOP(1) [r].[Id], [r].[AppId], [r].[IsSealed], [r].[Name]
+    FROM [Roles] AS [r]
+    WHERE [r].[Name] = @__sr_Name_0 AND [r].[AppId] = @__8__locals1_appId_1
+) AS [t]
+LEFT JOIN (
+    SELECT [r0].[PermissionsId], [r0].[RoleId], [p].[Id], [p].[Description], [p].[Name]
+    FROM [RolePermissions] AS [r0]
+    INNER JOIN [Permissions] AS [p] ON [r0].[PermissionsId] = [p].[Id]
+) AS [t0] ON [t].[Id] = [t0].[RoleId]
+ORDER BY [t].[Id], [t0].[PermissionsId], [t0].[RoleId]
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__sr_Name_0='?' (Size = 50), @__8__locals1_appId_1='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [t].[Id], [t].[AppId], [t].[IsSealed], [t].[Name], [t0].[PermissionsId], [t0].[RoleId], [t0].[Id], [t0].[Description], [t0].[Name]
+FROM (
+    SELECT TOP(1) [r].[Id], [r].[AppId], [r].[IsSealed], [r].[Name]
+    FROM [Roles] AS [r]
+    WHERE [r].[Name] = @__sr_Name_0 AND [r].[AppId] = @__8__locals1_appId_1
+) AS [t]
+LEFT JOIN (
+    SELECT [r0].[PermissionsId], [r0].[RoleId], [p].[Id], [p].[Description], [p].[Name]
+    FROM [RolePermissions] AS [r0]
+    INNER JOIN [Permissions] AS [p] ON [r0].[PermissionsId] = [p].[Id]
+) AS [t0] ON [t].[Id] = [t0].[RoleId]
+ORDER BY [t].[Id], [t0].[PermissionsId], [t0].[RoleId]
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__sr_Name_0='?' (Size = 50), @__8__locals1_appId_1='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [t].[Id], [t].[AppId], [t].[IsSealed], [t].[Name], [t0].[PermissionsId], [t0].[RoleId], [t0].[Id], [t0].[Description], [t0].[Name]
+FROM (
+    SELECT TOP(1) [r].[Id], [r].[AppId], [r].[IsSealed], [r].[Name]
+    FROM [Roles] AS [r]
+    WHERE [r].[Name] = @__sr_Name_0 AND [r].[AppId] = @__8__locals1_appId_1
+) AS [t]
+LEFT JOIN (
+    SELECT [r0].[PermissionsId], [r0].[RoleId], [p].[Id], [p].[Description], [p].[Name]
+    FROM [RolePermissions] AS [r0]
+    INNER JOIN [Permissions] AS [p] ON [r0].[PermissionsId] = [p].[Id]
+) AS [t0] ON [t].[Id] = [t0].[RoleId]
+ORDER BY [t].[Id], [t0].[PermissionsId], [t0].[RoleId]
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__sr_Name_0='?' (Size = 50), @__8__locals1_appId_1='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [t].[Id], [t].[AppId], [t].[IsSealed], [t].[Name], [t0].[PermissionsId], [t0].[RoleId], [t0].[Id], [t0].[Description], [t0].[Name]
+FROM (
+    SELECT TOP(1) [r].[Id], [r].[AppId], [r].[IsSealed], [r].[Name]
+    FROM [Roles] AS [r]
+    WHERE [r].[Name] = @__sr_Name_0 AND [r].[AppId] = @__8__locals1_appId_1
+) AS [t]
+LEFT JOIN (
+    SELECT [r0].[PermissionsId], [r0].[RoleId], [p].[Id], [p].[Description], [p].[Name]
+    FROM [RolePermissions] AS [r0]
+    INNER JOIN [Permissions] AS [p] ON [r0].[PermissionsId] = [p].[Id]
+) AS [t0] ON [t].[Id] = [t0].[RoleId]
+ORDER BY [t].[Id], [t0].[PermissionsId], [t0].[RoleId]
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__sr_Name_0='?' (Size = 50), @__8__locals1_appId_1='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [t].[Id], [t].[AppId], [t].[IsSealed], [t].[Name], [t0].[PermissionsId], [t0].[RoleId], [t0].[Id], [t0].[Description], [t0].[Name]
+FROM (
+    SELECT TOP(1) [r].[Id], [r].[AppId], [r].[IsSealed], [r].[Name]
+    FROM [Roles] AS [r]
+    WHERE [r].[Name] = @__sr_Name_0 AND [r].[AppId] = @__8__locals1_appId_1
+) AS [t]
+LEFT JOIN (
+    SELECT [r0].[PermissionsId], [r0].[RoleId], [p].[Id], [p].[Description], [p].[Name]
+    FROM [RolePermissions] AS [r0]
+    INNER JOIN [Permissions] AS [p] ON [r0].[PermissionsId] = [p].[Id]
+) AS [t0] ON [t].[Id] = [t0].[RoleId]
+ORDER BY [t].[Id], [t0].[PermissionsId], [t0].[RoleId]
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__permName_0='?' (Size = 100)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[Description], [p].[Name]
+FROM [Permissions] AS [p]
+WHERE [p].[Name] = @__permName_0
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__permName_0='?' (Size = 100)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[Description], [p].[Name]
+FROM [Permissions] AS [p]
+WHERE [p].[Name] = @__permName_0
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__sr_Name_0='?' (Size = 50), @__8__locals1_appId_1='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [t].[Id], [t].[AppId], [t].[IsSealed], [t].[Name], [t0].[PermissionsId], [t0].[RoleId], [t0].[Id], [t0].[Description], [t0].[Name]
+FROM (
+    SELECT TOP(1) [r].[Id], [r].[AppId], [r].[IsSealed], [r].[Name]
+    FROM [Roles] AS [r]
+    WHERE [r].[Name] = @__sr_Name_0 AND [r].[AppId] = @__8__locals1_appId_1
+) AS [t]
+LEFT JOIN (
+    SELECT [r0].[PermissionsId], [r0].[RoleId], [p].[Id], [p].[Description], [p].[Name]
+    FROM [RolePermissions] AS [r0]
+    INNER JOIN [Permissions] AS [p] ON [r0].[PermissionsId] = [p].[Id]
+) AS [t0] ON [t].[Id] = [t0].[RoleId]
+ORDER BY [t].[Id], [t0].[PermissionsId], [t0].[RoleId]
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__permName_0='?' (Size = 100)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[Description], [p].[Name]
+FROM [Permissions] AS [p]
+WHERE [p].[Name] = @__permName_0
+[22:23:47 INF] Executed DbCommand (2ms) [Parameters=[@__sr_Name_0='?' (Size = 50), @__8__locals1_appId_1='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [t].[Id], [t].[AppId], [t].[IsSealed], [t].[Name], [t0].[PermissionsId], [t0].[RoleId], [t0].[Id], [t0].[Description], [t0].[Name]
+FROM (
+    SELECT TOP(1) [r].[Id], [r].[AppId], [r].[IsSealed], [r].[Name]
+    FROM [Roles] AS [r]
+    WHERE [r].[Name] = @__sr_Name_0 AND [r].[AppId] = @__8__locals1_appId_1
+) AS [t]
+LEFT JOIN (
+    SELECT [r0].[PermissionsId], [r0].[RoleId], [p].[Id], [p].[Description], [p].[Name]
+    FROM [RolePermissions] AS [r0]
+    INNER JOIN [Permissions] AS [p] ON [r0].[PermissionsId] = [p].[Id]
+) AS [t0] ON [t].[Id] = [t0].[RoleId]
+ORDER BY [t].[Id], [t0].[PermissionsId], [t0].[RoleId]
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__sr_Name_0='?' (Size = 50), @__8__locals1_appId_1='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [t].[Id], [t].[AppId], [t].[IsSealed], [t].[Name], [t0].[PermissionsId], [t0].[RoleId], [t0].[Id], [t0].[Description], [t0].[Name]
+FROM (
+    SELECT TOP(1) [r].[Id], [r].[AppId], [r].[IsSealed], [r].[Name]
+    FROM [Roles] AS [r]
+    WHERE [r].[Name] = @__sr_Name_0 AND [r].[AppId] = @__8__locals1_appId_1
+) AS [t]
+LEFT JOIN (
+    SELECT [r0].[PermissionsId], [r0].[RoleId], [p].[Id], [p].[Description], [p].[Name]
+    FROM [RolePermissions] AS [r0]
+    INNER JOIN [Permissions] AS [p] ON [r0].[PermissionsId] = [p].[Id]
+) AS [t0] ON [t].[Id] = [t0].[RoleId]
+ORDER BY [t].[Id], [t0].[PermissionsId], [t0].[RoleId]
+[22:23:47 INF] Executed DbCommand (2ms) [Parameters=[@__sr_Name_0='?' (Size = 50), @__8__locals1_appId_1='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+SELECT [t].[Id], [t].[AppId], [t].[IsSealed], [t].[Name], [t0].[PermissionsId], [t0].[RoleId], [t0].[Id], [t0].[Description], [t0].[Name]
+FROM (
+    SELECT TOP(1) [r].[Id], [r].[AppId], [r].[IsSealed], [r].[Name]
+    FROM [Roles] AS [r]
+    WHERE [r].[Name] = @__sr_Name_0 AND [r].[AppId] = @__8__locals1_appId_1
+) AS [t]
+LEFT JOIN (
+    SELECT [r0].[PermissionsId], [r0].[RoleId], [p].[Id], [p].[Description], [p].[Name]
+    FROM [RolePermissions] AS [r0]
+    INNER JOIN [Permissions] AS [p] ON [r0].[PermissionsId] = [p].[Id]
+) AS [t0] ON [t].[Id] = [t0].[RoleId]
+ORDER BY [t].[Id], [t0].[PermissionsId], [t0].[RoleId]
+[22:23:47 INF] Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+SELECT [u].[Id], [u].[AccessFailedCount], [u].[Email], [u].[IsEmailVerified], [u].[IsPhoneVerified], [u].[IsSealed], [u].[LastLoginAppId], [u].[LastLoginUtc], [u].[LockoutEnd], [u].[OtpBlockedUntil], [u].[PasswordHash], [u].[Phone], [u].[Status]
+FROM [Users] AS [u]
+[22:23:47 INF] Executed DbCommand (1ms) [Parameters=[@__email_0='?' (Size = 200)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [u].[Id], [u].[AccessFailedCount], [u].[Email], [u].[IsEmailVerified], [u].[IsPhoneVerified], [u].[IsSealed], [u].[LastLoginAppId], [u].[LastLoginUtc], [u].[LockoutEnd], [u].[OtpBlockedUntil], [u].[PasswordHash], [u].[Phone], [u].[Status]
+FROM [Users] AS [u]
+WHERE [u].[Email] = @__email_0
+[22:23:47 INF] Executed DbCommand (6ms) [Parameters=[@p12='?' (DbType = Guid), @p0='?' (DbType = Int32), @p1='?' (Size = 200), @p2='?' (DbType = Boolean), @p3='?' (DbType = Boolean), @p4='?' (DbType = Boolean), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime2), @p7='?' (DbType = DateTime2), @p8='?' (DbType = DateTime2), @p9='?' (Size = 4000), @p10='?' (Size = 50), @p11='?' (DbType = Int32)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+UPDATE [Users] SET [AccessFailedCount] = @p0, [Email] = @p1, [IsEmailVerified] = @p2, [IsPhoneVerified] = @p3, [IsSealed] = @p4, [LastLoginAppId] = @p5, [LastLoginUtc] = @p6, [LockoutEnd] = @p7, [OtpBlockedUntil] = @p8, [PasswordHash] = @p9, [Phone] = @p10, [Status] = @p11
+OUTPUT 1
+WHERE [Id] = @p12;
+[22:23:47 INF] Updated existing seed user: admin@ump.com
+[22:23:47 INF] Executed DbCommand (2ms) [Parameters=[@__appId_0='?' (DbType = Guid), @__8__locals1_activeRoleName_1='?' (Size = 50)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [r].[Id], [r].[AppId], [r].[IsSealed], [r].[Name]
+FROM [Roles] AS [r]
+WHERE [r].[AppId] = @__appId_0 AND [r].[Name] = @__8__locals1_activeRoleName_1
+[22:23:47 ERR] Failed executing DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (DbType = Guid)], CommandType='Text', CommandTimeout='30']
+IF NOT EXISTS (SELECT 1 FROM [UserRoles] WHERE [UserId] = @p0 AND [RoleId] = @p1) INSERT INTO [UserRoles] ([UserId], [RoleId]) VALUES (@p0, @p1)

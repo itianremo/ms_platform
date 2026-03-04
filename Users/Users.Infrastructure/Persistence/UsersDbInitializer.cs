@@ -43,14 +43,7 @@ namespace Users.Infrastructure.Persistence
                     }
                 }
 
-                // --- NEW: Seed Report Reasons ---
                 await SeedReportReasonsAsync();
-
-                // --- NEW: Seed 5 Specific "Visitor" Users for Wissler (Requested minimum) ---
-                await SeedWisslerVisitorsAsync();
-                // ----------------------------------------------------------
-
-                // --- NEW: Sync Default RoleIds from AuthDb ---
                 await SyncRoleIdsFromAuthDbAsync();
             }
             catch (Exception ex)
@@ -62,77 +55,124 @@ namespace Users.Infrastructure.Persistence
         private async Task SeedBasicUsersAsync(List<SeedUserDto> seedUsers)
         {
             var random = new Random();
-            var genders = new[] { "Male", "Female", "Non-Binary", "Prefer Not to Say" };
+            var genders = new[] { "Male", "Female" };
+            var jobs = new[] { "Software Engineer", "Designer", "Chef", "Doctor", "Teacher", "Writer", "Musician" };
+            var educations = new[] { "High School", "Bachelors", "Masters", "PhD" };
+            var drinkSmoking = new[] { "Never", "Socially", "Often" };
+            var eyeColors = new[] { "Blue", "Brown", "Green", "Hazel" };
+            var hairColors = new[] { "Blonde", "Brown", "Black", "Red", "Grey" };
             var interestedIns = new[] { "Male", "Female", "All" };
+            var egyptCities = new[] { "Cairo", "Alexandria", "Giza", "Sharm El-Sheikh", "Luxor", "Aswan", "Hurghada", "Mansoura" };
+            
             var mockPhotos = GetMockPhotos();
-            var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            
+            var globalAdminAppId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+            var wisslerAdminAppId = Guid.Parse("00000000-0000-0000-0000-000000000002");
+            var wisslerAppId = Guid.Parse("00000000-0000-0000-0000-000000000012");
+            var fititAppId = Guid.Parse("00000000-0000-0000-0000-000000000013");
+
+            // Cleanup any users not in the seed array
+            var allDbProfiles = await _context.UserProfiles.ToListAsync();
+            var seedUserIds = seedUsers.Select(x => x.Id).ToHashSet();
+            foreach (var profile in allDbProfiles)
+            {
+                if (!seedUserIds.Contains(profile.UserId))
+                {
+                    _context.UserProfiles.Remove(profile);
+                    _logger.LogInformation("Removed unseeded profile for User: {UserId}", profile.UserId);
+                }
+            }
+            await _context.SaveChangesAsync();
 
             foreach (var user in seedUsers)
             {
                 var targetApps = new List<Guid>();
                 var email = user.Email.ToLower();
 
-                if (email.Contains("@globaldashboard.com") || email.Contains("@global.com")) targetApps.Add(Guid.Parse("00000000-0000-0000-0000-000000000001"));
-                if (email.Contains("@fitit.com") || email.Contains("@global.com")) targetApps.Add(Guid.Parse("11111111-1111-1111-1111-111111111111"));
-                if (email.Contains("@wissler.com") || email.Contains("@global.com")) targetApps.Add(wisslerAppId);
-
-                var globalAppId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-                if (!targetApps.Contains(globalAppId)) targetApps.Add(globalAppId);
+                if (email.Contains("admin@ump.com")) 
+                {
+                    // Superadmin gets profiles everywhere
+                    targetApps.Add(globalAdminAppId);
+                    targetApps.Add(wisslerAdminAppId);
+                    targetApps.Add(wisslerAppId);
+                    targetApps.Add(fititAppId);
+                }
+                else if (email.Contains("@wissler.com")) 
+                {
+                    if (email.StartsWith("admin") || email.StartsWith("manager"))
+                        targetApps.Add(wisslerAdminAppId);
+                    else if (email.StartsWith("vis15"))
+                    {
+                        targetApps.Add(wisslerAppId);
+                        targetApps.Add(fititAppId);
+                    }
+                    else if (email.StartsWith("vis13") || email.StartsWith("vis14"))
+                        targetApps.Add(fititAppId);
+                    else
+                        targetApps.Add(wisslerAppId); // vis1 to vis12
+                }
+                else if (email.Contains("@ump.com"))
+                {
+                   targetApps.Add(globalAdminAppId);
+                }
 
                 foreach (var appId in targetApps)
                 {
                      // Skip if already exists
                      if (await _context.UserProfiles.AnyAsync(x => x.UserId == user.Id && x.AppId == appId)) continue;
 
-                    var displayName = DeriveDisplayName(user.Email);
+                    var isVisitor = email.StartsWith("vis");
+                    var displayName = isVisitor ? $"Visitor {email.Replace("vis", "").Replace("@wissler.com", "")}" : DeriveDisplayName(user.Email);
                     var gender = genders[random.Next(genders.Length)];
-                    var dob = DateTime.UtcNow.AddYears(-random.Next(25, 45)).AddDays(-random.Next(0, 365));
+                    var dob = DateTime.UtcNow.AddYears(-random.Next(21, 40)).AddDays(-random.Next(0, 365));
                     
                     var customData = new JsonObject();
                     if (!string.IsNullOrEmpty(user.Phone)) customData["mobile"] = user.Phone;
                     
-                    if (appId == wisslerAppId && email == "admin@globaldashboard.com")
+                    if (isVisitor)
                     {
-                        // Specific rich profile for Admin in Wissler
-                        var photoUrls = mockPhotos.OrderBy(x => random.Next()).Take(4).ToList();
+                        // Specific rich Egyptian profile for Visitor
+                        var photoUrls = mockPhotos.OrderBy(x => random.Next()).Take(3).ToList();
                         var photoObjects = new JsonArray();
                         foreach (var url in photoUrls)
                         {
-                            photoObjects.Add(new JsonObject
-                            {
-                                ["url"] = url,
-                                ["isApproved"] = true,
-                                ["isVerified"] = true,
-                                ["isActive"] = true
-                            });
+                            photoObjects.Add(new JsonObject { ["url"] = url, ["isApproved"] = true, ["isVerified"] = true, ["isActive"] = true });
                         }
                         
-                        customData["cityId"] = "Admin City";
-                        customData["countryId"] = "Admin Country";
-                        customData["height"] = 185;
-                        customData["job"] = "System Administrator";
-                        customData["education"] = "Masters";
-                        customData["interestedIn"] = "All";
-                        customData["emailVerified"] = true;
-                        customData["phoneVerified"] = true;
+                        customData["cityId"] = egyptCities[random.Next(egyptCities.Length)];
+                        customData["countryId"] = "Egypt";
+                        customData["height"] = random.Next(155, 195);
+                        customData["job"] = jobs[random.Next(jobs.Length)];
+                        customData["education"] = educations[random.Next(educations.Length)];
+                        customData["drinking"] = drinkSmoking[random.Next(drinkSmoking.Length)];
+                        customData["smoking"] = drinkSmoking[random.Next(drinkSmoking.Length)];
+                        customData["eyeColor"] = eyeColors[random.Next(eyeColors.Length)];
+                        customData["hairColor"] = hairColors[random.Next(hairColors.Length)];
+                        customData["interestedIn"] = interestedIns[random.Next(interestedIns.Length)];
                         customData["photos"] = photoObjects;
-                        customData["interests"] = new JsonArray("Tech", "Management", "Coffee");
-                        customData["settings"] = new JsonObject { ["pushNotifications"] = true, ["privacy"] = "public" };
-                        customData["filters"] = new JsonObject { ["maxDistance"] = 50, ["ageRange"] = new JsonArray(18, 50) };
+                        customData["interests"] = new JsonArray("Travel", "Music", "Food", "Tech");
+                        customData["languages"] = new JsonArray("Arabic", "English");
                         
-                        var adminBio = "I am the platform administrator testing the Wissler application features.";
-                        await SeedProfileRawAsync(user.Id, appId, displayName, adminBio, photoUrls.First(), customData.ToJsonString(), dob, gender);
+                        int loyaltyPoints = 0;
+                        int coinsBalance = 0;
+                        if (user.Email.StartsWith("vis001") || user.Email.StartsWith("vis002") || user.Email.StartsWith("vis003") || user.Email.StartsWith("vis004") || user.Email.StartsWith("vis005"))
+                        {
+                            loyaltyPoints = 25; // Math approx 10% of total past subscriptions seeded in AppsDb
+                            coinsBalance = 100; // If they bought coins bundle
+                        }
+                        else if (user.Email.StartsWith("vis006"))
+                        {
+                            loyaltyPoints = 120; // Unlimited package math
+                        }
+
+                        var bio = $"Hi! I am from {customData["cityId"]}. Looking forward to connecting!";
+                        await SeedProfileRawAsync(user.Id, appId, displayName, bio, photoUrls.First(), customData.ToJsonString(), dob, gender, loyaltyPoints, coinsBalance);
                     }
-                    else
-                    {
-                        // Standard basic fallback behavior
-                        var simplePhotos = mockPhotos.OrderBy(x => random.Next()).Take(3).ToList();
-                        var photoArray = new JsonArray();
-                        foreach(var p in simplePhotos) photoArray.Add(p);
-                        customData["Images"] = photoArray;
+                    else {
+                        // Admin Default Profile
+                        var simplePhotos = mockPhotos.OrderBy(x => random.Next()).Take(1).ToList();
                         var bio = $"Automated profile for {user.Email}";
-                        
-                        await SeedProfileRawAsync(user.Id, appId, displayName, bio, simplePhotos.First(), customData.ToJsonString(), dob, gender);
+                        await SeedProfileRawAsync(user.Id, appId, displayName, bio, simplePhotos.First(), customData.ToJsonString(), dob, gender, 0, 0);
                     }
                 }
             }
@@ -140,7 +180,7 @@ namespace Users.Infrastructure.Persistence
 
         private async Task SeedReportReasonsAsync()
         {
-            var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            var wisslerAppId = Guid.Parse("00000000-0000-0000-0000-000000000012");
 
             if (!await _context.ReportReasons.AnyAsync(r => r.AppId == wisslerAppId))
             {
@@ -169,15 +209,13 @@ namespace Users.Infrastructure.Persistence
                 
                 var sql = @"
                     UPDATE up
-                    SET RoleId = r.Id
-                    FROM [UsersDb].[dbo].[UserProfiles] up
-                    INNER JOIN [AuthDb].[dbo].[Roles] r ON up.AppId = r.AppId
-                    WHERE up.RoleId = '00000000-0000-0000-0000-000000000000'
-                    AND r.Name = CASE 
+                    SET RoleId = (SELECT TOP 1 Id FROM [AuthDb].[dbo].[Roles] r WHERE up.AppId = r.AppId AND r.Name = CASE 
                         WHEN up.DisplayName LIKE '%Admin%' THEN 'SuperAdmin'
                         WHEN up.DisplayName LIKE '%Manager%' THEN 'ManageUsers'
                         ELSE 'Visitor' 
-                    END
+                    END)
+                    FROM [UserProfiles] up
+                    WHERE up.RoleId = '00000000-0000-0000-0000-000000000000'
                 ";
                 
                 var rowsAffected = await _context.Database.ExecuteSqlRawAsync(sql);
@@ -188,90 +226,18 @@ namespace Users.Infrastructure.Persistence
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to synchronize RoleIds from AuthDb. Ensure AuthDb is initialized.");
+                _logger.LogWarning("Failed to synchronize RoleIds from AuthDb. Skipping for now.");
             }
         }
 
-        private async Task SeedWisslerVisitorsAsync()
-        {
-            var wisslerAppId = Guid.Parse("22222222-2222-2222-2222-222222222222");
-            
-            _logger.LogInformation("Seeding 5 Realistic Visitor Users for Wissler...");
-
-            var random = new Random();
-            var genders = new[] { "Male", "Female" };
-            var jobs = new[] { "Software Engineer", "Designer", "Chef", "Doctor", "Teacher", "Writer", "Musician" };
-            var educations = new[] { "High School", "Bachelors", "Masters", "PhD" };
-            var drinkSmoking = new[] { "Never", "Socially", "Often" };
-            var eyeColors = new[] { "Blue", "Brown", "Green", "Hazel" };
-            var hairColors = new[] { "Blonde", "Brown", "Black", "Red", "Grey" };
-            var interestedIns = new[] { "Male", "Female", "All" };
-
-            var mockPhotos = GetMockPhotos();
-
-            // Just 5 users as requested
-            for (int i = 1; i <= 5; i++)
-            {
-                var email = $"vis{i}@wissler.com";
-                
-                var existingProfile = await _context.UserProfiles.FirstOrDefaultAsync(u => u.AppId == wisslerAppId && u.DisplayName == $"Visitor {i}");
-                if (existingProfile != null) continue;
-
-                var userId = Guid.NewGuid();
-                
-                var gender = genders[random.Next(genders.Length)];
-                var displayName = $"Visitor {i}";
-                var age = random.Next(21, 40);
-                var dob = DateTime.UtcNow.AddYears(-age).AddDays(-random.Next(1, 365));
-                var job = jobs[random.Next(jobs.Length)];
-                var edu = educations[random.Next(educations.Length)];
-                var interestedIn = interestedIns[random.Next(interestedIns.Length)];
-                
-                var photoUrls = mockPhotos.OrderBy(x => random.Next()).Take(3).ToList();
-                var photoObjects = new JsonArray();
-                
-                foreach (var url in photoUrls)
-                {
-                    photoObjects.Add(new JsonObject
-                    {
-                        ["url"] = url,
-                        ["isApproved"] = true, 
-                        ["isVerified"] = true,
-                        ["isActive"] = true
-                    });
-                }
-                
-                var customData = new JsonObject
-                {
-                    ["cityId"] = "Berlin",
-                    ["countryId"] = "Germany",
-                    ["height"] = random.Next(160, 200),
-                    ["job"] = job,
-                    ["education"] = edu,
-                    ["drinking"] = drinkSmoking[random.Next(drinkSmoking.Length)],
-                    ["smoking"] = drinkSmoking[random.Next(drinkSmoking.Length)],
-                    ["eyeColor"] = eyeColors[random.Next(eyeColors.Length)],
-                    ["hairColor"] = hairColors[random.Next(hairColors.Length)],
-                    ["interestedIn"] = interestedIn,
-                    ["photos"] = photoObjects,
-                    ["interests"] = new JsonArray("Travel", "Music", "Food"),
-                    ["languages"] = new JsonArray("English", "German")
-                };
-
-                var bio = $"Hi, I'm {displayName}. I work as a {job}. Checking out Wissler!";
-                
-                await SeedProfileRawAsync(userId, wisslerAppId, displayName, bio, photoUrls.First(), customData.ToJsonString(), dob, gender);
-            }
-        }
-
-        private async Task SeedProfileRawAsync(Guid userId, Guid appId, string displayName, string bio, string avatarUrl, string customDataJson, DateTime dob, string gender)
+        private async Task SeedProfileRawAsync(Guid userId, Guid appId, string displayName, string bio, string avatarUrl, string customDataJson, DateTime dob, string gender, int loyaltyPoints = 0, int coinsBalance = 0)
         {
              // Direct SQL Insert to bypass EF complexities for seeding
              await _context.Database.ExecuteSqlRawAsync(@"
-                INSERT INTO [UserProfiles] ([Id], [UserId], [AppId], [DisplayName], [Bio], [AvatarUrl], [CustomDataJson], [DateOfBirth], [Gender], [Created])
-                VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9})
+                INSERT INTO [UserProfiles] ([Id], [UserId], [AppId], [DisplayName], [Bio], [AvatarUrl], [CustomDataJson], [DateOfBirth], [Gender], [Created], [LoyaltyPoints], [CoinsBalance])
+                VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11})
             ", 
-            Guid.NewGuid(), userId, appId, displayName, bio, avatarUrl, customDataJson, dob, gender, DateTime.UtcNow);
+            Guid.NewGuid(), userId, appId, displayName, bio, avatarUrl, customDataJson, dob, gender, DateTime.UtcNow, loyaltyPoints, coinsBalance);
             
             _logger.LogInformation("Seeded User: {Name}", displayName);
         }

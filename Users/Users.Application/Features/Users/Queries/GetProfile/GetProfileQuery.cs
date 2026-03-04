@@ -1,6 +1,6 @@
 using MediatR;
-using Users.Domain.Entities;
+using Users.Application.DTOs;
 
 namespace Users.Application.Features.Users.Queries.GetProfile;
 
-public record GetProfileQuery(Guid UserId, Guid AppId) : IRequest<UserProfile?>;
+public record GetProfileQuery(Guid UserId, Guid AppId) : IRequest<UserProfileDto?>;

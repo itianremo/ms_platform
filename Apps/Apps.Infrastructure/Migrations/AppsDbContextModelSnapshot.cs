@@ -30,8 +30,8 @@ namespace Apps.Infrastructure.Migrations
 
                     b.Property<string>("BaseUrl")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("DefaultUserProfileJson")
                         .IsRequired()
@@ -60,7 +60,7 @@ namespace Apps.Infrastructure.Migrations
                     b.Property<bool>("RequiresAdminApproval")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ThemeJson")
+                    b.Property<string>("TermsAndConditions")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -84,9 +84,8 @@ namespace Apps.Infrastructure.Migrations
                     b.Property<Guid>("AppId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("CoinsAmount")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -98,6 +97,10 @@ namespace Apps.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<string>("LocalizedPricingJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -105,8 +108,8 @@ namespace Apps.Infrastructure.Migrations
                     b.Property<int>("Period")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

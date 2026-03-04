@@ -39,15 +39,19 @@ public class GeoDbInitializer
         {
             var countries = new List<Country>
             {
-                new Country { Name = "United States", Code = "US", PhoneCode = "+1" },
-                new Country { Name = "United Kingdom", Code = "GB", PhoneCode = "+44" },
-                new Country { Name = "Canada", Code = "CA", PhoneCode = "+1" },
-                new Country { Name = "Australia", Code = "AU", PhoneCode = "+61" },
-                new Country { Name = "Germany", Code = "DE", PhoneCode = "+49" },
-                new Country { Name = "France", Code = "FR", PhoneCode = "+33" },
-                new Country { Name = "Egypt", Code = "EG", PhoneCode = "+20" },
-                new Country { Name = "United Arab Emirates", Code = "AE", PhoneCode = "+971" },
-                new Country { Name = "Saudi Arabia", Code = "SA", PhoneCode = "+966" },
+                new Country { Name = "United States", Code = "US", PhoneCode = "+1", IsActive = true },
+                new Country { Name = "United Kingdom", Code = "GB", PhoneCode = "+44", IsActive = true },
+                new Country { Name = "Canada", Code = "CA", PhoneCode = "+1", IsActive = true },
+                new Country { Name = "Australia", Code = "AU", PhoneCode = "+61", IsActive = true },
+                new Country { Name = "Germany", Code = "DE", PhoneCode = "+49", IsActive = true },
+                new Country { Name = "France", Code = "FR", PhoneCode = "+33", IsActive = true },
+                new Country { Name = "Egypt", Code = "EG", PhoneCode = "+20", IsActive = true },
+                new Country { Name = "United Arab Emirates", Code = "AE", PhoneCode = "+971", IsActive = true },
+                new Country { Name = "Saudi Arabia", Code = "SA", PhoneCode = "+966", IsActive = true },
+                new Country { Name = "Qatar", Code = "QA", PhoneCode = "+974", IsActive = true },
+                new Country { Name = "Bahrain", Code = "BH", PhoneCode = "+973", IsActive = true },
+                new Country { Name = "Oman", Code = "OM", PhoneCode = "+968", IsActive = true },
+                new Country { Name = "Kuwait", Code = "KW", PhoneCode = "+965", IsActive = true },
             };
 
             await _context.Countries.AddRangeAsync(countries);
@@ -58,12 +62,16 @@ public class GeoDbInitializer
             var uk = countries.First(c => c.Code == "GB");
             var eg = countries.First(c => c.Code == "EG");
             var ae = countries.First(c => c.Code == "AE");
+            var sa = countries.First(c => c.Code == "SA");
+            var qa = countries.First(c => c.Code == "QA");
+            var kw = countries.First(c => c.Code == "KW");
 
             var cities = new List<City>
             {
                 new City { Name = "New York", CountryId = us.Id },
                 new City { Name = "Los Angeles", CountryId = us.Id },
                 new City { Name = "Chicago", CountryId = us.Id },
+                
                 new City { Name = "London", CountryId = uk.Id },
                 new City { Name = "Manchester", CountryId = uk.Id },
                 
@@ -92,7 +100,23 @@ public class GeoDbInitializer
                 
                 new City { Name = "Dubai", CountryId = ae.Id },
                 new City { Name = "Abu Dhabi", CountryId = ae.Id },
+                new City { Name = "Sharjah", CountryId = ae.Id },
+                
+                new City { Name = "Riyadh", CountryId = sa.Id },
+                new City { Name = "Jeddah", CountryId = sa.Id },
+                new City { Name = "Mecca", CountryId = sa.Id },
+                new City { Name = "Medina", CountryId = sa.Id },
+                
+                new City { Name = "Doha", CountryId = qa.Id },
+                
+                new City { Name = "Kuwait City", CountryId = kw.Id },
             };
+
+            // Add an "Other" category natively into EVERY injected country.
+            foreach (var country in countries)
+            {
+                cities.Add(new City { Name = "Other", CountryId = country.Id });
+            }
 
             await _context.Cities.AddRangeAsync(cities);
             await _context.SaveChangesAsync();
