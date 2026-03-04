@@ -9,6 +9,12 @@ public class SysConfigDto
     
     [JsonPropertyName("collapsedmenu")]
     public bool CollapsedMenu { get; set; } = false;
+
+    [JsonPropertyName("defaultcountry")]
+    public string DefaultCountry { get; set; } = "US";
+
+    [JsonPropertyName("countrysource")]
+    public string CountrySource { get; set; } = "profile"; // "profile" or "location"
 }
 
 public class NotificationsDto

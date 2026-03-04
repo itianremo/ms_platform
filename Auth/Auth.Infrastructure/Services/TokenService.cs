@@ -49,7 +49,7 @@ public class TokenService : ITokenService
 
                 if (appRole != null)
                 {
-                    claims.Add(new Claim(ClaimTypes.Role, appRole.Name));
+                    // Roles are just groups of permissions, relying on flattened permissions instead
                     
                     if (appRole.Permissions != null)
                     {
@@ -62,7 +62,7 @@ public class TokenService : ITokenService
                 
                 if (superAdminRole != null && appRole?.Name != "SuperAdmin")
                 {
-                    claims.Add(new Claim(ClaimTypes.Role, "SuperAdmin"));
+                    // Flattening SuperAdmin permissions as well
                     
                     if (superAdminRole.Permissions != null)
                     {

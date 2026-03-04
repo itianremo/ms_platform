@@ -21,6 +21,7 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddSharedHealthChecks(builder.Configuration);
+builder.Services.AddHttpClient();
 
 // Add Authentication
 var jwtSettings = new Apps.API.JwtSettings();

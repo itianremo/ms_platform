@@ -58,8 +58,7 @@ public class CheckPermissionCommandHandler : IRequestHandler<CheckPermissionQuer
                         var role = await _userRepository.GetRoleByIdAsync(profile.RoleId);
                         if (role != null)
                         {
-                            if (role.Name == "SuperAdmin") return true;
-                            if (role.Permissions != null && role.Permissions.Any(p => p.Name == request.PermissionName)) return true;
+                            if (role.Permissions != null && role.Permissions.Any(p => p.Name == request.PermissionName || p.Name == "AccessAll")) return true;
                         }
                     }
                 }

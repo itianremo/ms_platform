@@ -84,13 +84,10 @@ public class AppsDbInitializer
                     else
                     {
                         // Update specific fields if needed
-                        if (string.IsNullOrEmpty(existingApp.DefaultUserProfileJson) || existingApp.DefaultUserProfileJson == "{}")
+                        if (dynamicJson != "{}")
                         {
-                            if (dynamicJson != "{}")
-                            {
-                                existingApp.UpdateDefaultUserProfile(dynamicJson);
-                                logger.LogInformation("Updated App {Name} with DefaultUserProfileJson", seed.Name);
-                            }
+                            existingApp.UpdateDefaultUserProfile(dynamicJson);
+                            logger.LogInformation("Updated App {Name} with DefaultUserProfileJson", seed.Name);
                         }
 
                         if (string.IsNullOrEmpty(existingApp.PrivacyPolicy))

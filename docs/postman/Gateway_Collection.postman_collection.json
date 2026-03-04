@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "98dd033b-f9b9-4fab-8af7-79921e5c02b2",
+    "_postman_id": "1f6eb7da-a243-4b06-a475-4a638209d087",
     "name": "Gateway API Collection (Detailed)",
     "description": "Comprehensive Postman collection detailing all unified Gateway endpoints. \n\n**Required Environment Variables:**\n- `gateway_url`: The base URL, e.g., `http://localhost:7032`\n- `app_id`: Application ID UUID context\n- `tenant_id`: Tenant UUID context\n- `jwt_token`: Bearer token for authorized requests.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -82,7 +82,7 @@
                     }
                   ],
                   "cookie": [],
-                  "body": "[\n    {\n        \"Id\": \"00000000-0000-0000-0000-000000000000\",\n        \"Name\": \"Example Name\",\n        \"Description\": \"Detailed description of the resource.\",\n        \"BaseUrl\": \"https://example.com\"\n    }\n]"
+                  "body": "[\n    {\n        \"Id\": \"00000000-0000-0000-0000-000000000000\",\n        \"Name\": \"Example Name\",\n        \"Description\": \"Detailed description of the resource.\",\n        \"BaseUrl\": \"https://example.com\",\n        \"DefaultCountry\": \"US\"\n    }\n]"
                 }
               ]
             },
@@ -575,7 +575,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/apps/api/Apps/00000000-0000-0000-0000-000000000012/packages",
+                  "raw": "{{gateway_url}}/apps/api/Apps/{{par_app_id3}}/packages?country=EG",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -583,8 +583,14 @@
                     "apps",
                     "api",
                     "Apps",
-                    "00000000-0000-0000-0000-000000000012",
+                    "{{par_app_id3}}",
                     "packages"
+                  ],
+                  "query": [
+                    {
+                      "key": "country",
+                      "value": "EG"
+                    }
                   ]
                 },
                 "description": "**Get Packages**\n\nThis endpoint executes the `GetPackages` operation. \n\n**Authorization Context:**\nPublicly accessible endpoint (No authentication required)."
@@ -619,13 +625,23 @@
                     }
                   ],
                   "cookie": [],
-                  "body": "{\n    \"message\": \"Success\"\n}"
+                  "body": "{\n    \"subscriptions\": [\n        {\n            \"id\": \"2eed470d-7934-4edc-9bf5-0a1093b88fd2\",\n            \"name\": \"Weekly\",\n            \"description\": \"Premium Access\",\n            \"price\": 5.0,\n            \"period\": 1,\n            \"currency\": \"USD\",\n            \"packageType\": 0,\n            \"coinsAmount\": 0\n        }\n    ],\n    \"coins\": [\n        {\n            \"id\": \"3eed470d-7934-4edc-9bf5-0a1093b88fd3\",\n            \"name\": \"50 Coins\",\n            \"description\": \"50 Virtual Coins\",\n            \"price\": 5.0,\n            \"period\": 0,\n            \"currency\": \"USD\",\n            \"packageType\": 1,\n            \"coinsAmount\": 50\n        }\n    ]\n}"
                 }
               ]
             },
             {
               "name": "Get User Subscriptions (api/Apps/{appId}/users/{userId}/subscriptions)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -654,17 +670,7 @@
                     "subscriptions"
                   ]
                 },
-                "description": "**Get User Subscriptions**\n\nThis endpoint executes the `GetUserSubscriptions` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get User Subscriptions**\n\nThis endpoint executes the `GetUserSubscriptions` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -703,6 +709,16 @@
             {
               "name": "Grant Subscription (api/Apps/{appId}/users/{userId}/subscriptions)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -745,17 +761,7 @@
                     "subscriptions"
                   ]
                 },
-                "description": "**Grant Subscription**\n\nThis endpoint executes the `GrantSubscription` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Grant Subscription**\n\nThis endpoint executes the `GrantSubscription` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -799,6 +805,16 @@
             {
               "name": "Change Subscription Status (api/Apps/{appId}/subscriptions/{id}/status)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [
                   {
@@ -841,17 +857,7 @@
                     "status"
                   ]
                 },
-                "description": "**Change Subscription Status**\n\nThis endpoint executes the `ChangeSubscriptionStatus` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Change Subscription Status**\n\nThis endpoint executes the `ChangeSubscriptionStatus` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -905,6 +911,16 @@
             {
               "name": "Get Stats (api/Audit/stats)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -919,7 +935,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/audit/api/Audit/stats?days=7",
+                  "raw": "{{gateway_url}}/audit/api/Audit/stats?days=demo_value",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -937,17 +953,7 @@
                     }
                   ]
                 },
-                "description": "**Get Stats**\n\nThis endpoint executes the `GetStats` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Stats**\n\nThis endpoint executes the `GetStats` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -1255,6 +1261,16 @@
             {
               "name": "Request Otp (api/Auth/otp/request)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -1295,17 +1311,7 @@
                     "request"
                   ]
                 },
-                "description": "**Request Otp**\n\nThis endpoint executes the `RequestOtp` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Request Otp**\n\nThis endpoint executes the `RequestOtp` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -1349,6 +1355,16 @@
             {
               "name": "Verify Otp (api/Auth/otp/verify)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -1389,17 +1405,7 @@
                     "verify"
                   ]
                 },
-                "description": "**Verify Otp**\n\nThis endpoint executes the `VerifyOtp` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Verify Otp**\n\nThis endpoint executes the `VerifyOtp` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -1443,6 +1449,16 @@
             {
               "name": "Forgot Password (api/Auth/password/forgot)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -1483,17 +1499,7 @@
                     "forgot"
                   ]
                 },
-                "description": "**Forgot Password**\n\nThis endpoint executes the `ForgotPassword` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Forgot Password**\n\nThis endpoint executes the `ForgotPassword` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -1537,6 +1543,16 @@
             {
               "name": "Reset Password (api/Auth/password/reset)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -1577,17 +1593,7 @@
                     "reset"
                   ]
                 },
-                "description": "**Reset Password**\n\nThis endpoint executes the `ResetPassword` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Reset Password**\n\nThis endpoint executes the `ResetPassword` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -1631,6 +1637,16 @@
             {
               "name": "Initiate Reactivation (api/Auth/reactivate/initiate)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -1671,17 +1687,7 @@
                     "initiate"
                   ]
                 },
-                "description": "**Initiate Reactivation**\n\nThis endpoint executes the `InitiateReactivation` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Initiate Reactivation**\n\nThis endpoint executes the `InitiateReactivation` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -1725,6 +1731,16 @@
             {
               "name": "Verify Reactivation (api/Auth/reactivate/verify)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -1765,17 +1781,7 @@
                     "verify"
                   ]
                 },
-                "description": "**Verify Reactivation**\n\nThis endpoint executes the `VerifyReactivation` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Verify Reactivation**\n\nThis endpoint executes the `VerifyReactivation` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -1819,6 +1825,16 @@
             {
               "name": "Refresh (api/Auth/refresh)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -1844,17 +1860,7 @@
                     "refresh"
                   ]
                 },
-                "description": "**Refresh**\n\nThis endpoint executes the `Refresh` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Refresh**\n\nThis endpoint executes the `Refresh` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -1893,6 +1899,16 @@
             {
               "name": "Get Sessions (api/Auth/sessions)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -1918,17 +1934,7 @@
                     "sessions"
                   ]
                 },
-                "description": "**Get Sessions**\n\nThis endpoint executes the `GetSessions` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Sessions**\n\nThis endpoint executes the `GetSessions` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -2046,6 +2052,16 @@
             {
               "name": "Update User Verification (api/Auth/users/{id}/verify)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [
                   {
@@ -2073,17 +2089,7 @@
                     "verify"
                   ]
                 },
-                "description": "**Update User Verification**\n\nThis endpoint executes the `UpdateUserVerification` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Update User Verification**\n\nThis endpoint executes the `UpdateUserVerification` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -2122,6 +2128,16 @@
             {
               "name": "Add User To App (api/Auth/users/{id}/apps)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -2149,17 +2165,7 @@
                     "apps"
                   ]
                 },
-                "description": "**Add User To App**\n\nThis endpoint executes the `AddUserToApp` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Add User To App**\n\nThis endpoint executes the `AddUserToApp` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -2198,6 +2204,16 @@
             {
               "name": "Remove User From App (api/Auth/users/{id}/apps/{appId})",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "DELETE",
                 "header": [
                   {
@@ -2226,17 +2242,7 @@
                     "{appId}"
                   ]
                 },
-                "description": "**Remove User From App**\n\nThis endpoint executes the `RemoveUserFromApp` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Remove User From App**\n\nThis endpoint executes the `RemoveUserFromApp` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -2275,6 +2281,16 @@
             {
               "name": "Update App Status (api/Auth/users/{id}/apps/{appId}/status)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [
                   {
@@ -2304,17 +2320,7 @@
                     "status"
                   ]
                 },
-                "description": "**Update App Status**\n\nThis endpoint executes the `UpdateAppStatus` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Update App Status**\n\nThis endpoint executes the `UpdateAppStatus` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -2353,6 +2359,16 @@
             {
               "name": "Assign Role (api/Auth/users/{id}/apps/{appId}/role)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [
                   {
@@ -2382,17 +2398,7 @@
                     "role"
                   ]
                 },
-                "description": "**Assign Role**\n\nThis endpoint executes the `AssignRole` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Assign Role**\n\nThis endpoint executes the `AssignRole` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -2431,6 +2437,16 @@
             {
               "name": "Revoke Session (api/Auth/sessions/{sessionId})",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "DELETE",
                 "header": [
                   {
@@ -2457,17 +2473,7 @@
                     "{sessionId}"
                   ]
                 },
-                "description": "**Revoke Session**\n\nThis endpoint executes the `RevokeSession` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Revoke Session**\n\nThis endpoint executes the `RevokeSession` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -2506,6 +2512,16 @@
             {
               "name": "Get All Users (api/Auth/users)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -2531,17 +2547,7 @@
                     "users"
                   ]
                 },
-                "description": "**Get All Users**\n\nThis endpoint executes the `GetAllUsers` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get All Users**\n\nThis endpoint executes the `GetAllUsers` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -2580,6 +2586,16 @@
             {
               "name": "Logout (api/Auth/logout)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -2605,17 +2621,7 @@
                     "logout"
                   ]
                 },
-                "description": "**Logout**\n\nThis endpoint executes the `Logout` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Logout**\n\nThis endpoint executes the `Logout` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -2724,6 +2730,16 @@
             {
               "name": "Callback (api/ExternalAuth/callback)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -2749,17 +2765,7 @@
                     "callback"
                   ]
                 },
-                "description": "**Callback**\n\nThis endpoint executes the `Callback` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Callback**\n\nThis endpoint executes the `Callback` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -2798,6 +2804,16 @@
             {
               "name": "Callback Link (api/ExternalAuth/link/{provider})",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -2824,17 +2840,7 @@
                     "{provider}"
                   ]
                 },
-                "description": "**Callback Link**\n\nThis endpoint executes the `CallbackLink` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Callback Link**\n\nThis endpoint executes the `CallbackLink` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -2873,6 +2879,16 @@
             {
               "name": "Callback Link (api/ExternalAuth/link-callback)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -2898,17 +2914,7 @@
                     "link-callback"
                   ]
                 },
-                "description": "**Callback Link**\n\nThis endpoint executes the `CallbackLink` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Callback Link**\n\nThis endpoint executes the `CallbackLink` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -2947,6 +2953,16 @@
             {
               "name": "Unlink (api/ExternalAuth/users/{userId}/links/{provider})",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "DELETE",
                 "header": [
                   {
@@ -2975,17 +2991,7 @@
                     "{provider}"
                   ]
                 },
-                "description": "**Unlink**\n\nThis endpoint executes the `Unlink` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Unlink**\n\nThis endpoint executes the `Unlink` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -3029,6 +3035,16 @@
             {
               "name": "Reset App Data (api/Maintenance/reset/{appId})",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "DELETE",
                 "header": [
                   {
@@ -3055,17 +3071,7 @@
                     "{appId}"
                   ]
                 },
-                "description": "**Reset App Data**\n\nThis endpoint executes the `ResetAppData` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Reset App Data**\n\nThis endpoint executes the `ResetAppData` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -3109,6 +3115,16 @@
             {
               "name": "Check Permission (api/Permissions/check)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -3146,17 +3162,7 @@
                     }
                   ]
                 },
-                "description": "**Check Permission**\n\nThis endpoint executes the `CheckPermission` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Check Permission**\n\nThis endpoint executes the `CheckPermission` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -3205,6 +3211,16 @@
             {
               "name": "Assign Role (api/Roles/assign)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -3244,17 +3260,7 @@
                     "assign"
                   ]
                 },
-                "description": "**Assign Role**\n\nThis endpoint executes the `AssignRole` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Assign Role**\n\nThis endpoint executes the `AssignRole` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -3308,6 +3314,16 @@
             {
               "name": "Get History (api/Chat/history)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -3345,17 +3361,7 @@
                     }
                   ]
                 },
-                "description": "**Get History**\n\nThis endpoint executes the `GetHistory` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get History**\n\nThis endpoint executes the `GetHistory` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -3397,6 +3403,16 @@
             {
               "name": "Get Flagged Messages (api/Chat/flagged)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -3411,7 +3427,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/chat/api/Chat/flagged?appId=00000000-0000-0000-0000-000000000012",
+                  "raw": "{{gateway_url}}/chat/api/Chat/flagged?appId=demo_value",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -3429,17 +3445,7 @@
                     }
                   ]
                 },
-                "description": "**Get Flagged Messages**\n\nThis endpoint executes the `GetFlaggedMessages` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Flagged Messages**\n\nThis endpoint executes the `GetFlaggedMessages` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -3478,6 +3484,16 @@
             {
               "name": "Create Channel (api/Chat/channels)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -3503,17 +3519,7 @@
                     "channels"
                   ]
                 },
-                "description": "**Create Channel**\n\nThis endpoint executes the `CreateChannel` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Create Channel**\n\nThis endpoint executes the `CreateChannel` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -3562,6 +3568,16 @@
             {
               "name": "Get Nearby (api/Geo/nearby)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -3576,7 +3592,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/geo/api/Geo/nearby?appId=00000000-0000-0000-0000-000000000012&lat=demo_value&lon=demo_value&radiusKm=demo_value",
+                  "raw": "{{gateway_url}}/geo/api/Geo/nearby?appId=demo_value&lat=demo_value&lon=demo_value&radiusKm=demo_value",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -3609,17 +3625,7 @@
                     }
                   ]
                 },
-                "description": "**Get Nearby**\n\nThis endpoint executes the `GetNearby` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Nearby**\n\nThis endpoint executes the `GetNearby` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -3665,6 +3671,16 @@
             {
               "name": "Update Location (api/Geo/location)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -3704,17 +3720,7 @@
                     "location"
                   ]
                 },
-                "description": "**Update Location**\n\nThis endpoint executes the `UpdateLocation` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Update Location**\n\nThis endpoint executes the `UpdateLocation` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -3763,6 +3769,16 @@
             {
               "name": "Get Countries (api/Lookups/countries)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -3788,17 +3804,7 @@
                     "countries"
                   ]
                 },
-                "description": "**Get Countries**\n\nThis endpoint executes the `GetCountries` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Countries**\n\nThis endpoint executes the `GetCountries` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -3837,6 +3843,16 @@
             {
               "name": "Get Cities (api/Lookups/cities/{countryId})",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -3863,17 +3879,7 @@
                     "{countryId}"
                   ]
                 },
-                "description": "**Get Cities**\n\nThis endpoint executes the `GetCities` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Cities**\n\nThis endpoint executes the `GetCities` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -3922,6 +3928,16 @@
             {
               "name": "Upload (api/Media/upload)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -3947,17 +3963,7 @@
                     "upload"
                   ]
                 },
-                "description": "**Upload**\n\nThis endpoint executes the `Upload` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Upload**\n\nThis endpoint executes the `Upload` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -3996,6 +4002,16 @@
             {
               "name": "Get Url (api/Media/flagged)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -4021,17 +4037,7 @@
                     "flagged"
                   ]
                 },
-                "description": "**Get Url**\n\nThis endpoint executes the `GetUrl` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Url**\n\nThis endpoint executes the `GetUrl` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -4070,6 +4076,16 @@
             {
               "name": "Get Url (api/Media/{id}/url)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -4096,17 +4112,7 @@
                     "url"
                   ]
                 },
-                "description": "**Get Url**\n\nThis endpoint executes the `GetUrl` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Url**\n\nThis endpoint executes the `GetUrl` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -4155,6 +4161,16 @@
             {
               "name": "Test Sms (api/Config/test-sms)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -4180,17 +4196,7 @@
                     "test-sms"
                   ]
                 },
-                "description": "**Test Sms**\n\nThis endpoint executes the `TestSms` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Test Sms**\n\nThis endpoint executes the `TestSms` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -4229,6 +4235,16 @@
             {
               "name": "Test Email (api/Config/test-email)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -4254,17 +4270,7 @@
                     "test-email"
                   ]
                 },
-                "description": "**Test Email**\n\nThis endpoint executes the `TestEmail` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Test Email**\n\nThis endpoint executes the `TestEmail` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -4308,6 +4314,16 @@
             {
               "name": "Get Unread (api/Notifications/unread)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -4333,17 +4349,7 @@
                     "unread"
                   ]
                 },
-                "description": "**Get Unread**\n\nThis endpoint executes the `GetUnread` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Unread**\n\nThis endpoint executes the `GetUnread` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -4382,6 +4388,16 @@
             {
               "name": "Mark As Read (api/Notifications/{id}/read)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [
                   {
@@ -4408,17 +4424,7 @@
                     "read"
                   ]
                 },
-                "description": "**Mark As Read**\n\nThis endpoint executes the `MarkAsRead` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Mark As Read**\n\nThis endpoint executes the `MarkAsRead` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -4457,6 +4463,16 @@
             {
               "name": "Mark All As Read (api/Notifications/read-all)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [
                   {
@@ -4482,17 +4498,7 @@
                     "read-all"
                   ]
                 },
-                "description": "**Mark All As Read**\n\nThis endpoint executes the `MarkAllAsRead` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Mark All As Read**\n\nThis endpoint executes the `MarkAllAsRead` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -4541,6 +4547,16 @@
             {
               "name": "Create Checkout Session (api/payments/checkout)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -4566,17 +4582,7 @@
                     "checkout"
                   ]
                 },
-                "description": "**Create Checkout Session**\n\nThis endpoint executes the `CreateCheckoutSession` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Create Checkout Session**\n\nThis endpoint executes the `CreateCheckoutSession` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -4620,6 +4626,16 @@
             {
               "name": "Get Available Methods (api/Payments/config/{appId})",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -4646,17 +4662,7 @@
                     "{appId}"
                   ]
                 },
-                "description": "**Get Available Methods**\n\nThis endpoint executes the `GetAvailableMethods` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Available Methods**\n\nThis endpoint executes the `GetAvailableMethods` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -4695,6 +4701,16 @@
             {
               "name": "Configure Method (api/Payments/config)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -4734,17 +4750,7 @@
                     "config"
                   ]
                 },
-                "description": "**Configure Method**\n\nThis endpoint executes the `ConfigureMethod` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Configure Method**\n\nThis endpoint executes the `ConfigureMethod` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -4788,6 +4794,16 @@
             {
               "name": "Subscribe (api/Payments/subscribe)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -4827,17 +4843,7 @@
                     "subscribe"
                   ]
                 },
-                "description": "**Subscribe**\n\nThis endpoint executes the `Subscribe` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Subscribe**\n\nThis endpoint executes the `Subscribe` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -4881,6 +4887,16 @@
             {
               "name": "Get Analytics (api/Payments/analytics)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -4918,17 +4934,7 @@
                     }
                   ]
                 },
-                "description": "**Get Analytics**\n\nThis endpoint executes the `GetAnalytics` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Analytics**\n\nThis endpoint executes the `GetAnalytics` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -4970,6 +4976,16 @@
             {
               "name": "Get Plans (api/Payments/plans)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -4995,17 +5011,7 @@
                     "plans"
                   ]
                 },
-                "description": "**Get Plans**\n\nThis endpoint executes the `GetPlans` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Plans**\n\nThis endpoint executes the `GetPlans` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -5049,6 +5055,16 @@
             {
               "name": "Handle (api/webhooks/stripe)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -5074,17 +5090,7 @@
                     "stripe"
                   ]
                 },
-                "description": "**Handle**\n\nThis endpoint executes the `Handle` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Handle**\n\nThis endpoint executes the `Handle` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -5242,6 +5248,16 @@
             {
               "name": "Reset App Data (api/Maintenance/reset/{appId})",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "DELETE",
                 "header": [
                   {
@@ -5268,17 +5284,7 @@
                     "{appId}"
                   ]
                 },
-                "description": "**Reset App Data**\n\nThis endpoint executes the `ResetAppData` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Reset App Data**\n\nThis endpoint executes the `ResetAppData` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -5322,6 +5328,16 @@
             {
               "name": "Get Profile (api/Users/profile)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -5336,7 +5352,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/users/api/Users/profile?userId=demo_value&appId=00000000-0000-0000-0000-000000000012",
+                  "raw": "{{gateway_url}}/users/api/Users/profile?userId=demo_value&appId=demo_value",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -5359,17 +5375,7 @@
                     }
                   ]
                 },
-                "description": "**Get Profile**\n\nThis endpoint executes the `GetProfile` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Profile**\n\nThis endpoint executes the `GetProfile` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -5411,6 +5417,16 @@
             {
               "name": "Update Profile (api/Users/profile)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "PUT",
                 "header": [
                   {
@@ -5450,17 +5466,7 @@
                     "profile"
                   ]
                 },
-                "description": "**Update Profile**\n\nThis endpoint executes the `UpdateProfile` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Update Profile**\n\nThis endpoint executes the `UpdateProfile` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -5504,6 +5510,16 @@
             {
               "name": "Get Profiles (api/Users/profiles)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -5518,7 +5534,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/users/api/Users/profiles?appId=00000000-0000-0000-0000-000000000012",
+                  "raw": "{{gateway_url}}/users/api/Users/profiles?appId=demo_value",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -5536,17 +5552,7 @@
                     }
                   ]
                 },
-                "description": "**Get Profiles**\n\nThis endpoint executes the `GetProfiles` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Profiles**\n\nThis endpoint executes the `GetProfiles` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -5585,6 +5591,16 @@
             {
               "name": "Get Dashboard Stats (api/Users/dashboard/stats)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -5599,7 +5615,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/users/api/Users/dashboard/stats?appId=00000000-0000-0000-0000-000000000012&startDate=demo_value&endDate=demo_value",
+                  "raw": "{{gateway_url}}/users/api/Users/dashboard/stats?appId=demo_value&startDate=demo_value&endDate=demo_value",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -5628,17 +5644,7 @@
                     }
                   ]
                 },
-                "description": "**Get Dashboard Stats**\n\nThis endpoint executes the `GetDashboardStats` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Dashboard Stats**\n\nThis endpoint executes the `GetDashboardStats` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -5682,6 +5688,16 @@
             {
               "name": "Get Report Reasons (api/Users/ReportReasons)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -5707,17 +5723,7 @@
                     "ReportReasons"
                   ]
                 },
-                "description": "**Get Report Reasons**\n\nThis endpoint executes the `GetReportReasons` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Report Reasons**\n\nThis endpoint executes the `GetReportReasons` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -5756,6 +5762,16 @@
             {
               "name": "Get Report Reason (api/Users/Report)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "GET",
                 "header": [
                   {
@@ -5770,7 +5786,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{gateway_url}}/users/api/Users/Report?reporterId=00000000-0000-0000-0000-000000000001&reportedId=00000000-0000-0000-0000-000000000002",
+                  "raw": "{{gateway_url}}/users/api/Users/Report?reporterId=demo_value&reportedId=demo_value",
                   "host": [
                     "{{gateway_url}}"
                   ],
@@ -5793,17 +5809,7 @@
                     }
                   ]
                 },
-                "description": "**Get Report Reason**\n\nThis endpoint executes the `GetReportReason` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Get Report Reason**\n\nThis endpoint executes the `GetReportReason` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {
@@ -5845,6 +5851,16 @@
             {
               "name": "Report User (api/Users/Report)",
               "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "method": "POST",
                 "header": [
                   {
@@ -5870,17 +5886,7 @@
                     "Report"
                   ]
                 },
-                "description": "**Report User**\n\nThis endpoint executes the `ReportUser` operation. \n\n**Authorization Context:**\nRequires Authentication.",
-                "auth": {
-                  "bearer": [
-                    {
-                      "key": "token",
-                      "type": "string",
-                      "value": "{{jwt_token}}"
-                    }
-                  ],
-                  "type": "bearer"
-                }
+                "description": "**Report User**\n\nThis endpoint executes the `ReportUser` operation. \n\n**Authorization Context:**\nRequires Authentication."
               },
               "response": [
                 {

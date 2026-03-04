@@ -7,7 +7,7 @@ namespace Users.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "GlobalAdmin")] // Strict security
+[Authorize(Policy = "GlobalAdmin")] // Strict security, requires AccessAll permission
 public class AnalyticsController : ControllerBase
 {
     private readonly IMediator _mediator;

@@ -76,7 +76,8 @@ Publicly accessible endpoint (No authentication required).
         "Id": "00000000-0000-0000-0000-000000000000",
         "Name": "Example Name",
         "Description": "Detailed description of the resource.",
-        "BaseUrl": "https://example.com"
+        "BaseUrl": "https://example.com",
+        "DefaultCountry": "US"
     }
 ]
 ```
@@ -139,7 +140,11 @@ Requires 'AccessAll' or 'ManageApps' claim, OR all of ('AssignApps', 'EditApps',
 **Expected Successful Response:**
 ```json
 {
-    "message": "Success"
+    "Id": "00000000-0000-0000-0000-000000000000",
+    "Name": "Example Name",
+    "Description": "Detailed description of the resource.",
+    "BaseUrl": "https://example.com",
+    "DefaultCountry": "US"
 }
 ```
 
@@ -285,7 +290,7 @@ Requires 'AccessAll', 'DeleteApps', or 'ManageApps' permission claim.
 
 **Get Packages**
 
-This endpoint executes the `GetPackages` operation. 
+This endpoint executes the `GetPackages` operation, fetching available subcriptions and coin packages grouped separately and sorted by cheapest first.
 
 **Authorization Context:**
 Publicly accessible endpoint (No authentication required).
@@ -296,10 +301,36 @@ Publicly accessible endpoint (No authentication required).
 - `App-Id`: `{{app_id}}`
 - `Tenant-Id`: `{{tenant_id}}`
 
+**Query Parameters:**
+- `country`: Limit the currency and pricing to a specific country code (e.g. `EG`). If omitted, it will try the authenticated user's profile country, then fallback to the DefaultCountry of the App context.
+
 **Expected Successful Response:**
 ```json
 {
-    "message": "Success"
+  "subscriptions": [
+    {
+      "id": "2eed470d-7934-4edc-9bf5-0a1093b88fd2",
+      "name": "Weekly",
+      "description": "Premium Access",
+      "price": 5.0,
+      "period": 1,
+      "currency": "USD",
+      "packageType": 0,
+      "coinsAmount": 0
+    }
+  ],
+  "coins": [
+    {
+      "id": "3eed470d-7934-4edc-9bf5-0a1093b88fd3",
+      "name": "50 Coins",
+      "description": "50 Virtual Coins",
+      "price": 5.0,
+      "period": 0,
+      "currency": "USD",
+      "packageType": 1,
+      "coinsAmount": 50
+    }
+  ]
 }
 ```
 

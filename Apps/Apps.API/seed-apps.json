@@ -6,7 +6,9 @@
         "themeJson": "corporate",
         "sysConfig": {
             "theme": "dark",
-            "collapsedmenu": true
+            "collapsedmenu": true,
+            "defaultcountry": "US",
+            "countrysource": "profile"
         },
         "notifications": {
             "email": true,
@@ -28,7 +30,9 @@
         "themeJson": "default",
         "sysConfig": {
             "theme": "dark",
-            "collapsedmenu": true
+            "collapsedmenu": true,
+            "defaultcountry": "US",
+            "countrysource": "profile"
         },
         "notifications": {
             "email": true,
@@ -50,7 +54,9 @@
         "themeJson": "default",
         "sysConfig": {
             "theme": "light",
-            "collapsedmenu": true
+            "collapsedmenu": true,
+            "defaultcountry": "US",
+            "countrysource": "location"
         },
         "notifications": {
             "email": true,
@@ -71,7 +77,9 @@
         "baseUrl": "WisslerApp",
         "themeJson": "dating-theme",
         "sysConfig": {
-            "theme": "light"
+            "theme": "light",
+            "defaultcountry": "US",
+            "countrysource": "location"
         },
         "notifications": {
             "email": true,
@@ -106,7 +114,9 @@
         "baseUrl": "FititApp",
         "themeJson": "default",
         "sysConfig": {
-            "theme": "dark"
+            "theme": "dark",
+            "defaultcountry": "EG",
+            "countrysource": "profile"
         },
         "notifications": {
             "email": true,

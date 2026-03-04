@@ -10,7 +10,6 @@ public class AppDto
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string BaseUrl { get; set; } = string.Empty;
-    
     // We intentionally map ExternalAuthProvidersJson, PrivacyPolicy, TermsAndConditions to strings 
     // or as actual objects if preferred. We'll leave them as is or let Json handle it.
     public string ExternalAuthProvidersJson { get; set; } = "[]";

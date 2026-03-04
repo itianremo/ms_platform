@@ -3,20 +3,26 @@ using Apps.Domain.Repositories;
 
 namespace Apps.Application.Features.Apps.Queries.GetPackagesByApp;
 
-public class GetPackagesByAppQueryHandler : IRequestHandler<GetPackagesByAppQuery, List<SubscriptionPackageDto>>
+public class GetPackagesByAppQueryHandler : IRequestHandler<GetPackagesByAppQuery, GetPackagesResponseDto>
 {
     private readonly ISubscriptionPackageRepository _repository;
-
     public GetPackagesByAppQueryHandler(ISubscriptionPackageRepository repository)
     {
         _repository = repository;
     }
 
-    public async Task<List<SubscriptionPackageDto>> Handle(GetPackagesByAppQuery request, CancellationToken cancellationToken)
+    public async Task<GetPackagesResponseDto> Handle(GetPackagesByAppQuery request, CancellationToken cancellationToken)
     {
+        var targetCountry = request.Country;
+        
+        if (string.IsNullOrEmpty(targetCountry))
+        {
+            targetCountry = request.DefaultCountry;
+        }
+
         var packages = await _repository.GetByAppIdAsync(request.AppId);
         
-        return packages.Select(p => {
+        var dtos = packages.Select(p => {
             decimal price = 0;
             string currency = "USD";
             
@@ -25,7 +31,7 @@ public class GetPackagesByAppQueryHandler : IRequestHandler<GetPackagesByAppQuer
                 try
                 {
                     var pricingData = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, object>>>(p.LocalizedPricingJson) ?? new();
-                    var countryKey = request.Country?.ToUpper() ?? "DEFAULT";
+                    var countryKey = targetCountry.ToUpper();
                     
                     if (!pricingData.ContainsKey(countryKey))
                         countryKey = "DEFAULT";
@@ -52,5 +58,13 @@ public class GetPackagesByAppQueryHandler : IRequestHandler<GetPackagesByAppQuer
                 CoinsAmount = p.CoinsAmount
             };
         }).ToList();
+
+        var response = new GetPackagesResponseDto
+        {
+            Subscriptions = dtos.Where(p => p.PackageType == 0).OrderBy(p => p.Price).ToList(),
+            Coins = dtos.Where(p => p.PackageType == 1).OrderBy(p => p.Price).ToList()
+        };
+
+        return response;
     }
 }

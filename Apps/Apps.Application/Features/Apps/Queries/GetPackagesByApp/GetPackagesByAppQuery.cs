@@ -3,7 +3,13 @@ using Apps.Domain.Entities;
 
 namespace Apps.Application.Features.Apps.Queries.GetPackagesByApp;
 
-public record GetPackagesByAppQuery(Guid AppId, string? Country) : IRequest<List<SubscriptionPackageDto>>;
+public record GetPackagesByAppQuery(Guid AppId, string? Country, string DefaultCountry = "US") : IRequest<GetPackagesResponseDto>;
+
+public class GetPackagesResponseDto
+{
+    public List<SubscriptionPackageDto> Subscriptions { get; set; } = new();
+    public List<SubscriptionPackageDto> Coins { get; set; } = new();
+}
 
 public class SubscriptionPackageDto
 {

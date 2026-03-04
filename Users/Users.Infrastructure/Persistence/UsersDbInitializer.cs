@@ -234,10 +234,10 @@ namespace Users.Infrastructure.Persistence
         {
              // Direct SQL Insert to bypass EF complexities for seeding
              await _context.Database.ExecuteSqlRawAsync(@"
-                INSERT INTO [UserProfiles] ([Id], [UserId], [AppId], [DisplayName], [Bio], [AvatarUrl], [CustomDataJson], [DateOfBirth], [Gender], [Created], [LoyaltyPoints], [CoinsBalance])
-                VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11})
+                INSERT INTO [UserProfiles] ([Id], [UserId], [AppId], [RoleId], [Status], [DisplayName], [Bio], [AvatarUrl], [CustomDataJson], [DateOfBirth], [Gender], [Created], [LoyaltyPoints], [CoinsBalance])
+                VALUES ({0}, {1}, {2}, {3}, 4, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12})
             ", 
-            Guid.NewGuid(), userId, appId, displayName, bio, avatarUrl, customDataJson, dob, gender, DateTime.UtcNow, loyaltyPoints, coinsBalance);
+            Guid.NewGuid(), userId, appId, Guid.Empty, displayName, bio, avatarUrl, customDataJson, dob, gender, DateTime.UtcNow, loyaltyPoints, coinsBalance);
             
             _logger.LogInformation("Seeded User: {Name}", displayName);
         }

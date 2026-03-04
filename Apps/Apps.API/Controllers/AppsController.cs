@@ -15,10 +15,12 @@ namespace Apps.API.Controllers;
 public class AppsController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public AppsController(IMediator mediator)
+    public AppsController(IMediator mediator, IHttpClientFactory httpClientFactory)
     {
         _mediator = mediator;
+        _httpClientFactory = httpClientFactory;
     }
 
     [HttpPost]
@@ -94,7 +96,90 @@ public class AppsController : ControllerBase
     [Authorize(Policy = "ReadApps")]
     public async Task<IActionResult> GetPackages(Guid id, [FromQuery] string? country = null)
     {
-        var result = await _mediator.Send(new Apps.Application.Features.Apps.Queries.GetPackagesByApp.GetPackagesByAppQuery(id, country));
+        var userIdString = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier || c.Type == "sub")?.Value;
+        Guid? userId = null;
+        if (Guid.TryParse(userIdString, out var parsedUserId))
+        {
+            userId = parsedUserId;
+        }
+        string? authToken = Request.Headers.Authorization.FirstOrDefault();
+
+        var appDto = await _mediator.Send(new Apps.Application.Features.Apps.Queries.GetAppById.GetAppByIdQuery(id));
+        if (appDto == null) return NotFound();
+        
+        string defaultCountry = "US";
+        string countrySource = "profile";
+
+        if (appDto.DynamicData != null && appDto.DynamicData.TryGetValue("sysConfig", out var sysConfigElement) && sysConfigElement.ValueKind == System.Text.Json.JsonValueKind.Object)
+        {
+            if (sysConfigElement.TryGetProperty("defaultcountry", out var dcProp) || sysConfigElement.TryGetProperty("defaultCountry", out dcProp))
+            {
+                var val = dcProp.GetString();
+                if (!string.IsNullOrEmpty(val)) defaultCountry = val;
+            }
+            if (sysConfigElement.TryGetProperty("countrysource", out var csProp) || sysConfigElement.TryGetProperty("countrySource", out csProp))
+            {
+                var val = csProp.GetString();
+                if (!string.IsNullOrEmpty(val)) countrySource = val.ToLower();
+            }
+        }
+
+        if (string.IsNullOrEmpty(country))
+        {
+            if (countrySource == "location")
+            {
+                string ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+                if (Request.Headers.ContainsKey("X-Forwarded-For"))
+                {
+                    ip = Request.Headers["X-Forwarded-For"].FirstOrDefault()?.Split(',')[0].Trim() ?? ip;
+                }
+                
+                if (!string.IsNullOrEmpty(ip) && ip != "::1" && ip != "127.0.0.1")
+                {
+                    try
+                    {
+                        var client = _httpClientFactory.CreateClient();
+                        var ipResponse = await client.GetAsync($"http://ip-api.com/json/{ip}");
+                        if (ipResponse.IsSuccessStatusCode)
+                        {
+                            var ipStr = await ipResponse.Content.ReadAsStringAsync();
+                            using var doc = System.Text.Json.JsonDocument.Parse(ipStr);
+                            if (doc.RootElement.TryGetProperty("countryCode", out var ccProp))
+                            {
+                                var c = ccProp.GetString();
+                                if (!string.IsNullOrEmpty(c)) country = c;
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            
+            if (string.IsNullOrEmpty(country) && userId.HasValue && !string.IsNullOrEmpty(authToken))
+            {
+                try
+                {
+                    var client = _httpClientFactory.CreateClient();
+                    client.BaseAddress = new Uri("http://ms_users:8080/");
+                    client.DefaultRequestHeaders.Add("Authorization", authToken);
+                    var profileResponse = await client.GetAsync($"api/Users/profile?userId={userId}&appId={id}");
+                    if (profileResponse.IsSuccessStatusCode)
+                    {
+                        var profileStr = await profileResponse.Content.ReadAsStringAsync();
+                        using var doc = System.Text.Json.JsonDocument.Parse(profileStr);
+                        if (doc.RootElement.TryGetProperty("dynamicData", out var dynamicData) && 
+                            dynamicData.TryGetProperty("countryId", out var countryIdVal))
+                        {
+                            var c = countryIdVal.GetString();
+                            if (!string.IsNullOrEmpty(c)) country = c;
+                        }
+                    }
+                }
+                catch { }
+            }
+        }
+
+        var result = await _mediator.Send(new Apps.Application.Features.Apps.Queries.GetPackagesByApp.GetPackagesByAppQuery(id, country, defaultCountry));
         return Ok(result);
     }
 

@@ -41,6 +41,11 @@ builder.Services.AddAuthorization(options =>
         policy.RequireAssertion(context =>
             context.User.HasClaim(c => c.Type.Equals("permission", StringComparison.OrdinalIgnoreCase) && 
                 (c.Value == "AccessAll" || c.Value == "ManageUsers"))));
+
+    options.AddPolicy("GlobalAdmin", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type.Equals("permission", StringComparison.OrdinalIgnoreCase) && 
+                c.Value == "AccessAll")));
 });
 
 var app = builder.Build();
